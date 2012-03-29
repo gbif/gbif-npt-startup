@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * This module talks to the GBIF Registry to get organisation information
+ * and authorise registration requests.
+ */
+
+/**
+ * Implementats hook_help().
+ */
+
+function gbif_registry_help($path, $arg) {
+  if ($path == 'admin/help#gbif_registry') {
+    return t('This module talks to the GBIF Registry to get organisation information or authorise registration requests.');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+
+function gbif_registry_menu() {
+  $items['admin/config/gbif_registry'] = array(
+    'title' => 'GBIF Registry',
+    'description' => 'Available options for configuring the GBIF Registry.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/gbif_registry/settings'] = array(
+    'title' => 'GBIF Registry configuration',
+    'description' => 'Change how this Drupal instance interacts with the GBIF Registry.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gbif_registry_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'gbif_registry.admin.inc',
+  );
+  return $items;
+}
