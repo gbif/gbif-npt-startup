@@ -197,7 +197,7 @@ function ctools_entity_field_value_ctools_access_summary($conf, $context, $plugi
     }
     else {
       if (isset($conf[$conf_key])) {
-        $entity->{$field_name}[LANGUAGE_NONE][] = $conf[$conf_key];
+        $entity->{$field_name}[LANGUAGE_NONE][] = array($column => $conf[$conf_key]);
       }
     }
     $string .= " @{$column} equals @{$column}_value";

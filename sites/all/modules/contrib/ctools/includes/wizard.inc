@@ -34,9 +34,6 @@
  * Remember that the form builders for this form will receive
  * &$form, &$form_state, NOT just &$form_state and no additional args.
  *
- * Do NOT use #required => TRUE with these forms as that validation
- * cannot be skipped for the CANCEL button.
- *
  * @param $form_info
  *   An array of form info. @todo document the array.
  * @param $step
@@ -288,8 +285,7 @@ function ctools_wizard_wrapper($form, &$form_state) {
   if (empty($form_info['no buttons'])) {
     // Ensure buttons stay on the bottom.
     $form['buttons'] = array(
-      '#prefix' => '<div class="clearfix">',
-      '#suffix' => '</div>',
+      '#type' => 'actions',
       '#weight' => 1000,
     );
 
