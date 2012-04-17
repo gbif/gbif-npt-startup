@@ -51,28 +51,30 @@ class EntityAdminEntityController extends EntityAdminController{
       }
     }
     // Generate the view /edit / delete callbacks for the entity itself
-    $entity_path = entity_admin_entity_get_path($this->entityType, $this->entityInfo);
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
-    $entity_path .= '/' . $wildcard;
-    $arg_pos = substr_count($entity_path, '/');
+    $entity_path = entity_admin_entity_get_path($this->entityType, $this->entityInfo, $wildcard);
+    $arg_pos = substr_count($entity_path, '/', 0, strpos($entity_path, '%'));
     $items[$entity_path] = array(
       // The value in the position of the load function is always passed through first.
-      'load arguments' => array(
+      'load arguments' => (isset($this->entityInfo['admin ui']['load arguments']) ? isset($this->entityInfo['admin ui']['load arguments']) : array(
         $this->entityType
-      ),
+      )),
       'title callback' => 'entity_admin_page_title',
-      'title arguments' => array(
+      'title arguments' => (isset($this->entityInfo['admin ui']['title arguments']) ? isset($this->entityInfo['admin ui']['title arguments']) : array(
         $arg_pos
-      ),
+      )),
       'page callback' => 'entity_admin_page_view',
       'page arguments' => array(
         $arg_pos
       ),
+      'page arguments' => (isset($this->entityInfo['admin ui']['page arguments']) ? isset($this->entityInfo['admin ui']['page arguments']) : array(
+        $arg_pos
+      )),
       'access callback' => 'entity_access',
-      'access arguments' => array(
+      'access arguments' => (isset($this->entityInfo['admin ui']['access arguments']) ? isset($this->entityInfo['admin ui']['access arguments']) : array(
         'view',
         $this->entityType
-      )
+      ))
     );
     if(count($this->ops())){
       // Set view as the default task

@@ -65,6 +65,9 @@ h2,
   border-bottom: 1px solid #D6D6D6;
 }
 
+i{
+	font-style:italic;
+}
 
 #region-content h2{
  color: #fff;
@@ -371,6 +374,10 @@ h2.site-name {
   padding: 20px 0 30px 0  
 }
 
+.zone-footer-wrapper p{
+  text-align: center;
+}
+
 /* Footer links & menu */
 
 .block-footer-menu{
@@ -583,6 +590,10 @@ h2.site-name {
 
 .node div.item-list ul li{
   list-style: disc;
+}
+
+.node table th, .node table td{
+  border: 1px solid #ACACAC;
 }
 
 
