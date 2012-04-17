@@ -64,6 +64,7 @@ function ctools_plugin_api_info($owner, $api, $minimum_version, $current_version
     foreach (module_implements($hook) as $module) {
       $function = $module . '_' . $hook;
       $info = $function($owner, $api);
+      $version = NULL;
       // This is added to make hook_views_api() compatible with this, since
       // views used a different version key.
       if (isset($info['version'])) {
@@ -107,6 +108,9 @@ function ctools_plugin_api_info($owner, $api, $minimum_version, $current_version
         }
       }
     }
+
+    // Allow other modules to hook in.
+    drupal_alter($hook, $cache[$owner][$api]);
   }
 
   return $cache[$owner][$api];
@@ -242,10 +246,17 @@ function ctools_get_plugins($module, $type, $id = NULL) {
     $cache = cache_get("plugins:$module:$type", $info[$module][$type]['cache table']);
 
     if (!empty($cache->data)) {
-      // Cache load succeeded so use the cached plugin list.
-      $plugins[$module][$type]   = $cache->data;
-      // Set $setup to true so we know things where loaded.
-      $setup[$module][$type]     = TRUE;
+      // Verify that the file exists as it may have been moved in a multisite environment
+      if (isset($cache->data['path'])) {
+        // Files to be registered may be in two locations. Check for both of them.
+        if ((is_array($cache->data['path']) && file_exists($cache->data['path']['file'])) ||
+           file_exists($cache->data['path'])) {
+          // Cache load succeeded so use the cached plugin list.
+          $plugins[$module][$type]   = $cache->data;
+          // Set $setup to true so we know things where loaded.
+          $setup[$module][$type]     = TRUE;
+        }
+      }
     }
     else {
       // Cache load failed so store that we need to build and write the cache.

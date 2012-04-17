@@ -216,6 +216,8 @@ function ctools_content_prepare_subtype(&$subtype, $plugin) {
       $subtype[$key] = $plugin[$key];
     }
   }
+
+  drupal_alter('ctools_content_subtype', $subtype, $plugin);
 }
 
 /**
