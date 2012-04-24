@@ -1,0 +1,22 @@
+<?php
+/**
+ * 
+ * Implentation of hook_block_info_alter
+ * Adjust the blocks for this theme
+ * @param array $blocks
+ * @param string $theme
+ * @param array $code_blocks
+ */
+ 
+function gbif_blocks_block_info_alter(&$blocks, $theme, $code_blocks){
+  switch($theme){
+    case 'gbif2012':
+      // Move the search box to the search region
+      $blocks['search']['form']['region'] = 'search';
+      break;
+    case 'gbifwhite2012':
+      // Move the search box to the search region
+      $blocks['search']['form']['region'] = 'search';
+      break;
+  }
+}
