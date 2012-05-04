@@ -6,14 +6,15 @@ html {
 }
 
 Body {
-  padding: 3px 0px 0px 0px;
+  padding: 0px;
   margin: 0px;
-  background: url("../images/top_bar.jpg") repeat-x;
   height: 100%;
 }
 
 #page {
   min-height: 100%;
+  padding-top: 3px;
+  background: url("../images/top_bar.jpg") repeat-x;
   position: relative;
 }
 
