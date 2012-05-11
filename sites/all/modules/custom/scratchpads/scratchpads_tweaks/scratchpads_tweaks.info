@@ -37,6 +37,7 @@ dependencies[] = entitycache
 dependencies[] = imagemagick
 dependencies[] = role_delegation
 dependencies[] = linkit
+dependencies[] = emptyparagraphkiller
 
 ; Scratchpads modules
 dependencies[] = scratchpads_apachesolr_instant
@@ -48,6 +49,7 @@ dependencies[] = scratchpads_biblio_search
 dependencies[] = scratchpads_blocks
 dependencies[] = scratchpads_colour
 dependencies[] = scratchpads_contact
+dependencies[] = scratchpads_cleanup
 dependencies[] = scratchpads_error
 dependencies[] = scratchpads_file_colorboxed
 dependencies[] = scratchpads_front

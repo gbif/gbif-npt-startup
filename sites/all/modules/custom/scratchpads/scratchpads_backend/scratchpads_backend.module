@@ -27,7 +27,7 @@ function scratchpads_backend_menu_alter(&$items){
   $items['node/add'] = array(
     'title' => '',
     'title callback' => FALSE,
-    'page callback' => 'drupal_goto',
+    'page callback' => 'scratchpads_backend_goto',
     'page arguments' => array(
       'admin/content'
     ),
@@ -43,6 +43,41 @@ function scratchpads_backend_menu_alter(&$items){
   $items['admin/content/relation']['type'] = MENU_NORMAL_ITEM;
   $items['admin/config/development/maintenance']['access arguments'] = array(
     'administer maintenance mode'
+  );
+}
+
+/**
+ * scratchpads_admin_goto
+ * 
+ * This was added, as simply changing the callback of node/add to drupal_goto
+ * resulted in an error when accessing node/add/unknown_path.  The second 
+ * argument to drupal_goto must be an array.
+ */
+function scratchpads_backend_goto($path = ''){
+  drupal_set_message(t('That content type has been disabled.'));
+  drupal_goto($path);
+}
+
+/**
+ * Implements hook_permissions().
+ */
+function scratchpads_backend_permission(){
+  return array(
+    'administer maintenance mode' => array(
+      'title' => t('Administer maintenance mode'),
+      'description' => t('Allow this role to put the site into maintenance mode for ALL users.')
+    )
+  );
+}
+
+/**
+ * Implements hook_scratchpads_default_permissions().
+ */
+function scratchpads_backend_scratchpads_default_permissions(){
+  return array(
+    'maintainer' => array(
+      'administer maintenance mode'
+    )
   );
 }
 

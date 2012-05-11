@@ -55,6 +55,24 @@ function eolapi_entity_info(){
 }
 
 /**
+ * Implements hook_apachesolr_index_documents_alter().
+ */
+function eolapi_apachesolr_index_documents_alter(array &$documents, $entity, $entity_type){
+  if($entity_type == 'file'){
+    // If this ID appears in the field_data_eolapi_image table, then it's 
+    // associated with an eolapi entity, and therefore should not be indexed.
+    $row = db_query('SELECT COUNT(*) as count FROM {field_data_eolapi_image} WHERE eolapi_image_fid = :entity_id', array(
+      ':entity_id' => $entity->fid
+    ))->fetch();
+    if($row->count){
+      // Clear the document array if the file is associated!  There must be a
+      // better way of doing this, but I'm not sure what it is.
+      $documents = array();
+    }
+  }
+}
+
+/**
  * Implementation of hook_taxonomy_vocabulary_insert().
  * 
  * Exactly the same function (almost) from the field_taxonomic_name module.
@@ -207,6 +225,17 @@ function eolapi_page_view($eolapi){
   $data = unserialize($eolapi->data);
   foreach($data as $key => $value){
     switch($key){
+      case 'title':
+        $img = array_shift($rows);
+        array_unshift($rows, array(
+          array(
+            'data' => t('Title'),
+            'class' => 'biblio-row-title'
+          ),
+          $value
+        ));
+        array_unshift($rows, $img);
+        break;
       case 'mediaURL':
         $rows[] = array(
           array(
@@ -222,7 +251,7 @@ function eolapi_page_view($eolapi){
             'data' => t('Description'),
             'class' => 'biblio-row-title'
           ),
-          '<div style="max-width:400px">'.$data->description.'</div>'
+          '<div style="max-width:400px">' . $data->description . '</div>'
         );
         break;
       case 'agents':

@@ -1,0 +1,148 @@
+<?php
+
+define(MIGRATE_FIELDS_ONLY, 1);
+
+/**
+ * Add the database connection.
+ * 
+ * We're not adding the additional connection into the settings.php file as that
+ * file is managed by Aegir.  Instead, every new site that is going to become
+ * an "old" site will have an additional settings file in its files folder.
+ * Simply including that file will add the additional database connection.  The
+ * file should look like:
+//----------
+<?php
+Database::addConnectionInfo('scratchpad_1', 'default', array(
+  'database' => 'scratchpad_1_database',
+  'username' => 'scratchpad_1_user',
+  'password' => 'scratchpad_1_database_password',
+  'host' => 'localhost',
+  'port' => '',
+  'driver' => 'mysql',
+  'prefix' => ''
+));
+//----------
+ */
+require_once (drupal_realpath('public://scratchpad_1_database.php'));
+
+/**
+ * Implements hook_flush_caches().
+ */
+function scratchpads_migrate_flush_caches(){
+  scratchpads_migrate_register_migrations();
+}
+
+/**
+ * Implements hook_migrate_api().
+ */
+function scratchpads_migrate_migrate_api(){
+  return array(
+    'api' => 2
+  );
+}
+
+/**
+ * Register all of the migrations for this module.
+ */
+function scratchpads_migrate_register_migrations(){
+  // The database connection to the Scratchpad 1 site.
+  $common_arguments = array(
+    'source_connection' => 'scratchpad_1',
+    'source_version' => 6
+  );
+  // -- Users -----------------------------------------------------------------
+  $arguments = $common_arguments + array(
+    'description' => t('Migration of users from Drupal 6'),
+    'machine_name' => 'User'
+  );
+  Migration::registerMigration('DrupalUser6Migration', $arguments['machine_name'], $arguments);
+  // -- ContentTypes ----------------------------------------------------------
+  $arguments = $common_arguments + array(
+    'description' => t('Migration of content types from Drupal 6'),
+    'machine_name' => 'ContentType'
+  );
+  Migration::registerMigration('DrupalContentType6Migration', $arguments['machine_name'], $arguments);
+  // -- Vocabularies ----------------------------------------------------------
+  $arguments = $common_arguments + array(
+    'description' => t('Migration of vocabularies from Drupal 6'),
+    'machine_name' => 'Vocabulary'
+  );
+  Migration::registerMigration('DrupalVocabulary6Migration', $arguments['machine_name'], $arguments);
+  // The description and the migration machine name are also required arguments,
+  // which will be unique for each migration you register.
+  $arguments = $common_arguments + array(
+    'description' => t('Migration of fields from Drupal 6'),
+    'machine_name' => 'Field',
+    'dependencies' => array(
+      'ContentType'
+    )
+  );
+  // We just use the migrate_d2d D6 migration class as-is.
+  Migration::registerMigration('DrupalField6Migration', $arguments['machine_name'], $arguments);
+  $arguments = $common_arguments + array(
+    'description' => t('Migration of field groups from Drupal 6'),
+    'machine_name' => 'FieldGroup',
+    'dependencies' => array(
+      'Field'
+    )
+  );
+  // We just use the migrate_d2d D6 migration class as-is.
+  Migration::registerMigration('DrupalFieldGroup6Migration', $arguments['machine_name'], $arguments);
+}
+
+/**
+ * Array of migration types to import
+ */
+function scratchpads_migrate_migration_types($type = null){
+  /* An array of node types to be imported, strcutrue as:
+	 *   node_type => array(
+   *		skip_fields => array(field_name_not_to_import),
+   *		status => MIGRATE_FIELDS_ONLY
+   *	 )
+   *
+   *  Set status to MIGRATE_FIELDS_ONLY if you know you only want to migrate fileds attached to node
+   *  For example, the page node
+   *
+	 * 
+	 */
+  // TODO - Extend to set destination entity_type and destination bundle? Then use it for profile too?
+  $types = array(
+    'test' => array(
+      'exclude_fields' => array(
+        'field_test'
+      )
+    ),
+    'page' => array(
+			'status' => MIGRATE_FIELDS_ONLY
+    )
+  );
+  if($type){
+    return $types[$type];
+  }else{
+    return $types;
+  }
+}
+
+/**
+ * Return an array of node types requiring migration
+ * This will filter out types with status MIGRATE_FIELDS_ONLY
+ */
+function scratchpads_migrate_migration_node_types(){
+	return array_filter(scratchpads_migrate_migration_types(), "_scratchpads_migrate_migration_node_type_filter");
+}
+
+/**
+ * array_filter function
+ * Filter out types with MIGRATE_FIELDS_ONLY
+ */
+function _scratchpads_migrate_migration_node_type_filter($type){
+	if(isset($type['status']) && $type['status'] == MIGRATE_FIELDS_ONLY){
+		return false;
+	}
+	return true;
+}
+
+
+
+
+
