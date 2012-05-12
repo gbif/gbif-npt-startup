@@ -1,0 +1,249 @@
+<?php
+define('GBIF_QUERY_URL', 'http://staging.gbif.org:8080/checklistbank-search-ws/search?q=');
+define('GBIF_USAGE_URL', 'http://staging.gbif.org:8080/checklistbank-ws/name_usage/');
+define('GBIF_REGISTRY_WS_DATASET_URL', 'http://staging.gbif.org:8080/registry-ws/dataset/');
+define('GBIF_GBRDS_RESOURCE_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
+
+/**
+ * Implementation of hook_menu().
+ */
+function gbif_checklist_menu() {
+  return array(
+    'admin/structure/taxonomy/gbif-checklist-import' => array(
+      'title' => 'GBIF Checklist Import',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array(
+        'gbif_checklist_primary_form'
+      ),
+      'access arguments' => array(
+        'administer taxonomy'
+      )
+    )
+  );
+}
+
+/**
+ * Implementation of hook_silver
+ */
+function gbif_checklist_silver() {
+  return array(
+    array(
+      'type' => 'Taxonomy',
+      'name' => 'GBIF Checklist Bank Web Service',
+      'access arguments' => array(
+        'administer taxonomy'
+      ),
+      'form_id' => 'gbif_checklist_primary_form'
+    )
+  );
+}
+
+/**
+ * Form definition
+ */
+function gbif_checklist_primary_form($form, &$form_state){
+  $form = module_invoke_all('gbif_checklist_form', $form, $form_state);
+  $form['#action'] = url('admin/structure/taxonomy/gbif-checklist-import');
+  if(count($form)){
+    if(count($form) == 1) {
+      foreach($form as $key => $value) {
+        if(isset($form[$key]['#type']) && $form[$key]['#type'] == 'fieldset') {
+          $form[$key]['#collapsed'] = FALSE;
+        }
+      }
+      return array_merge($form, array(
+        '#submit' => array(
+          'gbif_checklist_primary_form_submit'
+        )
+      ));
+    }
+    $vocabularies = taxonomy_get_vocabularies();
+    $taxonomies = array(
+      '- SELECT VOCABULARY -'
+    );
+    foreach($vocabularies as $vid => $vocabulary) {
+      $taxonomies[$vid] = $vocabulary->name;
+    }
+    return array_merge($form, array(
+      '#submit' => array(
+        'gbif_checklist_primary_form_submit'
+      ),
+      'information' => array(
+        '#markup' => '<p>' . t('Please select from one of the classification sources below.') . '</p>',
+        '#weight' => -50
+      ),
+      'taxonomy_vid' => array(
+        '#type' => 'select',
+        '#title' => t('Taxonomy'),
+        '#options' => $taxonomies,
+        '#weight' => -90,
+        '#required' => TRUE
+      )
+    ));
+  } else {
+    return array(
+      'information' => array(
+        '#markup' => '<div class="messages error"><h2 class="element-invisible">Status message</h2>No import modules available.</div>'
+      )
+    );
+  }
+}
+
+/**
+ * Implementation of hook_form
+ */
+function gbif_checklist_gbif_checklist_form($form, $form_state) {
+  $gbif_checklist_service_status = @strlen(file_get_contents(GBIF_QUERY_URL, 0, stream_context_create(array(
+    'http' => array(
+      'timeout' => 3
+    )
+  ))));
+  return array(
+    'gbif-checklist' => array(
+      '#type' => 'fieldset',
+      '#title' => 'GBIF Checklist Bank',
+      '#description' => 'Import a classification directly from GBIF Checklist Bank',
+      '#collapsed' => FALSE,
+      '#collapsible' => TRUE,
+      'gbif-checklist-status' => array(
+        '#weight' => -10,
+        '#type' => 'markup',
+        '#markup' => $gbif_checklist_service_status ? '<div class="messages status"><h2 class="element-invisible">Status message</h2>The GBIF Checklist Bank service appears to be running.</div>' : '<div class="messages error"><h2 class="element-invisible">Status message</h2>The GBIF Checklist Bank service (<a href="' . GBIF_QUERY_URL . '">' . (strpos(GBIF_QUERY_URL, '?') ? substr(GBIF_QUERY_URL, 0, strpos(GBIF_QUERY_URL, '?')) : GBIF_QUERY_URL) . '</a>) does not appear to be running.  Please try again later.</div>',
+      ),
+      'gbif-checklist-name' => array(
+        '#weight' => -5,
+        '#type' => 'textfield',
+        '#title' => t('Enter the root term of your classification, e.g. Phthiraptera, Insecta, Aves'),
+        '#attributes' => array(
+          'onkeypress' => 'if(event.keyCode == 13){return false;}else{return true}'
+        )
+      ),
+      'gbif-checklist-search' => array(
+        '#weight' => 0,
+        '#type' => 'button',
+        '#value' => 'Search GBIF Checklist Bank',
+        '#title' => 'Search GBIF Checklist Bank',
+        '#disabled' => $gbif_checklist_service_status ? FALSE : TRUE,
+        '#ajax' => array(
+          'callback' => 'gbif_checklist_classification_js',
+          'event' => 'click',
+          'wrapper' => 'gbif-checklist-import-full'
+        ),
+        '#validate' => array('gbif_checklist_validate')
+      ),
+      'import-full' => array(
+        '#weight' => 5,
+        '#markup' => '<div id="gbif-checklist-import-full" style="clear:both"><input name="gbif-checklist-import-id" style="display:none"/><div>'
+      ),
+      'submit-gbif-checklist' => array(
+        '#weight' => 10,
+        '#disabled' => $gbif_checklist_service_status ? FALSE : TRUE,
+        '#type' => 'submit',
+        '#title' => t('Import from GBIF Checklist Bank'),
+        '#value' => t('Import from GBIF Checklist Bank'),
+        '#submit' => array(
+          'gbif_checklist_submit'
+        ),
+        '#validate' => array(
+          'gbif_checklist_validate'
+        ),
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="gbif-checklist-import-id"]' => array(
+              'value' => ''
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
+/**
+ * Callback for the ajax - return checklists that have matched term index
+ */
+function gbif_checklist_classification_js($form, $form_state) {
+  $url = GBIF_QUERY_URL . urlencode($_POST['gbif-checklist-name']);
+  
+  // From here the code treats the received response differently
+  // from ScratchPads TCS, since GBIF use JSON in the new APIs.
+  $gbifJSON = file_get_contents($url);
+  if ($gbifJSON) {
+    $gbifJSON = json_decode($gbifJSON);
+    $availableChecklistCount = $gbifJSON->count;
+    $begin = (int)$gbifJSON->offset + 1;
+    $end = $start + (int)$gbifJSON->limit;
+    $rangeText = format_plural(
+      $availableChecklistCount,
+      t('There is a checklist containing @searchName.', array('@searchName' => $_POST['gbif-checklist-name'])),
+      t('There are !count checklists containing "@searchName" in the GBIF Checklist Bank. Showing number !begin to !end.', array(
+        '!count' => $availableChecklistCount,
+        '@searchName' => $_POST['gbif-checklist-name'],
+        '!begin' => $begin,
+        '!end' => $end,
+      ))
+    );
+    $options = array();
+    foreach ($gbifJSON->results as $result) {
+      
+      // Prepare necessary strings for displaying options
+      $checklistTitle = '';
+      $checklistTitle = $result->checklistTitle;
+      $higherClassificationString = '';
+      if ($result->higherClassification <> '') {
+        $higherClassificationString .= $result->higherClassification;
+      } else {
+        $higherClassificationString .= t('There is no higher classification for this checklist. This could be a single-name checklist.');
+      }
+      $checklistKey = '';
+      $checklistKey = $result->checklistKey;
+      $numDescendants = '';
+      $numDescendants = $result->numDescendants;
+      if ($numDescendants == 0) $higherClassificationString .= ' (' . t('There is no descendant for this checklist at the level the search term is matched. Only one name will be imported.') . ')';
+      $url = '';
+      $url = GBIF_GBRDS_RESOURCE_URL . $checklistKey;
+      
+      // Construct options
+      $options[$checklistKey . '|' . $numDescendants] = $higherClassificationString . '<br/>(' . l($checklistTitle, $url, array(
+        'abosolute' => 1
+      ))
+      . ') [approx. ' . $numDescendants . ' taxa]';
+    }
+  }
+  $form['gbif-checklist']['gbif-checklist-import-id'] = array(
+    '#weight' => 5,
+    '#name' => 'gbif-checklist-import-id',
+    '#type' => 'radios',
+    '#title' => t('Import from a Checklist'),
+    '#default_value' => '',
+    '#options' => $options,
+    '#parents' => array(
+      'gbif-checklist-import-id'
+    ),
+    '#prefix' => '<div id="gbif-checklist-import-full" style="clear:both">',
+    '#suffix' => '</div>'
+  );
+  form_set_cache($form['#build_id'], $form, $form_state);
+  // Need to follow ScratchPads team whether the following code
+  // will be changed for better handling.
+  $form_to_return = form_process_radios($form['gbif-checklist']['gbif-checklist-import-id']);
+  $children = element_children($form_to_return);
+  foreach($children as $key){
+    $form_to_return[$key]['#name'] = 'gbif-checklist-import-id';
+  }
+  $output = drupal_render($form_to_return);
+  drupal_get_messages();
+  return $output;
+}
+
+/**
+ * Validate the form
+ */
+function gbif_checklist_validate($form, &$form_state) {
+  if(!isset($form_state['values']['taxonomy_vid']) || !$form_state['values']['taxonomy_vid']) {
+    form_set_error('taxonomy_vid', t('Please select a vocabulary first.'));
+  }
+  if(!(isset($form_state['values']['gbif-checklist-import-id']) && count(explode("|", $form_state['values']['gbif-checklist-import-id'])) == 2)) {
+    form_set_error('gbif-checklist-id', t('Please ensure you select a classification to import.'));
+  }
+}

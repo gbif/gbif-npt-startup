@@ -1,0 +1,5 @@
+name = "GBIF Checklist Bank taxonomy import provider"
+description = "Interacts with the GBIF Checklist API and retrieve names from the servcie."
+package = GBIF
+core = 7.x
+files [] = gbif_checklist.module
