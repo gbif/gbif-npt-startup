@@ -11,3 +11,4 @@ sites/all/themes/gbif2012/
 dummy.php
 .DS_Store
 sites/all/modules/custom/feeds_xls/PHPExcel/
+sites/all/libraries/filemakerapi/
