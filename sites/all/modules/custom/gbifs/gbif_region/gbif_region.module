@@ -1,0 +1,282 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function gbif_region_menu() {
+  $items['gbif/region'] = array(
+    'title' => 'Data Publishing',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
+  );
+  $items['gbif/region/africa'] = array(
+    'title' => 'Africa',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['gbif/region/asia'] = array(
+    'title' => 'Asia',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['gbif/region/europe'] = array(
+    'title' => 'Europe',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['gbif/region/namerica'] = array(
+    'title' => 'North America',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['gbif/region/oceania'] = array(
+    'title' => 'Oceania',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['gbif/region/lamerica'] = array(
+    'title' => 'Latin America',
+    'description' => 'Statistics according to regions',
+    'page callback' => 'gbif_region',
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/*
+ * Implementation of hook_library()
+ */
+function gbif_region_library() {
+  $libraries['d3'] = array(
+    'title' => 'd3 data visualisation',
+    'website' => 'http://d3js.org',
+    'version' => '2.9.1',
+    'js' => array(
+      'http://d3js.org/d3.v2.min.js' => array(
+        'type' => 'external',
+        'weight' => -20,
+      ),
+    ),  
+  );
+  $libraries['population'] = array(
+    'title' => 'd3 demo on population',
+    'website' => 'http://d3js.org',
+    'version' => '0',
+    'js' => array(
+      drupal_get_path('module', 'gbif_region') . '/js/population.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'gbif_region') . '/css/population.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+    ),
+  );
+  $libraries['data_series'] = array(
+    'title' => 'd3 demo on population',
+    'website' => 'http://d3js.org',
+    'version' => '0',
+    'js' => array(
+      drupal_get_path('module', 'gbif_region') . '/js/stream_layers.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+      drupal_get_path('module', 'gbif_region') . '/js/stack.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 25,
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'gbif_region') . '/css/stack.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'gbif_region') . '/css/button.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+    ),
+  );
+  return $libraries;
+}
+
+/*
+ * Process the main page content
+ * @TODO use hook_page_build() instead
+ */
+function gbif_region() {
+  
+  // First decide which region to display.
+  $request_url = isset($_GET['q']) ? $_GET['q'] : 'gbif/region';
+  $request_segments = explode('/', $request_url);
+  $request_region = $request_segments[sizeof($request_segments)-1];
+  
+  $region = array(
+    'africa' => 'Africa',
+    'asia' => 'Asia',
+    'europe' => 'Europe',
+    'namerica' => 'North America',
+    'oceania' => 'Oceania',
+    'lamerica' => 'Latin America',
+  );
+
+  // Export the list
+  $page_content = '';
+  $page_content .= '<article>';
+  
+  if ($request_region == 'region') {
+    $page_content .= '<p>';
+    $page_content .= 'Please click a tab.';
+    $page_content .= '</p>';
+  } else {
+    $region_to_load = $region[$request_region];
+
+    gbif_region_load_api();
+    // Include access credentials.
+    include_once('includes/gbif_region.settings.inc');
+    $IMS = new FileMaker();
+    $IMS->setProperty('database', $IMSCredential['database']);
+    $IMS->setProperty('hostspec', $IMSCredential['hostname']);
+    $IMS->setProperty('username', $IMSCredential['username']);
+    $IMS->setProperty('password', $IMSCredential['password']);
+
+    
+    // Get the list of country and other associate participant
+    $membershipTypes = array(
+      'country' => 'Country',
+      'other' => 'Other Associate Participants',
+    );
+    foreach ($membershipTypes as $membershipType => $membershipTitle) {
+      $participants = list_participants($membershipType, $region_to_load, $IMS, $gbrdsCredential);
+      $page_content .= '<h4>'.$membershipTitle.'</h4><p>';
+      foreach ($participants['member'] as $member => $value) {
+        $page_content .= '<strong>' . $member . '</strong>, ';
+        foreach ($value as $agent => $count) {
+          $page_content .= $agent . '(' . $count . '), ';
+        }
+        $page_content .= '</br>';
+      }
+      $page_content .= '</p>';      
+    }
+  }
+
+  $page_content .= '</article>';
+  $page_content .= '<div class="gallery" id="chart">';
+  $page_content .= '<button class="first" id="group" onclick="transitionGroup()">Group</button><button class="last active" id="stack" onclick="transitionStack()">Stack</button>';
+  $page_content .= '</div>';
+
+  drupal_add_library('gbif_region', 'd3', FALSE);
+  drupal_add_library('gbif_region', 'data_series', FALSE);
+
+  return $page_content;
+}
+
+/**
+ * Get participant list according to membership type
+ */
+function list_participants($type, $region_to_load, $IMS, $gbrdsCredential) {
+
+  $records = array();
+
+  $membershipType = array(
+    'country' => 'Member_Country__lcn',
+    'other' => 'Member_Other__lcn',
+  );
+  
+  $ListNodes_find =& $IMS->newFindCommand('WWWA_Participant');
+  $ListNodes_find->addFindCriterion($membershipType[$type], '1');
+  $ListNodes_find->addFindCriterion('WWWA_Participant_Region_GBIFarea::GBIFarea', $region_to_load);
+  $ListNodes_find->addSortRule('Name_Short', 1, FILEMAKER_SORT_ASCEND);
+  $result = $ListNodes_find->execute();
+
+  // Handle error (if any)
+  if (FileMaker::isError($result)) {
+    echo "Error: " . $result->getMessage() . "\n"; 
+  }
+
+  $records['IMS'] = $result->getRecords();
+  $gbrds_profile = array();
+
+  // Connect GBRDS for relevant information
+  $gbrds = array(
+    'driver' => 'mysql',
+    'database' => 'gbrds_registry',
+    'username' => $gbrdsCredential['username'],
+    'password' => $gbrdsCredential['password'],
+    'host' => $gbrdsCredential['hostname'],
+  );
+  Database::addConnectionInfo('gbrds', 'default', $gbrds);
+  db_set_active('gbrds');
+
+  foreach($records['IMS'] as $value) {
+    $key = $value->getField('Name_Short');
+    $gbrds_profile[$key] = array();
+
+    $gbrds = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.name = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key))->fetchAll();
+
+    foreach ($gbrds as $agentType) {
+      $gbrds_profile[$key][$agentType->name] = $agentType->count;
+    }
+  
+  }
+
+  db_set_active();
+
+  $records['member'] = $gbrds_profile;
+  unset($records['IMS']);
+  return $records;
+}
+
+/**
+ * Loads FileMaker API if it's not loaded already.
+ *
+ * @return
+ *  TRUE if the FileMaker API is loaded, FALSE otherwise.
+ */
+function gbif_region_load_api() {
+
+  if (!class_exists('FileMaker')) {
+
+    // Try using libraries module.
+    if (module_exists('libraries')) {
+
+      $libraries_path= drupal_get_path('module', 'libraries');
+      $libraries_include = $libraries_path . '/' . 'libraries.module';
+
+      include_once($libraries_include);
+
+      // Let's see if the FileMaker API is really available from libraries.
+      $filemaker_api = './' . libraries_get_path('filemakerapi') . '/FileMaker.php';
+      if (file_exists($filemaker_api)) {
+        include_once $filemaker_api;
+      }
+    }
+  }
+
+  if (!class_exists('FileMaker')) {
+    drupal_set_message(t('Can not find FileMaker API. Please place the FileMaker API at sites/all/libraries/filemakerapi/FileMaker. See README.txt for details.'), 'error');
+  }
+  
+  // Tell the caller if the FileMaker class exists.
+  return class_exists('FileMaker');
+}
