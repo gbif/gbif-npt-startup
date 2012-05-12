@@ -11,7 +11,7 @@
  * @see system_settings_form().
  */
 
-function gbif_registry_admin_settings() {
+function gbif_nptregistry_admin_settings() {
   // Get an array of node types with internal names as keys and
   // "friendly names" as values. E.g.,
   // array('page' => 'Basic Page', 'article' => 'Articles')
@@ -31,7 +31,7 @@ asort($nodes);
   }
 */
 
-  $form['gbif_registry_org_list'] = array(
+  $form['gbif_nptregistry_org_list'] = array(
     '#type' => 'select',
     '#title' => t('Endorsed GBIF Nodes worldwide:'),
     '#options' => $nodes,
@@ -39,34 +39,34 @@ asort($nodes);
     '#description' => t('Select the node against which this NPT/Drupal website will register.'),
   );
 
-  $form['gbif_registry_org_password'] = array(
+  $form['gbif_nptregistry_org_password'] = array(
     '#type' => 'textfield',
     '#title' => t('Node Password:'),
     '#description' => t("Node password for verifying that you have rights to set up and manage this NPT/Drupal instance for a GBIF Node. If you don't know this, please contact the node manager to get it."),
   );
   
-  $form['gbif_registry_org_publishpermitted'] = array(
+  $form['gbif_nptregistry_org_publishpermitted'] = array(
     '#type' => 'checkbox',
     '#title' => t('Can publish resources'),
   );
 
-  $form['gbif_registry_org_title'] = array(
+  $form['gbif_nptregistry_org_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title for this NPT/Drupal Installation:'),
     '#description' => t("The title will be used for identifying this NPT/Drupal instance in the GBIF Registry"),
   );
   
-  $form['gbif_registry_org_description'] = array(
+  $form['gbif_nptregistry_org_description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description for this NPT/Drupal installation:'),
   );
   
-  $form['gbif_registry_org_contact_name'] = array(
+  $form['gbif_nptregistry_org_contact_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Contact Name:'),
   );  
 
-  $form['gbif_registry_org_contact_email'] = array(
+  $form['gbif_nptregistry_org_contact_email'] = array(
     '#type' => 'textfield',
     '#title' => t('Contact Email:'),
   );  
@@ -91,17 +91,18 @@ asort($nodes);
   );
 */  
 
-  $form['#submit'][] = 'gbif_registry_admin_settings_submit';
+  $form['#submit'][] = 'gbif_nptregistry_admin_settings_submit';
   return system_settings_form($form, TRUE);
 
 }
 
 /**
- * Process annotation settings submission.
+ * Process gbif_nptregistry settings submission.
+ * WARNING: Test function drafted from a book example. To be worked.
  */
-function gbif_registry_admin_settings_submit($form, $form_state) {
+function gbif_nptregistry_admin_settings_submit($form, $form_state) {
   // Loop through each of the content type checkboxes shown on the form.
-  foreach ($form_state['values']['gbif_registry_node_types'] as $key => $value) {
+  foreach ($form_state['values']['gbif_nptregistry_node_types'] as $key => $value) {
     // If the check box for a content type is unchecked, look to see whether
     // this content type has the annotation field attached to it using the
     // field_info_instance function. If it does then we need to remove the
@@ -110,7 +111,7 @@ function gbif_registry_admin_settings_submit($form, $form_state) {
       $instance = field_info_instance('node', 'annotation', $key);
       if (!empty($instance)) {
         field_delete_instance($instance, false);
-        watchdog("GBIF Registry", 'Deleted annotation field from content type:
+        watchdog("GBIF NPT Registry", 'Deleted annotation field from content type:
           %key', array('%key' => $key));
       }
     } else {
