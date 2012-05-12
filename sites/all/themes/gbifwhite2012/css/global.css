@@ -514,3 +514,7 @@ div.modal-forms-modal-content .form-item label {
   text-transform: uppercase;
   font-size: 1em;
 }
+
+#chart {
+  float: right;
+}

@@ -17,3 +17,12 @@ $gbrdsCredential = array(
   'username' => 'bko',
   'password' => 'f4m3rinot',
 );
+
+// GBIF Portal connection settings
+
+$mogoCredential = array(
+  'hostname' => 'mogo.gbif.org',
+  'database' => 'portal',
+  'username' => 'burke',
+  'password' => 'pumaconcolor',
+);

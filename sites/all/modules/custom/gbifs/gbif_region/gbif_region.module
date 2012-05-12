@@ -72,46 +72,19 @@ function gbif_region_library() {
       ),
     ),  
   );
-  $libraries['population'] = array(
-    'title' => 'd3 demo on population',
-    'website' => 'http://d3js.org',
+  $libraries['data_publishing'] = array(
+    'title' => 'GBIF data publishing status',
+    'website' => 'http://data.gbif.org',
     'version' => '0',
     'js' => array(
-      drupal_get_path('module', 'gbif_region') . '/js/population.js' => array(
+      drupal_get_path('module', 'gbif_region') . '/js/published.js' => array(
         'type' => 'file',
         'scope' => 'footer',
         'weight' => 20,
       ),
     ),
     'css' => array(
-      drupal_get_path('module', 'gbif_region') . '/css/population.css' => array(
-        'type' => 'file',
-        'media' => 'all',
-      ),
-    ),
-  );
-  $libraries['data_series'] = array(
-    'title' => 'd3 demo on population',
-    'website' => 'http://d3js.org',
-    'version' => '0',
-    'js' => array(
-      drupal_get_path('module', 'gbif_region') . '/js/stream_layers.js' => array(
-        'type' => 'file',
-        'scope' => 'footer',
-        'weight' => 20,
-      ),
-      drupal_get_path('module', 'gbif_region') . '/js/stack.js' => array(
-        'type' => 'file',
-        'scope' => 'footer',
-        'weight' => 25,
-      ),
-    ),
-    'css' => array(
-      drupal_get_path('module', 'gbif_region') . '/css/stack.css' => array(
-        'type' => 'file',
-        'media' => 'all',
-      ),
-      drupal_get_path('module', 'gbif_region') . '/css/button.css' => array(
+      drupal_get_path('module', 'gbif_region') . '/css/published.css' => array(
         'type' => 'file',
         'media' => 'all',
       ),
@@ -142,6 +115,10 @@ function gbif_region() {
 
   // Export the list
   $page_content = '';
+  $page_content .= '<div class="gallery" id="map">';
+  $page_content .= '</div>';
+  $page_content .= '<div class="gallery" id="chart">';
+  $page_content .= '</div>';
   $page_content .= '<article>';
   
   if ($request_region == 'region') {
@@ -166,27 +143,30 @@ function gbif_region() {
       'country' => 'Country',
       'other' => 'Other Associate Participants',
     );
+    $memberships = array();
     foreach ($membershipTypes as $membershipType => $membershipTitle) {
-      $participants = list_participants($membershipType, $region_to_load, $IMS, $gbrdsCredential);
+      $participants = list_participants($membershipType, $region_to_load, $IMS, $gbrdsCredential, $mogoCredential);
       $page_content .= '<h4>'.$membershipTitle.'</h4><p>';
-      foreach ($participants['member'] as $member => $value) {
+      foreach ($participants['member'] as $member => $agent) {
         $page_content .= '<strong>' . $member . '</strong>, ';
-        foreach ($value as $agent => $count) {
-          $page_content .= $agent . '(' . $count . '), ';
+        if (isset($agent['agents'])) $agents = $agent['agents'];
+        foreach ($agents as $agent_type => $count) {
+          $page_content .= $agent_type . '(' . $count . '), ';
         }
         $page_content .= '</br>';
       }
       $page_content .= '</p>';      
+      $memberships[$membershipType] = $participants['member'];
     }
   }
 
   $page_content .= '</article>';
-  $page_content .= '<div class="gallery" id="chart">';
-  $page_content .= '<button class="first" id="group" onclick="transitionGroup()">Group</button><button class="last active" id="stack" onclick="transitionStack()">Stack</button>';
-  $page_content .= '</div>';
+
+  $membershipsJSON = json_encode($memberships);
 
   drupal_add_library('gbif_region', 'd3', FALSE);
-  drupal_add_library('gbif_region', 'data_series', FALSE);
+  drupal_add_library('gbif_region', 'data_publishing', FALSE);
+  drupal_add_js(array('gbif_region' => $membershipsJSON), 'setting');
 
   return $page_content;
 }
@@ -194,7 +174,7 @@ function gbif_region() {
 /**
  * Get participant list according to membership type
  */
-function list_participants($type, $region_to_load, $IMS, $gbrdsCredential) {
+function list_participants($type, $region_to_load, $IMS, $gbrdsCredential, $mogoCredential) {
 
   $records = array();
 
@@ -203,7 +183,7 @@ function list_participants($type, $region_to_load, $IMS, $gbrdsCredential) {
     'other' => 'Member_Other__lcn',
   );
   
-  $ListNodes_find =& $IMS->newFindCommand('WWWA_Participant');
+  $ListNodes_find =& $IMS->newFindCommand('WWWA_Participant_bko');
   $ListNodes_find->addFindCriterion($membershipType[$type], '1');
   $ListNodes_find->addFindCriterion('WWWA_Participant_Region_GBIFarea::GBIFarea', $region_to_load);
   $ListNodes_find->addSortRule('Name_Short', 1, FILEMAKER_SORT_ASCEND);
@@ -215,9 +195,9 @@ function list_participants($type, $region_to_load, $IMS, $gbrdsCredential) {
   }
 
   $records['IMS'] = $result->getRecords();
-  $gbrds_profile = array();
+  $participantProfile = array();
 
-  // Connect GBRDS for relevant information
+  // Connect to GBRDS/Portal for relevant information
   $gbrds = array(
     'driver' => 'mysql',
     'database' => 'gbrds_registry',
@@ -226,23 +206,46 @@ function list_participants($type, $region_to_load, $IMS, $gbrdsCredential) {
     'host' => $gbrdsCredential['hostname'],
   );
   Database::addConnectionInfo('gbrds', 'default', $gbrds);
-  db_set_active('gbrds');
+  $portal = array(
+    'driver' => 'mysql',
+    'database' => 'portal',
+    'username' => $mogoCredential['username'],
+    'password' => $mogoCredential['password'],
+    'host' => $mogoCredential['hostname'],
+  );
+  Database::addConnectionInfo('portal', 'default', $portal);
 
   foreach($records['IMS'] as $value) {
-    $key = $value->getField('Name_Short');
-    $gbrds_profile[$key] = array();
+    $key = $value->getField('__Country::ISO2');
+    $name_short = $value->getField('Name_Short');
+    $participantProfile[$name_short] = array();
+    
+    db_set_active('gbrds');
+    $gbrdsResult = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.iso_country_code = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key))->fetchAll();
 
-    $gbrds = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.name = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key))->fetchAll();
-
-    foreach ($gbrds as $agentType) {
-      $gbrds_profile[$key][$agentType->name] = $agentType->count;
+    foreach ($gbrdsResult as $agentType) {
+      $participantProfile[$name_short]['agents'][$agentType->name] = (int) $agentType->count;
     }
+
+    db_set_active('portal');
+    $portalResult = db_query("SELECT rollover_id, provider_count, dataset_count, occurrence_count, occurrence_georeferenced_count FROM {stats_country_contribution} WHERE iso_country_code = :ISO ORDER BY rollover_id DESC LIMIT 0,1", array(':ISO' => $key))->fetchAll();
+    if (isset($portalResult[0])) $participantProfile[$name_short]['stats'] = (array) $portalResult[0];
+    if (isset($portalResult[0]) == NULL) {
+      $participantProfile[$name_short]['stats'] = array(
+        'rollover_id' => 0,
+        'provider_count' => 0,
+        'dataset_count' => 0,
+        'occurrence_count' => 0,
+        'occurrence_georeferenced_count' => 0,
+      );
+    }
+    foreach ($participantProfile[$name_short]['stats'] as $k => $v) { $participantProfile[$name_short]['stats'][$k] = (int) $v; }
   
   }
 
   db_set_active();
 
-  $records['member'] = $gbrds_profile;
+  $records['member'] = $participantProfile;
   unset($records['IMS']);
   return $records;
 }
