@@ -10,8 +10,8 @@
  * Implementats hook_help().
  */
 
-function gbif_registry_help($path, $arg) {
-  if ($path == 'admin/help#gbif_registry') {
+function gbif_nptregistry_help($path, $arg) {
+  if ($path == 'admin/help#gbif_nptregistry') {
     return t('This module talks to the GBIF Registry to get organisation information or authorise registration requests.');
   }
 }
@@ -20,9 +20,9 @@ function gbif_registry_help($path, $arg) {
  * Implementation of hook_menu().
  */
 
-function gbif_registry_menu() {
-  $items['admin/config/gbif_registry'] = array(
-    'title' => 'GBIF Registry',
+function gbif_nptregistry_menu() {
+  $items['admin/config/gbif_nptregistry'] = array(
+    'title' => 'GBIF NPT Registry',
     'description' => 'Available options for configuring the GBIF Registry.',
     'position' => 'right',
     'weight' => -5,
@@ -31,14 +31,14 @@ function gbif_registry_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  $items['admin/config/gbif_registry/settings'] = array(
+  $items['admin/config/gbif_nptregistry/settings'] = array(
     'title' => 'GBIF Registry configuration',
     'description' => 'Change how this Drupal instance interacts with the GBIF Registry.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('gbif_registry_admin_settings'),
+    'page arguments' => array('gbif_nptregistry_admin_settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'gbif_registry.admin.inc',
+    'file' => 'gbif_nptregistry.admin.inc',
   );
   return $items;
 }
