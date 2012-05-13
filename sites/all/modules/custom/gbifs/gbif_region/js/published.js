@@ -1,23 +1,13 @@
-  var json = Drupal.settings.gbif_region;
-  alert(json);
-  var data = [{node: 'India', count: 5818},
-              {node: 'Indonesia', count: 0},
-              {node: 'Japan', count: 2887429},
-              {node: 'Korea', count: 1648194},
-              {node: 'Pakistan', count: 773},
-              {node: 'Philippines', count: 0},
-              {node: 'Taiwan', count: 1158793},
-              {node: 'ACB', count: 0},
-              {node: 'ICIMOD', count: 288880},
-              {node: 'China', count: 288880}];
-  
+  var dest = Drupal.settings.gbif_region;
+
+d3.json(dest, function(data) {
   var width = 480;
   var canvasWidth = 525;
   var height = 380;
   var canvasHeight = 480;
   var padding = 20;
   var barWidth = (width / data.length) - 10;
-  
+    
   var x = d3.scale.linear().
     domain([0, data.length]).
     range([0, width]);
@@ -89,3 +79,4 @@
       attr("style", "font-size: 12; font-family: Helvetica, sans-serif;").
       attr("text-anchor", "end").
       text(function(d) { return (Math.round(d / 1e5)/10).toFixed(1) + "M"; });
+});
