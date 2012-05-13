@@ -14,7 +14,7 @@ Body {
 #page {
   min-height: 100%;
   padding-top: 3px;
-  background: url("../images/top_bar.jpg") repeat-x;
+  background: url("../images/top_bar_bw.jpg") repeat-x;
   position: relative;
 }
 
@@ -26,12 +26,12 @@ a {
 
 #region-user-first {
   top: -3px;
-  height: 25px;
+  height: 17px;
 }
 
 #region-user-second {
   top: -3px;
-  height: 25px;
+  height: 17px;
   color: #ADD8B8;
   text-align: right;
   float: right;
