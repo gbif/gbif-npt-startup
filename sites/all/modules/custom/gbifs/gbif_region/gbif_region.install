@@ -7,7 +7,9 @@
  * the status of the FileMaker API in status report.
  */
 function gbif_region_requirements($phase) {
-
+  
+  $requirements = array();
+  
   if ($phase == "runtime") {
 
     // Try to load the API.
@@ -31,4 +33,16 @@ function gbif_region_requirements($phase) {
   }
 
   return $requirements;
+}
+
+/**
+ * Implementation of hook_enable()
+ */
+function gbif_region_enable() {
+  // Create directory for storing generated data files
+  $uri = 'public://gbif_region';
+  $dir_exists = file_prepare_directory($uri);
+  if (!$dir_exists) {
+    drupal_mkdir($uri);
+  }
 }
