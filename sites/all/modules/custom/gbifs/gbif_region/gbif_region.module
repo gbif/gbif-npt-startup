@@ -114,6 +114,16 @@ function gbif_region_library() {
         'scope' => 'footer',
         'weight' => 20,
       ),
+      drupal_get_path('module', 'gbif_region') . '/js/jquery.dataTables.min.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 21,
+      ),
+      drupal_get_path('module', 'gbif_region') . '/js/dataGrid.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 22,
+      ),
     ),
     'css' => array(
       drupal_get_path('module', 'gbif_region') . '/css/published.css' => array(
@@ -168,6 +178,8 @@ function gbif_region_page_view($region = NULL) {
   
   $region_to_load = $regionList[$region];
 
+  // Intended to put this FileMaker new object code into list_participants()
+  // But once put in, it always complains FileMaker_Error::getRecords(). How come?
   gbif_region_load_api();
   // Include access credentials.
   include_once('includes/gbif_region.settings.inc');
@@ -201,12 +213,22 @@ function gbif_region_page_view($region = NULL) {
 
   $page_content .= '</article>';
 
+  $page_content .= '<table cellpadding="0" cellspacing="0" border="0" class="display dataTable" id="dataGrid"></table>';
+
   $occurrenceCount = array();
   foreach($memberships as $node) {
     foreach($node as $nodeName => $statsType) {
       $toPush = array();
-      $toPush['node'] = $nodeName;
-      $toPush['count'] = $statsType['stats']['occurrence_count'];
+      $toPush['nodeTitle'] = $nodeName;
+      $toPush['GBIFMembership'] = $statsType['GBIFMembership'];
+      $toPush['nodeCount'] = (isset($statsType['agents']['Node'])) ? $statsType['agents']['Node'] : 0;
+      $toPush['orgCount'] = (isset($statsType['agents']['Organisation'])) ? $statsType['agents']['Organisation'] : 0;
+      $toPush['resourceCount'] = (isset($statsType['agents']['Resource'])) ? $statsType['agents']['Resource'] : 0;
+      $toPush['IPTCount'] = (isset($statsType['agents']['IPT'])) ? $statsType['agents']['IPT'] : 0;
+      $toPush['providerCount'] = $statsType['stats']['provider_count'];
+      $toPush['datasetCount'] = $statsType['stats']['dataset_count'];
+      $toPush['occurrenceCount'] = $statsType['stats']['occurrence_count'];
+      $toPush['occurrenceGeoCount'] = $statsType['stats']['occurrence_georeferenced_count'];
       array_push($occurrenceCount, $toPush);
     }
   }
@@ -229,6 +251,7 @@ function gbif_region_page_view($region = NULL) {
 
   return $page_content;
 }
+
 
 /**
  * Get participant list according to membership type
@@ -275,9 +298,13 @@ function list_participants($type, $region_to_load, $IMS, $gbrdsCredential, $mogo
   Database::addConnectionInfo('portal', 'default', $portal);
 
   foreach($records['IMS'] as $value) {
-    $key = $value->getField('__Country::ISO2');
     $name_short = $value->getField('Name_Short');
+
     $participantProfile[$name_short] = array();
+    $participantProfile[$name_short]['GBIFMembership'] = $value->getField('GBIFmembership');
+    // $participantProfile[$name_short]['MOU2012'] = $value->getField('MOU2012');
+
+    $key = $value->getField('__Country::ISO2');
     
     db_set_active('gbrds');
     $gbrdsResult = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.iso_country_code = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key))->fetchAll();

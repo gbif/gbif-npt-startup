@@ -12,7 +12,7 @@ d3.json(dest, function(data) {
     domain([0, data.length]).
     range([0, width]);
   var y = d3.scale.linear().
-    domain([0, d3.max(data, function(d) { return d.count + 200000; })]).
+    domain([0, d3.max(data, function(d) { return d.occurrenceCount + 200000; })]).
     rangeRound([0, height - 100]);
   
   var published = d3.select("#chart").
@@ -34,19 +34,19 @@ d3.json(dest, function(data) {
     transition().
       delay(100).
       duration(750).
-      attr("height", function(d) { return y(d.count); }).
-      attr("y", function(d) { return height - 100 - y(d.count); });
+      attr("height", function(d) { return y(d.occurrenceCount); }).
+      attr("y", function(d) { return height - 100 - y(d.occurrenceCount); });
     
   barGroup.selectAll("text").
     data(data).
     enter().
     append("svg:text").
     attr("x", function(d, i) { return x(i); }).
-    attr("y", function(d) { return height - 100 - y(d.count); }).
+    attr("y", function(d) { return height - 100 - y(d.occurrenceCount); }).
     attr("dx", barWidth/2).
     attr("dy", "-0.4em").
     attr("text-anchor", "middle").
-    text(function(d) { return d.count;}).
+    text(function(d) { return d.occurrenceCount;}).
     attr("style", "font-size: 12; font-family: Helvetica, sans-serif;").
     attr("fill", "gray");
 
@@ -59,7 +59,7 @@ d3.json(dest, function(data) {
       attr("text-anchor", "end").
       attr("transform", function(d, i){ return "translate("+(x(i)+padding+(barWidth/2))+" "+ (height - 60) +") rotate(-40)";}).
       attr("style", "font-size: 12; font-family: Helvetica, sans-serif;").
-      text(function(d) { return d.node;}).
+      text(function(d) { return d.nodeTitle;}).
       attr("class", "yAxis");
 
   var rules = published.append("g").attr("transform", "translate("+padding+", "+padding+")");
