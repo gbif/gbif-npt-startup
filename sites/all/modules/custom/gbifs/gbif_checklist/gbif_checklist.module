@@ -190,24 +190,28 @@ function gbif_checklist_classification_js($form, $form_state) {
       $checklistTitle = '';
       $checklistTitle = $result->checklistTitle;
       $higherClassificationString = '';
+      $remark = '';
       if ($result->higherClassification <> '') {
         $higherClassificationString .= $result->higherClassification;
       } else {
-        $higherClassificationString .= t('There is no higher classification for this checklist. This could be a single-name checklist.');
+        $higherClassificationString .= '('.t('There is no higher classification for this checklist.').')';
       }
       $checklistKey = '';
       $checklistKey = $result->checklistKey;
       $numDescendants = '';
-      $numDescendants = $result->numDescendants;
-      if ($numDescendants == 0) $higherClassificationString .= ' (' . t('There is no descendant for this checklist at the level the search term is matched. Only one name will be imported.') . ')';
+      $numDescendants = (int)$result->numDescendants; // Assuming the search term matches one taxon, so added on the descendant count.
+      if ($numDescendants == 0) $remark .= '<br/> (' . t('There is no descendant for this checklist at the level the search term is matched. Only one name will be imported.') . ')';
       $url = '';
       $url = GBIF_GBRDS_RESOURCE_URL . $checklistKey;
       
+      $estimatedTaxa = $numDescendants + 1;
+      $taxonUnit = format_plural($estimatedTaxa, 'taxon', 'taxa');
+      
       // Construct options
-      $options[$checklistKey . '|' . $numDescendants] = $higherClassificationString . '<br/>(' . l($checklistTitle, $url, array(
+      $options[$checklistKey . '|' . $estimatedTaxa] = $higherClassificationString . '<br/>from ' . l($checklistTitle, $url, array(
         'abosolute' => 1
       ))
-      . ') [approx. ' . $numDescendants . ' taxa]';
+      . ', with approx. ' . $estimatedTaxa . ' '. $taxonUnit . $remark;
     }
   }
   $form['gbif-checklist']['gbif-checklist-import-id'] = array(
