@@ -133,7 +133,7 @@ function gbif_checklist_gbif_checklist_form($form, $form_state) {
       ),
       'import-full' => array(
         '#weight' => 5,
-        '#markup' => '<div id="gbif-checklist-import-full" style="clear:both"><input name="gbif-checklist-import-id" style="display:none"/><div>'
+        '#markup' => '<div id="gbif-checklist-import-full" style="clear:both"><input name="gbif-checklist-import-id" style="display:none"/></div>'
       ),
       'submit-gbif-checklist' => array(
         '#weight' => 10,
@@ -250,4 +250,56 @@ function gbif_checklist_validate($form, &$form_state) {
   if(!(isset($form_state['values']['gbif-checklist-import-id']) && count(explode("|", $form_state['values']['gbif-checklist-import-id'])) == 2)) {
     form_set_error('gbif-checklist-id', t('Please ensure you select a classification to import.'));
   }
+}
+
+/**
+ * Callback function when pressing "Import from GBIF Checklist Bank"
+ */
+function gbif_checklist_submit($form, $form_state){
+  // Validation doesn't appear to work, so we instead piss people off and 
+  // do it here.  
+  if((!isset($form_state['values']['taxonomy_vid']) || !$form_state['values']['taxonomy_vid'])||(!(isset($form_state['values']['gbif-checklist-import-id']) && count(explode("|", $form_state['values']['gbif-checklist-import-id'])) == 2))){
+    drupal_set_message('Please ensure you select a source and destination vocabulary.', 'error');
+    drupal_goto('admin/import');
+  }
+  // Added for D7 to prevent errors on submission/testing.
+  $parts = explode("|", $form_state['values']['gbif-checklist-import-id']);
+  $batch = array(
+    'operations' => array(
+      array(
+        'tcsdc_batch_downloader',
+        array(
+          array(
+            EOL_REQUEST_URL . $parts[0]
+          ),
+          $parts[1],
+          $form_state['values']['taxonomy_vid']
+        )
+      ),
+      array(
+        'tcsdc_import_terms',
+        array(
+          $form_state['values']['taxonomy_vid']
+        )
+      )
+    ),
+    'finished' => 'tcsdc_finished_batch',
+    'title' => t('Importing'),
+    // We use a single multi-pass operation, so the default
+    // 'Remaining x of y operations' message will be confusing here.
+    'error_message' => t('The import has encountered an error.')
+  );
+  batch_set($batch);
+}
+
+function gbif_checklist_batch_downloader() {
+  
+}
+
+function gbif_checklist_import_terms() {
+  
+}
+
+function gbif_checklist_finished_batch() {
+  
 }
