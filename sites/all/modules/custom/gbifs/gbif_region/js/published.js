@@ -4,7 +4,7 @@ d3.json(dest, function(data) {
   var width = 895;
   var canvasWidth = 940;
   var height = 420;
-  var canvasHeight = 480;
+  var canvasHeight = 450;
   var padding = 20;
   var barWidth = (width / data.length) - 10;
     
