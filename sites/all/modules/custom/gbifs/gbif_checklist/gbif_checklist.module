@@ -197,7 +197,7 @@ function gbif_checklist_classification_js($form, $form_state) {
         $higherClassificationString .= '('.t('There is no higher classification for this checklist.').')';
       }
       $checklistKey = '';
-      $checklistKey = $result->checklistKey;
+      $checklistKey = $result->key; // was $result->checklistKey, but key can be used to list children directly.
       $numDescendants = '';
       $numDescendants = (int)$result->numDescendants; // Assuming the search term matches one taxon, so added on the descendant count.
       if ($numDescendants == 0) $remark .= '<br/> (' . t('There is no descendant for this checklist at the level the search term is matched. Only one name will be imported.') . ')';
@@ -267,23 +267,23 @@ function gbif_checklist_submit($form, $form_state){
   $batch = array(
     'operations' => array(
       array(
-        'tcsdc_batch_downloader',
+        'gbif_checklist_batch_downloader',
         array(
           array(
-            EOL_REQUEST_URL . $parts[0]
+            GBIF_USAGE_URL . $parts[0] . '/children'
           ),
           $parts[1],
           $form_state['values']['taxonomy_vid']
         )
       ),
       array(
-        'tcsdc_import_terms',
+        'gbif_checklist_import_terms',
         array(
           $form_state['values']['taxonomy_vid']
         )
       )
     ),
-    'finished' => 'tcsdc_finished_batch',
+    'finished' => 'gbif_checklist_finished_batch',
     'title' => t('Importing'),
     // We use a single multi-pass operation, so the default
     // 'Remaining x of y operations' message will be confusing here.
@@ -293,6 +293,10 @@ function gbif_checklist_submit($form, $form_state){
 }
 
 function gbif_checklist_batch_downloader() {
+  
+}
+
+function gbif_checklist_batch_downloader_helper() {
   
 }
 
