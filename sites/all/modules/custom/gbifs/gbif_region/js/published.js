@@ -1,9 +1,9 @@
-  var dest = Drupal.settings.gbif_region;
+  var dest = Drupal.settings.gbif_region.forChart;
 
 d3.json(dest, function(data) {
-  var width = 480;
-  var canvasWidth = 525;
-  var height = 380;
+  var width = 895;
+  var canvasWidth = 940;
+  var height = 420;
   var canvasHeight = 480;
   var padding = 20;
   var barWidth = (width / data.length) - 10;

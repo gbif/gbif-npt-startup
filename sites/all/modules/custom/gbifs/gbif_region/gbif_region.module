@@ -167,7 +167,27 @@ function gbif_region_page_view($region = NULL) {
     'oceania' => 'Oceania',
     'lamerica' => 'Latin America',
   );
-
+  
+  // Prepare the data grid table
+  $table = '';
+  $table .= '<table cellpadding="0" cellspacing="0" border="0" class="display" id="dataGrid">';
+  $table .= '<thead>';
+  $table .= '<tr>';
+  $table .= '<th>Node</th>';
+  $table .= '<th>Membership</th>';
+  $table .= '<th>Node(s)</th>';
+  $table .= '<th>Organisation(s)</th>';
+  $table .= '<th>Resource(s)</th>';
+  $table .= '<th>IPT(s)</th>';
+  $table .= '<th>Provider(s)</th>';
+  $table .= '<th>Dataset(s)</th>';
+  $table .= '<th>Occurrence(s)</th>';
+  $table .= '<th>Georeference(s)</th>';
+  $table .= '</tr>';
+  $table .= '</thead>';
+  $table .= '<tbody><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tbody>';
+  $table .= '</table>';
+    
   // Export the list
   $page_content = '';
   $page_content .= '<div class="gallery" id="map">';
@@ -198,22 +218,22 @@ function gbif_region_page_view($region = NULL) {
   $memberships = array();
   foreach ($membershipTypes as $membershipType => $membershipTitle) {
     $participants = list_participants($membershipType, $region_to_load, $IMS, $gbrdsCredential, $mogoCredential);
-    $page_content .= '<h4>'.$membershipTitle.'</h4><p>';
+    //$page_content .= '<h4>'.$membershipTitle.'</h4><p>';
     foreach ($participants['member'] as $member => $agent) {
-      $page_content .= '<strong>' . $member . '</strong>, ';
+      //$page_content .= '<strong>' . $member . '</strong>, ';
       if (isset($agent['agents'])) $agents = $agent['agents'];
       foreach ($agents as $agent_type => $count) {
-        $page_content .= $agent_type . '(' . $count . '), ';
+        //$page_content .= $agent_type . '(' . $count . '), ';
       }
-      $page_content .= '</br>';
+      //$page_content .= '</br>';
     }
-    $page_content .= '</p>';      
+    //$page_content .= '</p>';      
     $memberships[$membershipType] = $participants['member'];
   }
 
-  $page_content .= '</article>';
+  $page_content .= $table;
 
-  $page_content .= '<table cellpadding="0" cellspacing="0" border="0" class="display dataTable" id="dataGrid"></table>';
+  $page_content .= '</article>';
 
   $occurrenceCount = array();
   foreach($memberships as $node) {
@@ -234,6 +254,9 @@ function gbif_region_page_view($region = NULL) {
   }
   $membershipsJSON = json_encode($memberships);
   $occurrenceCountJSON = json_encode($occurrenceCount);
+  $occurrenceTable = array();
+  $occurrenceTable['aaData'] = $occurrenceCount;
+  $occurrenceTableJSON = json_encode($occurrenceTable);
   
   $filename = 'gbif_region/membership_' . $region . '.json';
   $dest = file_build_uri($filename);
@@ -243,7 +266,13 @@ function gbif_region_page_view($region = NULL) {
   $destOcc = file_build_uri($filenameOcc);
   file_save_data($occurrenceCountJSON, $destOcc, FILE_EXISTS_REPLACE);
   
-  $destURL = file_create_url($destOcc);
+  $filenameOccTable = 'gbif_region/occurrenceTable_' . $region . '.json';
+  $destOccTable = file_build_uri($filenameOccTable);
+  file_save_data($occurrenceTableJSON, $destOccTable, FILE_EXISTS_REPLACE);
+  
+  $destURL = array();
+  $destURL['forChart'] = file_create_url($destOcc);
+  $destURL['forTable'] = file_create_url($destOccTable);
 
   drupal_add_library('gbif_region', 'd3', FALSE);
   drupal_add_library('gbif_region', 'data_publishing', FALSE);
