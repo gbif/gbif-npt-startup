@@ -163,15 +163,6 @@ function gbif_region() {
  */
 function gbif_region_page_view($region = NULL) {
   
-  $regionList = array(
-    'africa' => 'Africa',
-    'asia' => 'Asia',
-    'europe' => 'Europe',
-    'namerica' => 'North America',
-    'oceania' => 'Oceania',
-    'lamerica' => 'Latin America',
-  );
-  
   // Prepare the data grid table
   $table = '';
   $table .= '<table cellpadding="0" cellspacing="0" border="0" class="display" id="dataGrid">';
@@ -200,88 +191,21 @@ function gbif_region_page_view($region = NULL) {
   $page_content .= '</div>';
   $page_content .= '<article>';
   
-  $region_to_load = $regionList[$region];
-
-  // Intended to put this FileMaker new object code into list_participants()
-  // But once put in, it always complains FileMaker_Error::getRecords(). How come?
-  gbif_region_load_api();
-  // Include access credentials.
-  include_once('includes/gbif_region.settings.inc');
-  $IMS = new FileMaker();
-  $IMS->setProperty('database', $IMSCredential['database']);
-  $IMS->setProperty('hostspec', $IMSCredential['hostname']);
-  $IMS->setProperty('username', $IMSCredential['username']);
-  $IMS->setProperty('password', $IMSCredential['password']);
-
-  
-  // Get the list of country and other associate participant
-  $membershipTypes = array(
-    'country' => 'Country',
-    'other' => 'Other Associate Participants',
-  );
-  $memberships = array();
-  foreach ($membershipTypes as $membershipType => $membershipTitle) {
-    $participants = list_participants($membershipType, $region_to_load, $IMS, $gbrdsCredential, $mogoCredential);
-    foreach ($participants['member'] as $member => $agent) {
-      if (isset($agent['agents'])) $agents = $agent['agents'];
-      foreach ($agents as $agent_type => $count) {
-      }
-    }
-    $memberships[$membershipType] = $participants['member'];
-  }
-
   $page_content .= $table;
 
   $page_content .= '</article>';
 
-  $occurrenceCount = array();
-  foreach($memberships as $node) {
-    foreach($node as $nodeName => $statsType) {
-      $toPush = array();
-      $toPush['nodeTitle'] = $nodeName;
-      
-      $membershipAcronym = '';
-      switch ($statsType['GBIFMembership']) {
-        case 'Voting Participant':
-          $membershipAcronym = 'VP';
-          break;
-        case 'Associate Country Participant';
-          $membershipAcronym = 'ACP';
-          break;
-        case 'Other Associate Participant';
-          $membershipAcronym = 'OAP';
-          break;
-      }
-      
-      $toPush['GBIFMembership'] = $membershipAcronym;
-      $toPush['nodeCount'] = (isset($statsType['agents']['Node'])) ? $statsType['agents']['Node'] : 0;
-      $toPush['orgCount'] = (isset($statsType['agents']['Organisation'])) ? $statsType['agents']['Organisation'] : 0;
-      $toPush['resourceCount'] = (isset($statsType['agents']['Resource'])) ? $statsType['agents']['Resource'] : 0;
-      $toPush['IPTCount'] = (isset($statsType['agents']['IPT'])) ? $statsType['agents']['IPT'] : 0;
-      $toPush['providerCount'] = $statsType['stats']['provider_count'];
-      $toPush['datasetCount'] = $statsType['stats']['dataset_count'];
-      $toPush['occurrenceCount'] = $statsType['stats']['occurrence_count'];
-      $toPush['occurrenceGeoCount'] = $statsType['stats']['occurrence_georeferenced_count'];
-      array_push($occurrenceCount, $toPush);
-    }
-  }
-  $membershipsJSON = json_encode($memberships);
-  $occurrenceCountJSON = json_encode($occurrenceCount);
-  $occurrenceTable = array();
-  $occurrenceTable['aaData'] = $occurrenceCount;
-  $occurrenceTableJSON = json_encode($occurrenceTable);
-  
+  // Currently unused structured JSON
   $filename = 'gbif_region/membership_' . $region . '.json';
-  $dest = file_build_uri($filename);
-  file_save_data($membershipsJSON, $dest, FILE_EXISTS_REPLACE);
+  $destMembership = file_build_uri($filename);
   
+  // Used by d3 chart
   $filenameOcc = 'gbif_region/occurrence_' . $region . '.json';
   $destOcc = file_build_uri($filenameOcc);
-  file_save_data($occurrenceCountJSON, $destOcc, FILE_EXISTS_REPLACE);
   
+  // Used by DataTables
   $filenameOccTable = 'gbif_region/occurrenceTable_' . $region . '.json';
   $destOccTable = file_build_uri($filenameOccTable);
-  file_save_data($occurrenceTableJSON, $destOccTable, FILE_EXISTS_REPLACE);
   
   $destURL = array();
   $destURL['forChart'] = file_create_url($destOcc);
@@ -417,12 +341,11 @@ function gbif_region_load_api() {
  */
 function gbif_region_cron() {
 
-  gbif_region_stats_update();
-
   $interval = variable_get('gbif_region_interval', 60 * 60 * 24);
   if (time() >= variable_get('gbif_region_next_update', 0)) {
-    
-    
+
+    gbif_region_stats_update();
+  
     watchdog('gbif_region', 'GBIF Regional stats updated.');
     variable_set('gbif_region_next_update', time() + $interval);
   }
@@ -431,6 +354,7 @@ function gbif_region_cron() {
 /*
  * GBIF Region Statistics Update
  * Run through all queries and save results as JSON files.
+ * @ToDo clean up credentials
  */
 function gbif_region_stats_update() {
   $regions = array(
@@ -441,8 +365,14 @@ function gbif_region_stats_update() {
     'oceania' => 'Oceania',
     'lamerica' => 'Latin America',
   );
+  
+  // Iterate through all regions
   foreach($regions as $regionAcronym => $region) {
+    
+    // Load FileMaker api
     gbif_region_load_api();
+    
+    // Load credentials
     include_once('includes/gbif_region.settings.inc');
     $IMS = new FileMaker();
     $IMS->setProperty('database', $IMSCredential['database']);
@@ -455,6 +385,9 @@ function gbif_region_stats_update() {
     );
     $memberships = array();
     foreach ($membershipTypes as $membershipType => $membershipTitle) {
+      
+      // It's really strange that FileMaker API doesn't allow me
+      // to include credentials inside list_participants()
       $participants = list_participants($membershipType, $region, $IMS, $gbrdsCredential, $mogoCredential);
       foreach ($participants['member'] as $member => $agent) {
         if (isset($agent['agents'])) $agents = $agent['agents'];
