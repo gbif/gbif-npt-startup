@@ -48,7 +48,7 @@ d3.json(dest, function(data) {
     attr("text-anchor", "middle").
     text(function(d) { return d.occurrenceCount;}).
     attr("style", "font-size: 12; font-family: Helvetica, sans-serif;").
-    attr("fill", "gray");
+    attr("fill", "grey");
 
   var yAxis = published.append("svg:g");
     yAxis.selectAll("yAxis").
