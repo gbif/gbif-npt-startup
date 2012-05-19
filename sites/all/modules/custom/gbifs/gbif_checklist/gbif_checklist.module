@@ -270,20 +270,20 @@ function gbif_checklist_submit($form, $form_state){
         'gbif_checklist_batch_downloader',
         array(
           array(
-            GBIF_USAGE_URL . $parts[0] . '/children'
+            GBIF_USAGE_URL . $parts[0]
           ),
           $parts[1],
           $form_state['values']['taxonomy_vid']
         )
       ),
       array(
-        'gbif_checklist_import_terms',
+        'tcsdc_import_terms',
         array(
           $form_state['values']['taxonomy_vid']
         )
       )
     ),
-    'finished' => 'gbif_checklist_finished_batch',
+    'finished' => 'tcsdc_finished_batch',
     'title' => t('Importing'),
     // We use a single multi-pass operation, so the default
     // 'Remaining x of y operations' message will be confusing here.
@@ -292,17 +292,129 @@ function gbif_checklist_submit($form, $form_state){
   batch_set($batch);
 }
 
-function gbif_checklist_batch_downloader() {
-  
+/**
+ * Helper function for setting variables that need to be accessed in different
+ * functions.
+ */
+function gbif_checklist_variable($name, $value = NULL){
+  static $data = array();
+  if(!is_null($value)){
+    $data[$name] = $value;
+  }
+  if(isset($data[$name])){
+    return $data[$name];
+  }else{
+    return $value;
+  }
 }
 
-function gbif_checklist_batch_downloader_helper() {
+/*
+ * In principle replicate the way ScratchPads tcsdc works, however,
+ * share the same database for temporary storage.
+ */
+function gbif_checklist_batch_downloader($urls, $total = 1000000, $vid, &$context) {
+  if(!isset($context['sandbox']['progress'])){
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = $total;
+    $context['sandbox']['originalurl'] = $urls[0];
+    $context['sandbox']['urls'] = $urls;
+    $context['sandbox']['start_time'] = time();
+    // Set a static array for the URLs, this means that we can alter it when
+    // parsing the XML.
+    gbif_checklist_variable('gbif_checklist_urls', $urls);
+  }
+  $batch = &batch_get();
+  $url = array_shift($context['sandbox']['urls']);
+  gbif_checklist_variable('gbif_checklist_urls', $context['sandbox']['urls']);
+  gbif_checklist_variable('gbif_checklist_vernaculars', $context['sandbox']['vernacular_urls']);
+  gbif_checklist_variable('gbif_checklist_synonyms', $context['sandbox']['synonym_urls']);
+  gbif_checklist_batch_downloader_helper($url, $vid);
+  $context['sandbox']['urls'] = gbif_checklist_variable('gbif_checklist_urls');
+  $context['sandbox']['vernacular_urls'] = gbif_checklist_variable('gbif_checklist_vernaculars');
+  $context['sandbox']['synonym_urls'] = gbif_checklist_variable('gbif_checklist_synonyms');
+  // Get the number of names we have downloaded.
+  $num_names_saved = db_query("SELECT COUNT(*) FROM {tcsdc_data} WHERE bid = ?", array(
+    $batch['id']
+  ))->fetchField();
+  $context['sandbox']['progress'] = $num_names_saved / $context['sandbox']['max'];
+  // Set the message
+  $time_taken_so_far = time() - $context['sandbox']['start_time'];
+  $approx_time_remaining = $context['sandbox']['progress'] == 0 ? 'Too soon to guess' : format_interval($time_taken_so_far * ((1 - $context['sandbox']['progress']) / $context['sandbox']['progress']));
+  $context['message'] = t('Downloaded %numnames names of approximately %totalnames', array(
+    '%numnames' => $num_names_saved,
+    '%totalnames' => $context['sandbox']['max']
+  )) . '<br/>' . t('Approximate time remaining: %time_remaining', array(
+    '%time_remaining' => $approx_time_remaining
+  ));
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if(count($context['sandbox']['urls'])){
+    if($context['sandbox']['progress'] < 1){
+      $context['finished'] = $context['sandbox']['progress'];
+    }else{
+      $context['finished'] = 0.95;
+    }
+  }else{
+    $context['finished'] = 1;
+  }
+}  
+
+function gbif_checklist_batch_downloader_helper($url, $vid) {
+  try{
+    $json = json_decode(file_get_contents($url), true);
+  } 
+  catch(Exception $e){
+    drupal_set_message(t('Unable to parse <a href="!url">Checklist Source URL</a>', array(
+      '!url' => $url
+    )));
+    return;
+  }
+  $batch = &batch_get();
+  $data = array();
+
+  // vernacular handling to be implemented.
   
+  // There is no nomenclatural code value in the Checklist API JSON,
+  // therefore we decide it here according to the kingdom.
+  switch ($json['kingdom']) {
+    case 'Animalia':
+      $nomenclaturalCode = 'Zoological';
+      break;
+    case 'Plantae':
+      $nomenclaturalCode = 'Botanical';
+      break;
+  }
+
+  $jsonChildren = json_decode(file_get_contents(($url . '/children'), true));
+  
+  foreach ($jsonChildren->results as $result) {
+    $urls = gbif_checklist_variable('gbif_checklist_urls');
+    $urls[] = GBIF_USAGE_URL . (string)$result->key;
+    gbif_checklist_variable('gbif_checklist_urls', $urls);
+  }
+
+  $data = array(
+    'simple' => strtolower((string)$json['canonicalName']),
+    'rank' => ucwords(strtolower((string)$json['rank'])),
+    'canonicalname' => (string)$json['canonicalName'],
+    'id' => $json['key'],
+    'nomenclaturalCode' => $nomenclaturalCode,
+    'parent' => GBIF_USAGE_URL . $json['parentKey'],
+    'usage' => strtolower((string)$json['taxonomicStatus'])
+  );
+  
+  if(count($data)){
+    db_insert('tcsdc_data')->fields(array(
+      'id' => $url,
+      'name' => $data['simple'],
+      'bid' => $batch['id'],
+      'vid' => $vid,
+      'parent' => $data['parent'],
+      'data' => serialize($data)
+    ))->execute();
+  }
 }
 
-function gbif_checklist_import_terms() {
-  
-}
 
 function gbif_checklist_finished_batch() {
   
