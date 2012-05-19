@@ -12,3 +12,4 @@ dummy.php
 .DS_Store
 sites/all/modules/custom/feeds_xls/PHPExcel/
 sites/all/libraries/filemakerapi/
+sites/all/modules/custom/gbifs/gbif_region/includes/gbif_region.settings.inc
