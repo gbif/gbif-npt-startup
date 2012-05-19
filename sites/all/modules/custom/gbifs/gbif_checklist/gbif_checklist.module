@@ -372,8 +372,8 @@ function gbif_checklist_batch_downloader_helper($url, $vid) {
   $batch = &batch_get();
   $data = array();
 
-  // vernacular handling to be implemented.
-  
+  // Vernaculars to be implemented
+    
   // There is no nomenclatural code value in the Checklist API JSON,
   // therefore we decide it here according to the kingdom.
   switch ($json['kingdom']) {
@@ -385,23 +385,42 @@ function gbif_checklist_batch_downloader_helper($url, $vid) {
       break;
   }
 
-  $jsonChildren = json_decode(file_get_contents(($url . '/children'), true));
-  
-  foreach ($jsonChildren->results as $result) {
-    $urls = gbif_checklist_variable('gbif_checklist_urls');
-    $urls[] = GBIF_USAGE_URL . (string)$result->key;
-    gbif_checklist_variable('gbif_checklist_urls', $urls);
-  }
-
   $data = array(
     'simple' => strtolower((string)$json['canonicalName']),
     'rank' => ucwords(strtolower((string)$json['rank'])),
     'canonicalname' => (string)$json['canonicalName'],
     'id' => $json['key'],
     'nomenclaturalCode' => $nomenclaturalCode,
-    'parent' => GBIF_USAGE_URL . $json['parentKey'],
     'usage' => strtolower((string)$json['taxonomicStatus'])
   );
+
+  if ($json['taxonomicStatus'] == 'ACCEPTED') {
+    $data['parent'] = GBIF_USAGE_URL . $json['parentKey'];
+  } elseif ($json['taxonomicStatus'] == 'SYNONYM') {
+    $data['parent'] = GBIF_USAGE_URL . $json['acceptedKey'];
+  }
+
+  if ($json['numChildren'] > 0) {
+    $jsonChildren = json_decode(file_get_contents(($url . '/children'), true));
+    foreach ($jsonChildren->results as $result) {
+      $urls = gbif_checklist_variable('gbif_checklist_urls');
+      $urls[] = GBIF_USAGE_URL . (string)$result->key;
+      gbif_checklist_variable('gbif_checklist_urls', $urls);
+    }
+  }
+
+  if ($json['numSynonyms'] > 0) {
+    $jsonSynonyms = json_decode(file_get_contents(($url . '/synonyms'), true));
+    foreach ($jsonSynonyms->results as $result) {
+      $urls = gbif_checklist_variable('gbif_checklist_urls');
+      $urls[] = GBIF_USAGE_URL . (string)$result->key;
+      gbif_checklist_variable('gbif_checklist_urls', $urls);
+      // Synonyms
+      $synonym_urls = gbif_checklist_variable('gbif_checklist_synonyms');
+      $synonym_urls[ GBIF_USAGE_URL . (string)$result->key] = $url;
+      gbif_checklist_variable('gbif_checklist_synonyms', $gbif_checklist_urls);
+    }
+  }
   
   if(count($data)){
     db_insert('tcsdc_data')->fields(array(
