@@ -197,7 +197,8 @@ function gbif_checklist_classification_js($form, $form_state) {
         $higherClassificationString .= '('.t('There is no higher classification for this checklist.').')';
       }
       $checklistKey = '';
-      $checklistKey = $result->key; // was $result->checklistKey, but key can be used to list children directly.
+      $checklistKey = $result->checklistKey;
+      $nameKey = $result->key;
       $numDescendants = '';
       $numDescendants = (int)$result->numDescendants; // Assuming the search term matches one taxon, so added on the descendant count.
       if ($numDescendants == 0) $remark .= '<br/> (' . t('There is no descendant for this checklist at the level the search term is matched. Only one name will be imported.') . ')';
@@ -208,7 +209,7 @@ function gbif_checklist_classification_js($form, $form_state) {
       $taxonUnit = format_plural($estimatedTaxa, 'taxon', 'taxa');
       
       // Construct options
-      $options[$checklistKey . '|' . $estimatedTaxa] = $higherClassificationString . '<br/>from ' . l($checklistTitle, $url, array(
+      $options[$nameKey . '|' . $estimatedTaxa] = $higherClassificationString . '<br/>from ' . l($checklistTitle, $url, array(
         'abosolute' => 1
       ))
       . ', with approx. ' . $estimatedTaxa . ' '. $taxonUnit . $remark;
