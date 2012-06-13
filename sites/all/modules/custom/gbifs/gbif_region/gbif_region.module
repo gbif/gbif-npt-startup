@@ -222,7 +222,7 @@ function gbif_region_page_view($region = NULL) {
 /**
  * Get participant list according to membership type
  */
-function list_participants($type, $region_to_load, $IMS, $gbrdsCredential, $mogoCredential) {
+function list_participants($type, $region_to_load, $IMS) {
 
   $records = array();
 
@@ -244,24 +244,6 @@ function list_participants($type, $region_to_load, $IMS, $gbrdsCredential, $mogo
 
   $records['IMS'] = $result->getRecords();
   $participantProfile = array();
-
-  // Connect to GBRDS/Portal for relevant information
-  $gbrds = array(
-    'driver' => 'mysql',
-    'database' => 'gbrds_registry',
-    'username' => $gbrdsCredential['username'],
-    'password' => $gbrdsCredential['password'],
-    'host' => $gbrdsCredential['hostname'],
-  );
-  Database::addConnectionInfo('gbrds', 'default', $gbrds);
-  $portal = array(
-    'driver' => 'mysql',
-    'database' => 'portal',
-    'username' => $mogoCredential['username'],
-    'password' => $mogoCredential['password'],
-    'host' => $mogoCredential['hostname'],
-  );
-  Database::addConnectionInfo('portal', 'default', $portal);
 
   foreach($records['IMS'] as $value) {
     $name_short = $value->getField('Name_Short');
@@ -340,21 +322,21 @@ function gbif_region_load_api() {
  * Implementation of hook_cron()
  */
 function gbif_region_cron() {
-
+  gbif_region_stats_update();
+/*
   $interval = variable_get('gbif_region_interval', 60 * 60 * 24);
   if (time() >= variable_get('gbif_region_next_update', 0)) {
 
-    gbif_region_stats_update();
   
     watchdog('gbif_region', 'GBIF Regional stats updated.');
     variable_set('gbif_region_next_update', time() + $interval);
   }
+*/
 }
 
 /*
  * GBIF Region Statistics Update
  * Run through all queries and save results as JSON files.
- * @ToDo clean up credentials
  */
 function gbif_region_stats_update() {
   $regions = array(
@@ -373,7 +355,8 @@ function gbif_region_stats_update() {
     gbif_region_load_api();
     
     // Load credentials
-    include_once('includes/gbif_region.settings.inc');
+    $IMSCredential = variable_get('ims_connection');
+
     $IMS = new FileMaker();
     $IMS->setProperty('database', $IMSCredential['database']);
     $IMS->setProperty('hostspec', $IMSCredential['hostname']);
@@ -388,7 +371,7 @@ function gbif_region_stats_update() {
       
       // It's really strange that FileMaker API doesn't allow me
       // to include credentials inside list_participants()
-      $participants = list_participants($membershipType, $region, $IMS, $gbrdsCredential, $mogoCredential);
+      $participants = list_participants($membershipType, $region, $IMS);
       foreach ($participants['member'] as $member => $agent) {
         if (isset($agent['agents'])) $agents = $agent['agents'];
         foreach ($agents as $agent_type => $count) {
