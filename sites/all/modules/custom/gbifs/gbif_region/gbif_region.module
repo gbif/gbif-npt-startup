@@ -154,6 +154,23 @@ function gbif_region() {
   $page_content .= 'Please click a tab.';
   $page_content .= '</p>';
   $page_content .= '</article>';
+
+  // geoJSON generation
+  db_set_active('postgis');
+  $result = Database::getConnection()->query("SELECT 'Feature' AS type, iso_country_code_2d, name_short, ST_AsGeoJson(geom) AS geometry, occurrence_count, occurrence_georeferenced_count FROM {europe}")->fetchAll();
+  db_set_active();
+  
+  foreach ($result as $v) {
+    $v->geometry = json_decode($v->geometry);
+  }
+  
+  $geo = array();
+  $geo['type'] = 'FeatureCollection';
+  $geo['features'] = $result;
+  $geoJSON = json_encode($geo);
+  $geoFileURI = file_build_uri('gbif_region/geo.json');
+  file_save_data($geoJSON, $geoFileURI, FILE_EXISTS_REPLACE);
+    
   return $page_content;
 }
 
@@ -428,4 +445,6 @@ function gbif_region_stats_update() {
     $destOccTable = file_build_uri($filenameOccTable);
     file_save_data($occurrenceTableJSON, $destOccTable, FILE_EXISTS_REPLACE);
   }
+  
+  
 }
