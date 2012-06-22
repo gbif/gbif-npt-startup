@@ -288,7 +288,10 @@ function list_participants($type, $region_to_load) {
 
   $records['IMS'] = $result->getRecords();
   $participantProfile = array();
-
+  
+  // Following the membership definition in the IMS, and use that to decide
+  // where on the portal DB to look for information, hence
+  // stats_participant_contribution or stats_country_contribution
   foreach($records['IMS'] as $value) {
     $name_short = $value->getField('Name_Short');
 
@@ -296,18 +299,51 @@ function list_participants($type, $region_to_load) {
     $participantProfile[$name_short]['GBIFMembership'] = $value->getField('GBIFmembership');
     $participantProfile[$name_short]['iso_a2'] = $value->getField('__Country::ISO2');
     // $participantProfile[$name_short]['MOU2012'] = $value->getField('MOU2012');
-
-    $key = $value->getField('__Country::ISO2');
     
-    db_set_active('gbrds');
-    $gbrdsResult = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.iso_country_code = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key))->fetchAll();
-
-    foreach ($gbrdsResult as $agentType) {
-      $participantProfile[$name_short]['agents'][$agentType->name] = (int) $agentType->count;
+    // Decideing queries and keys to use according to membership type
+    if ($type == 'country') {
+      $key = $value->getField('__Country::ISO2');
+      db_set_active('gbrds');
+      $query_gbrds = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.iso_country_code = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key));
+      db_set_active('portal');
+      $query_portal = db_query("SELECT rollover_id, provider_count, dataset_count, occurrence_count, occurrence_georeferenced_count FROM {stats_country_contribution} WHERE iso_country_code = :ISO ORDER BY rollover_id DESC LIMIT 0,1", array(':ISO' => $key));
+    } else if ($type == 'other') {
+      db_set_active('postgis');
+      $name_relation = db_query("SELECT * FROM {ims.relate_registry} WHERE ims_name_short = :name_short", array(':name_short' => $name_short))->fetchAll();
+      db_set_active();
+      $node_name_for_gbrds = isset($name_relation[0]->registry_name) ? $name_relation[0]->registry_name : NULL;
+      $gbif_approver = isset($name_relation[0]->gbif_approver) ? $name_relation[0]->gbif_approver : NULL;
+      db_set_active('gbrds');
+      $query_gbrds = db_query("SELECT rt.name, count(*) as count FROM agent a LEFT JOIN agent_type at ON at.id = a.agent_type_id LEFT JOIN agent_relation ar ON a.id = ar.from_agent_id LEFT JOIN relation_type rt ON rt.id = ar.relation_type_id WHERE a.name = :nodeName AND ar.relation_type_id in (1, 2, 3, 4) GROUP BY rt.name", array(':nodeName' => $node_name_for_gbrds));
+      db_set_active('portal');
+      $query_portal = db_query("SELECT rollover_id, provider_count, dataset_count, occurrence_count, occurrence_georeferenced_count FROM {stats_participant_contribution} WHERE gbif_approver = :gbif_approver ORDER BY rollover_id DESC LIMIT 0,1", array(':gbif_approver' => $gbif_approver));
+    }
+    db_set_active();
+    
+    $gbrdsResult = $query_gbrds->fetchAll();
+    
+    $relationshipType = array(
+      'ENDORSES' => 'Organisation',
+      'HAS_RESOURCE' => 'Resource',
+      'HAS_TECHNICAL_INSTALLATION' => 'IPT',
+      'PUBLISHES' => ''
+    );
+    
+    if ($type == 'other') {
+      $participantProfile[$name_short]['agents']['Node'] = 1;
     }
 
-    db_set_active('portal');
-    $portalResult = db_query("SELECT rollover_id, provider_count, dataset_count, occurrence_count, occurrence_georeferenced_count FROM {stats_country_contribution} WHERE iso_country_code = :ISO ORDER BY rollover_id DESC LIMIT 0,1", array(':ISO' => $key))->fetchAll();
+    foreach ($gbrdsResult as $agentType) {
+      
+      if ($type == 'other') {
+        $agentTypeName = $relationshipType[$agentType->name];        
+        $participantProfile[$name_short]['agents'][$agentTypeName] = isset($agentType->count) ? (int) $agentType->count : 0;        
+      } else if ($type == 'country') {
+        $participantProfile[$name_short]['agents'][$agentType->name] = isset($agentType->count) ? (int) $agentType->count : 0;        
+      }
+    }
+
+    $portalResult = $query_portal->fetchAll();
     if (isset($portalResult[0])) $participantProfile[$name_short]['stats'] = (array) $portalResult[0];
     if (isset($portalResult[0]) == NULL) {
       $participantProfile[$name_short]['stats'] = array(
@@ -321,8 +357,6 @@ function list_participants($type, $region_to_load) {
     foreach ($participantProfile[$name_short]['stats'] as $k => $v) { $participantProfile[$name_short]['stats'][$k] = (int) $v; }
   
   }
-
-  db_set_active();
 
   $records['member'] = $participantProfile;
   unset($records['IMS']);
