@@ -32,7 +32,7 @@ a {
 #region-user-second {
   top: -3px;
   height: 17px;
-  color: #0080FF;
+  color: #09C;
   text-align: right;
   float: right;
   font-size: 0.85em;
@@ -45,7 +45,7 @@ a {
 }
 
 #region-user-second a {
-  color: #0080FF;
+  color: #09C;
   text-decoration: none;
 }
 
@@ -112,7 +112,7 @@ a {
 }
 
 #zone-preface-wrapper {
-  background: url("../images/texture-noise.png");
+  background: url("../images/NSLinenBackgroundPattern.png");
   overflow: hidden;
 }
 
@@ -312,10 +312,15 @@ ul.map-tabs-relative li a { border-radius: 3px; border: 1px solid #ccc; padding:
 ul.map-tabs-relative li a:hover { border-radius: 3px; border: 1px solid #ccc; padding: 0.3em 1em; }
 ul.map-tabs-relative li a.active { border-radius: 3px; border: none; background-color: #09C; color: #fff; font-weight: bold; padding: 0.4em 1em; }
 
-
 #zone-preface-wrapper {
   border-bottom: #ccc solid 1px;
   height: 480px;
+}
+
+#zone-preface {
+  position: relative;
+  height: 100%;
+  margin-bottom: -40px;
 }
 
 #zone-preface h1 {
@@ -323,7 +328,24 @@ ul.map-tabs-relative li a.active { border-radius: 3px; border: none; background-
   text-shadow: 1px 1px white;
   margin-left: 10px;
   padding-top: 20px;
+  font-size: 2.0em;
 }
+
+#regional-map-menu-wrapper {
+  position: absolute;
+  height: 40px;
+  bottom: 0px;
+}
+ul#map-region-menu {
+}
+ul#map-region-menu li {
+  display: inline;
+  padding: 0.3em;
+  
+}
+ul#map-region-menu li a { border-radius: 3px; border: 1px solid #fff; padding: 0.3em 1em; text-decoration: none; color: #fff;}
+ul#map-region-menu li a:hover { border-radius: 3px; border: 1px solid #ccc; padding: 0.3em 1em; background: #ccc; }
+ul#map-region-menu li a.active { border-radius: 3px; border: none; background-color: #09C; color: #fff; font-weight: bold; padding: 0.4em 1em; }
 
 #zone-content { padding-top: 20px; }
 

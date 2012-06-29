@@ -45,4 +45,15 @@ function gbif_region_enable() {
   if (!$dir_exists) {
     drupal_mkdir($uri);
   }
+  
+  $regions = array(
+    'africa' => 'Africa',
+    'asia' => 'Asia',
+    'europe' => 'Europe',
+    'namerica' => 'North America',
+    'lamerica' => 'Latin America',
+    'oceania' => 'Oceania',
+  );
+  
+  variable_set('regions', $regions);
 }

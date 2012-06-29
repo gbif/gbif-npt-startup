@@ -32,9 +32,31 @@ jQuery(document).ready(function() {
         { "aTargets": [3], "mDataProp": "orgCount", "sClass": "alignRight" },
         { "aTargets": [4], "mDataProp": "resourceCount", "sClass": "alignRight" },
         { "aTargets": [5], "mDataProp": "IPTCount", "sClass": "alignRight" },
-        { "aTargets": [6], "mDataProp": "providerCount", "sClass": "alignRight" },
-        { "aTargets": [7], "mDataProp": "datasetCount", "sClass": "alignRight" },
-        { "aTargets": [8], "sClass": "alignRight", "mDataProp": function (source, type, val) {
+        { "aTargets": [6], "mDataProp": "ChecklistDataset", "sClass": "alignRight" },
+        { "aTargets": [7], "sClass": "alignRight", "mDataProp": function (source, type, val) {
+          if (type === 'set') {
+    					// Store the base value
+    					source.ChecklistRecord = val;
+
+    					// Display is formatted with a dollar sign and number formatting
+    					source.ChecklistRecord_display = val==="" ? "" : numberFormat(val);
+
+    					// Filtering can occur on the formatted number, or the value alone
+    					source.ChecklistRecord_filter  = val==="" ? "" : source.occurrenceCount_display+" "+val;
+    					return;
+    				}
+    				else if (type === 'display') {
+    					return source.ChecklistRecord_display;
+    				}
+    				else if (type === 'filter') {
+    					return source.ChecklistRecord_filter;
+    				}
+    				// 'sort', 'type' and undefined all just use the integer
+    				return source.ChecklistRecord;
+        } },
+        { "aTargets": [8], "mDataProp": "providerCount", "sClass": "alignRight" },
+        { "aTargets": [9], "mDataProp": "datasetCount", "sClass": "alignRight" },
+        { "aTargets": [10], "sClass": "alignRight", "mDataProp": function (source, type, val) {
           if (type === 'set') {
     					// Store the base value
     					source.occurrenceCount = val;
@@ -55,7 +77,7 @@ jQuery(document).ready(function() {
     				// 'sort', 'type' and undefined all just use the integer
     				return source.occurrenceCount;
         } },
-        { "aTargets": [9], "sClass": "alignRight", "mDataProp": function (source, type, val) {
+        { "aTargets": [11], "sClass": "alignRight", "mDataProp": function (source, type, val) {
           if (type === 'set') {
     					// Store the base value
     					source.occurrenceGeoCount = val;

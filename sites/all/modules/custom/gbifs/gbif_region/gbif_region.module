@@ -5,9 +5,9 @@
  */
 function gbif_region_menu() {
   $items['gbif/region'] = array(
-    'title' => 'Regional Overview',
+    'title' => 'Network Overview',
     'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region',
+    'page callback' => 'gbif_region_global_view',
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
     'menu_name' => 'main-menu',
@@ -98,9 +98,21 @@ function gbif_region_library() {
     'website' => 'http://d3js.org',
     'version' => '2.9.1',
     'js' => array(
+      /*
       'http://d3js.org/d3.v2.js' => array(
         'type' => 'external',
         'weight' => -20,
+      ),
+      */
+      drupal_get_path('module', 'gbif_region') . '/js/d3.v2.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),      
+      drupal_get_path('module', 'gbif_region') . '/js/d3.geo.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
       ),
     ),  
   );
@@ -109,17 +121,7 @@ function gbif_region_library() {
     'website' => 'http://data.gbif.org',
     'version' => '0',
     'js' => array(
-      drupal_get_path('module', 'gbif_region') . '/js/d3.geo.js' => array(
-        'type' => 'file',
-        'scope' => 'footer',
-        'weight' => 20,
-      ),
       drupal_get_path('module', 'gbif_region') . '/js/jquery.tipsy.js' => array(
-        'type' => 'file',
-        'scope' => 'footer',
-        'weight' => 20,
-      ),
-      drupal_get_path('module', 'gbif_region') . '/js/regional_map.js' => array(
         'type' => 'file',
         'scope' => 'footer',
         'weight' => 20,
@@ -163,6 +165,50 @@ function gbif_region_library() {
       ),
     ),
   );
+  $libraries['gbif_global_overview'] = array(
+    'title' => 'GBIF global overview',
+    'website' => 'http://data.gbif.org',
+    'version' => '0',
+    'js' => array(
+      drupal_get_path('module', 'gbif_region') . '/js/global_map_front.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+      drupal_get_path('module', 'gbif_region') . '/js/jquery.tipsy.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+      drupal_get_path('module', 'gbif_region') . '/js/jquery.dataTables.min.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 21,
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'gbif_region') . '/css/published.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'gbif_region') . '/css/dataGrid.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'gbif_region') . '/css/tipsy.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'gbif_region') . '/css/map.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'gbif_region') . '/css/colorbrewer.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+    ),
+  );
   return $libraries;
 }
 
@@ -170,15 +216,77 @@ function gbif_region_library() {
  * Default overview page
  * Could be a global view but right now is just a placeholder.
  */
-function gbif_region() {
+function gbif_region_global_view() {
+
+  // Prepare the data grid table
+  $table = '';
+  $table .= '<table cellpadding="0" cellspacing="0" border="0" class="display" id="dataGrid">';
+  $table .= '<thead>';
+  $table .= '<tr>';
+  $table .= '<th>Node</th>';
+  $table .= '<th>Status</th>';
+  $table .= '<th>Node</th>';
+  $table .= '<th>Org Nr.</th>';
+  $table .= '<th>Res.</th>';
+  $table .= '<th>IPT</th>';
+  $table .= '<th>chk dst</th>';
+  $table .= '<th>chk usg</th>';
+  $table .= '<th>Provider</th>';
+  $table .= '<th>Occu dst</th>';
+  $table .= '<th>Occu</th>';
+  $table .= '<th>Geo Occu</th>';
+  $table .= '</tr>';
+  $table .= '</thead>';
+  $table .= '<tbody><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tbody>';
+  $table .= '</table>';
+
   $page_content = '';
   $page_content .= '<div class="gallery" id="chart">';
   $page_content .= '</div>';
   $page_content .= '<article>';
   $page_content .= '<p>';
-  $page_content .= 'Please click a tab.';
+  $page_content .= t('This page shows membership status of GBIF and overall data growth.');
   $page_content .= '</p>';
+
+  //$page_content .= $table;
+
   $page_content .= '</article>';
+
+  $regions = variable_get('regions');
+  $regionsURL = array();
+  foreach ($regions as $region => $region_name) {
+    $url = $GLOBALS['base_url'] . "/gbif/region#" . $region;
+    $regionsURL[$region] = l($region_name, $url);
+  }
+
+  $json_location = array();
+  $regions = variable_get('regions');
+  foreach ($regions as $i => $v) {
+    // GeoJSON
+    $filenameGeo = 'gbif_region/geo_' . $i . '.json';
+    $destGeo = file_build_uri($filenameGeo);
+
+    // Used by MAP tipsy
+    $filename = 'gbif_region/membership_' . $i . '.json';
+    $destMembership = file_build_uri($filename);
+
+    // Used by d3 chart
+    $filenameOcc = 'gbif_region/occurrence_' . $i . '.json';
+    $destOcc = file_build_uri($filenameOcc);
+
+    // Used by DataTables
+    $filenameOccTable = 'gbif_region/occurrenceTable_' . $i . '.json';
+    $destOccTable = file_build_uri($filenameOccTable);
+
+    $json_location['geo'][$i] = file_create_url($destGeo);
+    $json_location['membership'][$i] = file_create_url($destMembership);
+    $json_location['forChart'][$i] = file_create_url($destOcc);
+    $json_location['forTable'][$i] = file_create_url($destOccTable);
+  }
+  
+  drupal_add_library('gbif_region', 'd3', FALSE);
+  drupal_add_library('gbif_region', 'gbif_global_overview', FALSE);
+  drupal_add_js(array('gbif_region' => $regionsURL, 'json_location' => $json_location), 'setting');
 
   return $page_content;
 }
@@ -195,18 +303,20 @@ function gbif_region_page_view($region = NULL) {
   $table .= '<thead>';
   $table .= '<tr>';
   $table .= '<th>Node</th>';
-  $table .= '<th>Membership</th>';
+  $table .= '<th>Status</th>';
   $table .= '<th>Node</th>';
-  $table .= '<th>Organisation</th>';
-  $table .= '<th>Resource</th>';
+  $table .= '<th>Org Nr.</th>';
+  $table .= '<th>Res.</th>';
   $table .= '<th>IPT</th>';
+  $table .= '<th>chk dst</th>';
+  $table .= '<th>chk usg</th>';
   $table .= '<th>Provider</th>';
-  $table .= '<th>Dataset</th>';
-  $table .= '<th>Occurrence</th>';
-  $table .= '<th>Georeferenced</th>';
+  $table .= '<th>Occu dst</th>';
+  $table .= '<th>Occu</th>';
+  $table .= '<th>Geo Occu</th>';
   $table .= '</tr>';
   $table .= '</thead>';
-  $table .= '<tbody><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tbody>';
+  $table .= '<tbody><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tbody>';
   $table .= '</table>';
     
   // Export the list
@@ -301,48 +411,86 @@ function list_participants($type, $region_to_load) {
     // $participantProfile[$name_short]['MOU2012'] = $value->getField('MOU2012');
     
     // Decideing queries and keys to use according to membership type
+    // Thanks to Jose Curdra for developing the basic query to the Registry
     if ($type == 'country') {
       $key = $value->getField('__Country::ISO2');
+
       db_set_active('gbrds');
-      $query_gbrds = db_query("SELECT at.name as name, count(a.name) as count FROM {agent} a LEFT JOIN {country} c ON a.iso_country_code = LOWER(c.iso_country_code) LEFT JOIN agent_type at ON at.id = a.agent_type_id WHERE c.iso_country_code = :memberName AND a.agent_type_id in (1, 2, 3, 4) GROUP BY at.`name`", array(':memberName' => $key));
+      $query_gbrds_node_count = db_query("SELECT count(uuid) AS count FROM {agent} WHERE agent_type_id = 1 AND deleted IS NULL AND iso_country_code = :memberName", array(':memberName' => $key));
+      $query_gbrds_org_count = db_query("SELECT count(a2.uuid) AS count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id WHERE a1.agent_type_id = 1 AND a2.agent_type_id = 2 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND a1.iso_country_code = :memberName", array(':memberName' => $key));
+      $query_gbrds_resource_count = db_query("SELECT count(a3.uuid) AS count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id WHERE a1.agent_type_id = 1 AND a3.agent_type_id = 3 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL AND a1.iso_country_code = :memberName", array(':memberName' => $key));
+      $query_gbrds_ipt_count = db_query("SELECT count(a3.uuid) AS count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id WHERE a1.agent_type_id = 1 AND a3.agent_type_id = 4 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL AND a1.iso_country_code = :memberName", array(':memberName' => $key));
+      $query_gbrds_checklist_count = db_query("SELECT count(a3.uuid) as count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id LEFT JOIN {service} s ON s.agent_id = a3.id WHERE a1.agent_type_id = 1 AND a1.iso_country_code = :memberName AND a3.agent_type_id = 3 AND s.service_type_id = 18 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL", array(':memberName' => $key));
+      $query_gbrds_checklist = db_query("SELECT a3.uuid FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id LEFT JOIN {service} s ON s.agent_id = a3.id WHERE a1.agent_type_id = 1 AND a1.iso_country_code = :memberName AND a3.agent_type_id = 3 AND s.service_type_id = 18 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL", array(':memberName' => $key));
+      db_set_active();
+      
       db_set_active('portal');
       $query_portal = db_query("SELECT rollover_id, provider_count, dataset_count, occurrence_count, occurrence_georeferenced_count FROM {stats_country_contribution} WHERE iso_country_code = :ISO ORDER BY rollover_id DESC LIMIT 0,1", array(':ISO' => $key));
+      db_set_active();
+      
     } else if ($type == 'other') {
+
+      // Get the node name used by the Registry
       db_set_active('postgis');
       $name_relation = db_query("SELECT * FROM {ims.relate_registry} WHERE ims_name_short = :name_short", array(':name_short' => $name_short))->fetchAll();
-      db_set_active();
       $node_name_for_gbrds = isset($name_relation[0]->registry_name) ? $name_relation[0]->registry_name : NULL;
       $gbif_approver = isset($name_relation[0]->gbif_approver) ? $name_relation[0]->gbif_approver : NULL;
+      db_set_active();
+
       db_set_active('gbrds');
-      $query_gbrds = db_query("SELECT rt.name, count(*) as count FROM agent a LEFT JOIN agent_type at ON at.id = a.agent_type_id LEFT JOIN agent_relation ar ON a.id = ar.from_agent_id LEFT JOIN relation_type rt ON rt.id = ar.relation_type_id WHERE a.name = :nodeName AND ar.relation_type_id in (1, 2, 3, 4) GROUP BY rt.name", array(':nodeName' => $node_name_for_gbrds));
+      
+      // Old logic to get all counts from the registry, but not really works. To be deleted.
+      // $query_gbrds = db_query("SELECT rt.name, count(*) as count FROM {agent} a LEFT JOIN {agent_type} at ON at.id = a.agent_type_id LEFT JOIN {agent_relation} ar ON a.id = ar.from_agent_id LEFT JOIN {relation_type} rt ON rt.id = ar.relation_type_id WHERE a.name = :nodeName AND ar.relation_type_id in (1) AND a.deleted is NULL AND ar.deleted is NULL GROUP BY rt.name", array(':nodeName' => $node_name_for_gbrds));
+      
+      $query_gbrds_node_count = db_query("SELECT count(uuid) AS count FROM {agent} WHERE agent_type_id = 1 AND deleted IS NULL AND name = :nodeName", array(':nodeName' => $node_name_for_gbrds));
+      $query_gbrds_org_count = db_query("SELECT count(a2.uuid) AS count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id WHERE a1.agent_type_id = 1 AND a2.agent_type_id = 2 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND a1.name = :nodeName", array(':nodeName' => $node_name_for_gbrds));
+      $query_gbrds_resource_count = db_query("SELECT count(a3.uuid) as count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id WHERE a1.agent_type_id = 1 AND a1.name= :nodeName AND a3.agent_type_id = 3 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL", array(':nodeName' => $node_name_for_gbrds));
+      $query_gbrds_ipt_count = db_query("SELECT count(a3.uuid) as count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id WHERE a1.agent_type_id = 1 AND a1.name= :nodeName AND a3.agent_type_id = 4 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL", array(':nodeName' => $node_name_for_gbrds));
+      $query_gbrds_checklist_count = db_query("SELECT count(a3.uuid) as count FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id LEFT JOIN service s ON s.agent_id = a3.id WHERE a1.agent_type_id = 1 AND a1.name = :nodeName AND a3.agent_type_id = 3 AND s.service_type_id = 18 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL", array(':nodeName' => $node_name_for_gbrds));
+      $query_gbrds_checklist = db_query("SELECT a3.uuid FROM {agent} a1 INNER JOIN {agent_relation} ar1 ON a1.id = ar1.from_agent_id INNER JOIN {agent} a2 ON a2.id = ar1.to_agent_id INNER JOIN {agent_relation} ar2 ON a2.id = ar2.from_agent_id INNER JOIN {agent} a3 ON ar2.to_agent_id = a3.id LEFT JOIN {service} s ON s.agent_id = a3.id WHERE a1.agent_type_id = 1 AND a1.name = :nodeName AND a3.agent_type_id = 3 AND s.service_type_id = 18 AND a1.deleted IS NULL AND ar1.deleted IS NULL AND a2.deleted IS NULL AND ar2.deleted IS NULL AND a3.deleted IS NULL", array(':nodeName' => $node_name_for_gbrds));
+      db_set_active();
+      
       db_set_active('portal');
       $query_portal = db_query("SELECT rollover_id, provider_count, dataset_count, occurrence_count, occurrence_georeferenced_count FROM {stats_participant_contribution} WHERE gbif_approver = :gbif_approver ORDER BY rollover_id DESC LIMIT 0,1", array(':gbif_approver' => $gbif_approver));
+      db_set_active();
     }
-    db_set_active();
+    db_set_active('default');
     
-    $gbrdsResult = $query_gbrds->fetchAll();
+    $gbrdsNodeCount = $query_gbrds_node_count->fetchAll();
+    $gbrdsOrgCount = $query_gbrds_org_count->fetchAll();   
+    $gbrdsResourceCount = $query_gbrds_resource_count->fetchAll();
+    $gbrdsIPTCount = $query_gbrds_ipt_count->fetchAll();
+    $gbrdsChecklistCount = $query_gbrds_checklist_count->fetchAll();
+    $gbrdsChecklist = $query_gbrds_checklist->fetchAll();
     
-    $relationshipType = array(
-      'ENDORSES' => 'Organisation',
-      'HAS_RESOURCE' => 'Resource',
-      'HAS_TECHNICAL_INSTALLATION' => 'IPT',
-      'PUBLISHES' => ''
-    );
+    // Prepare UUIDs to get checklist counts
+    $uuid = '';
+    $checklistQuery = '';
+    $checklistRecordCount = array();
     
-    if ($type == 'other') {
-      $participantProfile[$name_short]['agents']['Node'] = 1;
-    }
-
-    foreach ($gbrdsResult as $agentType) {
-      
-      if ($type == 'other') {
-        $agentTypeName = $relationshipType[$agentType->name];        
-        $participantProfile[$name_short]['agents'][$agentTypeName] = isset($agentType->count) ? (int) $agentType->count : 0;        
-      } else if ($type == 'country') {
-        $participantProfile[$name_short]['agents'][$agentType->name] = isset($agentType->count) ? (int) $agentType->count : 0;        
+    if (!empty($gbrdsChecklist)) {
+      for ( $i = 0 ; $i < count($gbrdsChecklist) ; $i++) {
+        $uuid .= "'" . $gbrdsChecklist[$i]->uuid . "'";
+        if ( $i < count($gbrdsChecklist) - 1 ) {
+          $uuid .= ", ";
+        }
       }
-    }
+      // Connect to checklist bank and get SUM()
+      db_set_active('checklistbank');
+      $checklistQuery = "SELECT sum(num_usages) AS count FROM {checklist} WHERE resource_key IN (" . $uuid . ")";
+      $checklistRecordCount = db_query($checklistQuery)->fetchAll();
+    }      
+    db_set_active('default');
 
+    // Append counts from the Registry      
+    $participantProfile[$name_short]['agents']['Node'] = isset($gbrdsNodeCount[0]->count) ? (int) $gbrdsNodeCount[0]->count : 0;
+    $participantProfile[$name_short]['agents']['Org'] = isset($gbrdsOrgCount[0]->count) ? (int) $gbrdsOrgCount[0]->count : 0;
+    $participantProfile[$name_short]['agents']['Resource'] = isset($gbrdsResourceCount[0]->count) ? (int) $gbrdsResourceCount[0]->count : 0;
+    $participantProfile[$name_short]['agents']['IPT'] = isset($gbrdsIPTCount[0]->count) ? (int) $gbrdsIPTCount[0]->count : 0;
+    $participantProfile[$name_short]['agents']['ChecklistDataset'] = isset($gbrdsResourceCount[0]->count) ? (int) $gbrdsChecklistCount[0]->count : 0;
+    $participantProfile[$name_short]['agents']['ChecklistRecord'] = isset($checklistRecordCount[0]->count) ? (int) $checklistRecordCount[0]->count : 0;
+    
+    // Append counts from the Portal
     $portalResult = $query_portal->fetchAll();
     if (isset($portalResult[0])) $participantProfile[$name_short]['stats'] = (array) $portalResult[0];
     if (isset($portalResult[0]) == NULL) {
@@ -418,14 +566,8 @@ function gbif_region_cron() {
  * Run through all queries and save results as JSON files.
  */
 function gbif_region_stats_update() {
-  $regions = array(
-    'africa' => 'Africa',
-    'asia' => 'Asia',
-    'europe' => 'Europe',
-    'namerica' => 'North America',
-    'oceania' => 'Oceania',
-    'lamerica' => 'Latin America',
-  );
+  
+  $regions = variable_get('regions');
   
   // Iterate through all regions
   foreach($regions as $regionAcronym => $region) {
@@ -467,9 +609,11 @@ function gbif_region_stats_update() {
         $toPush['GBIFMembership'] = $membershipAcronym;
         $toPush['iso_a2'] = (isset($statsType['iso_a2'])) ? $statsType['iso_a2'] : '';
         $toPush['nodeCount'] = (isset($statsType['agents']['Node'])) ? $statsType['agents']['Node'] : 0;
-        $toPush['orgCount'] = (isset($statsType['agents']['Organisation'])) ? $statsType['agents']['Organisation'] : 0;
+        $toPush['orgCount'] = (isset($statsType['agents']['Org'])) ? $statsType['agents']['Org'] : 0;
         $toPush['resourceCount'] = (isset($statsType['agents']['Resource'])) ? $statsType['agents']['Resource'] : 0;
         $toPush['IPTCount'] = (isset($statsType['agents']['IPT'])) ? $statsType['agents']['IPT'] : 0;
+        $toPush['ChecklistDataset'] = (isset($statsType['agents']['ChecklistDataset'])) ? $statsType['agents']['ChecklistDataset'] : 0;
+        $toPush['ChecklistRecord'] = (isset($statsType['agents']['ChecklistRecord'])) ? $statsType['agents']['ChecklistRecord'] : 0;
         $toPush['providerCount'] = $statsType['stats']['provider_count'];
         $toPush['datasetCount'] = $statsType['stats']['dataset_count'];
         $toPush['occurrenceCount'] = $statsType['stats']['occurrence_count'];
@@ -506,7 +650,7 @@ function geojson_generate($regionAcronym) {
   // geoJSON generation
   db_set_active('postgis');
   $result = Database::getConnection()->query($sql)->fetchAll();
-  db_set_active();
+  db_set_active('default');
 
   foreach ($result as $v) {
     $v->geometry = json_decode($v->geometry);
