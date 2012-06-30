@@ -111,11 +111,6 @@ a {
   padding: 0 0 0 0;
 }
 
-#zone-preface-wrapper {
-  background: url("../images/NSLinenBackgroundPattern.png");
-  overflow: hidden;
-}
-
 #block-superfish-1 {
   margin-top: 18px;
   z-index: 10;
@@ -315,6 +310,8 @@ ul.map-tabs-relative li a.active { border-radius: 3px; border: none; background-
 #zone-preface-wrapper {
   border-bottom: #ccc solid 1px;
   height: 480px;
+  background: url("../images/NSLinenBackgroundPattern.png");
+  overflow: hidden;
 }
 
 #zone-preface {
@@ -329,6 +326,8 @@ ul.map-tabs-relative li a.active { border-radius: 3px; border: none; background-
   margin-left: 10px;
   padding-top: 20px;
   font-size: 2.0em;
+  position: absolute;
+  top: 0px;
 }
 
 #regional-map-menu-wrapper {

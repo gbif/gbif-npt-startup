@@ -3,8 +3,12 @@ var dataTable = '<table cellpadding="0" cellspacing="0" border="0" class="displa
 var jsonLocation = Drupal.settings.json_location;
 var destForTable = Drupal.settings.json_location.forTable;
 var destForChart = Drupal.settings.json_location.forChart;
+var destForMembership = Drupal.settings.json_location.membership;
+var destForGeo = Drupal.settings.json_location.geo;
 
 jQuery(document).ready(function() {
+  var region = window.location.hash.substring(1);
+  
   jQuery(".menu").append('<li><input id="toggle-map" type="button" value="hide map" /></li>');
   jQuery("#zone-content-wrapper").before('<div id="zone-preface-wrapper" class="zone-wrapper zone-preface-wrapper clearfix"><div id="zone-preface" class="zone zone-preface clearfix container-24"><div id="map"></div></div></div>');
   jQuery("#zone-preface-wrapper").hide().delay(800).slideDown();
@@ -12,9 +16,12 @@ jQuery(document).ready(function() {
   jQuery("#zone-preface").append('<div id="regional-map-menu-wrapper"></div>');
 
   jQuery('<ul/>').attr('id', 'map-region-menu').appendTo("#regional-map-menu-wrapper");
+  
+  jQuery("#page-title").remove();
+  jQuery("#breadcrumb").remove();
 
   jQuery.each(regionsURL, function(index, value) {
-    jQuery('<li/>').append(value).appendTo("#map-region-menu");
+    jQuery('<li/>').addClass(index).append(value).appendTo("#map-region-menu");
   });
   
   jQuery("#map-region-menu").appendTo("#regional-map-menu-wrapper");
@@ -29,20 +36,33 @@ jQuery(document).ready(function() {
     });
   });
 
-  // If a anchor variable is available in the url, attache the data table.
+  // If a anchor variable is available in the url, attach the data table.
 
-  jQuery("li").click(function() {
+  if (region) {
     jQuery("#region-content").append(dataTable);
-    catchRegion();
-    //dataGrid(destForTable[region]);
-  });
+    chart(destForChart[region]);
+    dataGrid(destForTable[region]);
+    createMap(region);
+  }
+  
+  
+  jQuery("li").click(function() {
+    if (jQuery("#dataGrid").length == 0 ) {
+      jQuery("#region-content").append(dataTable);      
+    } else if (jQuery("#dataGrid").length > 0 ) {
+      jQuery("#dataGrid_wrapper").remove();
+      jQuery("#region-content").append(dataTable);
+      jQuery("svg.chart").remove();
+      jQuery("svg.mapvector").remove();
+    }
+    
+    region = jQuery(this).attr("class");
+    chart(destForChart[region]);
+    dataGrid(destForTable[region]);
+    createMap(region);
+  });    
   
 });
-
-function catchRegion() {
-  var region = window.location.hash.substring(1);
-  alert(region);
-}
 
 function chart(dest) {
   d3.json(dest, function(data) {
@@ -62,6 +82,7 @@ function chart(dest) {
 
     var published = d3.select("#chart").
       append("svg:svg").
+      attr("class", "chart").
       attr("width", canvasWidth).
       attr("height", canvasHeight);
 
@@ -238,7 +259,7 @@ function dataGrid(dest) {
 
 
 
-function createMap() {
+function createMap(region) {
     var geoLayoutParams = {
       africa: {
         "origin": [20, 5],
@@ -257,7 +278,7 @@ function createMap() {
       },
       lamerica: {
         "origin": [-65, -10],
-        "scale": 600,
+        "scale": 300,
         "translate": [680, 360]
       },
       namerica: {
@@ -279,17 +300,17 @@ function createMap() {
           .translate(geoLayoutParams[region].translate));
 
     var svg = d3.select("#map").append("svg:svg")
-      .attr("class", "Blues")
+      .attr("class", "Blues mapvector")
       .attr("width", 1160)
       .attr("height", 480);
 
     var counties = svg.append("svg:g")
       .attr("id", "counties");
 
-  d3.json(destMembership, function(data) {
+  d3.json(destForMembership[region], function(data) {
     var pad = d3.format("02,"), quantize = d3.scale.quantile().domain([0, 36215834]).range(d3.range(9));
 
-    d3.json(destGeo, function(json) {
+    d3.json(destForGeo[region], function(json) {
     
       counties.selectAll("path")
           .data(json.features)
@@ -318,9 +339,11 @@ function createMap() {
                  } else {
                      return d.name + ": <br />" + count.GBIFMembership + "<br />"
                      + count.agents.Node + " node(s).<br />"
-                     + count.agents.Organisation + " organisation(s).<br />"
+                     + count.agents.Org + " organisation(s).<br />"
                      + count.agents.Resource + " resource(s).<br />"
                      + count.stats.provider_count + " provider(s).<br />"
+                     + count.agents.ChecklistDataset + " checklist(s). <br />"
+                     + count.agents.ChecklistRecord + " name(s). <br />"
                      + count.stats.dataset_count + " dataset(s).<br />"
                      + pad(count.stats.occurrence_count) + " records.<br />"
                      + pad(count.stats.occurrence_georeferenced_count) + " georeferended.<br />";

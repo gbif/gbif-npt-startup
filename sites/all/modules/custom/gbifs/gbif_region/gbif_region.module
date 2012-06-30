@@ -12,76 +12,6 @@ function gbif_region_menu() {
     'type' => MENU_NORMAL_ITEM,
     'menu_name' => 'main-menu',
   );
-  $items['gbif/region/%region'] = array(
-    'title' => 'Regional Overview',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_NORMAL_ITEM,
-  );
-  $items['gbif/region/africa'] = array(
-    'title' => 'Africa',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 0,
-  );
-  $items['gbif/region/asia'] = array(
-    'title' => 'Asia',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
-  );
-  $items['gbif/region/europe'] = array(
-    'title' => 'Europe',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-  );
-  $items['gbif/region/namerica'] = array(
-    'title' => 'North America',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 3,
-  );
-  $items['gbif/region/lamerica'] = array(
-    'title' => 'Latin America',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 4,
-  );
-  $items['gbif/region/oceania'] = array(
-    'title' => 'Oceania',
-    'description' => 'Statistics according to regions',
-    'page callback' => 'gbif_region_page_view',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 5,
-  );
-  $items['gbif/region/json/%'] = array(
-    'title' => 'GBIF Region JSON',
-    'description' => 'Export overview information in JSON',
-    'page callback' => 'gbif_region_page_json',
-    'page arguments' => array(3),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
   return $items;
 }
 
@@ -245,7 +175,7 @@ function gbif_region_global_view() {
   $page_content .= '</div>';
   $page_content .= '<article>';
   $page_content .= '<p>';
-  $page_content .= t('This page shows membership status of GBIF and overall data growth.');
+  //$page_content .= t('This page shows membership status of GBIF and overall data growth.');
   $page_content .= '</p>';
 
   //$page_content .= $table;
