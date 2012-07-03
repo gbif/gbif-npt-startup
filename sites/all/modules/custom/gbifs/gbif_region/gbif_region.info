@@ -1,5 +1,0 @@
-name = "GBIF Regional Information"
-description = "Internal use only. Provides live updated statistics of GBIF Network."
-package = GBIF
-core = 7.x
-files [] = gbif_region.module
