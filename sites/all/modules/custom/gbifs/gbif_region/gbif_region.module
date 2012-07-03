@@ -1,5 +1,16 @@
 <?php
+/*
 
+  ToDo: 1) Remove tipsy. Instead create a column and show statistics inside.
+        2) Generalize maps. Then could show the whole earth instead.
+        3) Non-matching short names with GBIF Membership causes. Suspecting shapefiles.
+        4) Should not animate map container.
+        5) Think about what kind of chart makes best sense.
+        6) Count on top of chart.
+        7) Map title should change with region. To include region name in the JSON.
+        8) Projection should be changed.
+
+*/
 /**
  * Implementation of hook_menu().
  */
