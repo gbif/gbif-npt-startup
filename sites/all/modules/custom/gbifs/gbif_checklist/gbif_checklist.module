@@ -1,8 +1,12 @@
 <?php
-define('GBIF_QUERY_URL', 'http://staging.gbif.org:8080/checklistbank-search-ws/search?q=');
-define('GBIF_USAGE_URL', 'http://staging.gbif.org:8080/checklistbank-ws/name_usage/');
-define('GBIF_REGISTRY_WS_DATASET_URL', 'http://staging.gbif.org:8080/registry-ws/dataset/');
-define('GBIF_GBRDS_RESOURCE_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
+
+/**
+ * Current Checklist Bank Web Service API, in development and subject to change.
+ */
+define('GBIF_QUERY_URL', 'http://jawa.gbif.org:8080/checklistbank-search-ws/search?q=');
+define('GBIF_USAGE_URL', 'http://jawa.gbif.org:8080/checklistbank-ws/name_usage/');
+define('GBIF_REGISTRY_WS_DATASET_URL', 'http://jawa.gbif.org:8080/registry-ws/dataset/');
+define('GBIF_GBRDS_RESOURCE_URL', 'http://jawa.gbif.org/browse/agent?uuid=');
 
 /**
  * Implementation of hook_menu().
