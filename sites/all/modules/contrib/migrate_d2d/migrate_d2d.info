@@ -1,4 +1,4 @@
-name = "Drupal-to-Drupal CSV migration"
+name = "Drupal-to-Drupal migration"
 description = "Migration from one Drupal site to another, using migration mappings provided by CSV files"
 package = "Development"
 core = 7.x
@@ -15,10 +15,6 @@ files[] = menu_links.inc
 files[] = node.inc
 files[] = taxonomy.inc
 files[] = user.inc
-files[] = content_type.inc
-files[] = field.inc
-files[] = field_group.inc
-files[] = vocabulary.inc
 
 ; D5 implementations
 files[] = d5/d5.inc
@@ -34,9 +30,6 @@ files[] = d6/menu_links.inc
 files[] = d6/node.inc
 files[] = d6/taxonomy.inc
 files[] = d6/user.inc
-files[] = d6/content_type.inc
-files[] = d6/field.inc
-files[] = d6/field_group.inc
 
 ; D7 implementations
 files[] = d7/d7.inc

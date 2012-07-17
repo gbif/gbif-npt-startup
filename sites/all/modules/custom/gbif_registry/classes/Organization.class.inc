@@ -23,6 +23,8 @@ namespace GBIF;
 
 class Organization extends RegistryObject{
 
+  protected $technicalInstallations = array();
+
   final public function getURLPrefix(){
     return 'organization';
   }
@@ -39,9 +41,37 @@ class Organization extends RegistryObject{
   }
 
   /**
+   * Get the technical installations.
+   *
+   * @return \GBIF\TechnicalInstallations
+   */
+  public function getTechnicalInstallations(){
+    return new TechnicalInstallations($this->getURLPrefix() . "/{$this->key}/technical_installation");
+  }
+
+  /**
+   * Add a single technical installation.
+   *
+   * @return \GBIF\TechnicalInstallation
+   */
+  public function addTechnicalInstallation($ti){
+    // Ensure we have been sent an array.
+    if(!is_array($ti)){return FALSE;}
+    // Set the key to this organization's key.
+    $ti['hostingOrganizationKey'] = $this->getKey();
+    $ti = new TechnicalInstallation($ti);
+    $ti->save();
+    return $ti;
+  }
+
+  /**
    * Get the graph of the object
    */
   function getGraph($get_png = FALSE){
-    return Registry::singleton()->get($this->getURLPrefix() . "/{$this->key}/graph" . ($get_png ? '?format=png' : ''));
+    $parameters = array();
+    if($get_png){
+      $parameters['format'] = 'png';
+    }
+    return Registry::singleton()->get($this->getURLPrefix() . "/{$this->key}/graph", $parameters);
   }
 }

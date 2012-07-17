@@ -38,8 +38,10 @@ function field_schema_alter(&$schema){
         'description' => 'The entity type of the entity to delete fields for.'
       ),
       'entity' => array(
-        'type' => 'text',
+        'description' => 'The entity serialized.',
+        'type' => 'blob',
         'not null' => TRUE,
+        'size' => 'big',
         'serialize' => TRUE
       )
     ),

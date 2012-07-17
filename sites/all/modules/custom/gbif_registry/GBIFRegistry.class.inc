@@ -26,9 +26,17 @@ class GBIFRegistry extends GBIF\Registry{
    * Basic singleton code copied straight from php.net
    */
   public static function singleton(){
+    if(!function_exists('curl_init')){throw new Exception('CURL functions not found');}
     if(!isset(self::$instance)){
       $className = __CLASS__;
       self::$instance = new $className();
+      // We try to set the username/password at this point by loading them from
+      // a configuration file.
+      $ini = @parse_ini_file(drupal_get_path('module', 'gbif_registry') . '/login.ini');
+      if(isset($ini['username']) && isset($ini['password'])){
+        self::$instance->setUser($ini['username']);
+        self::$instance->setPassword($ini['password']);
+      }
     }
     return self::$instance;
   }
@@ -47,45 +55,54 @@ class GBIFRegistry extends GBIF\Registry{
   /**
    * Override the getNodes() function, to enable caching.
    */
-  public function getNodes(){
+  public function getNodes($tag = FALSE, $name = FALSE){
     $rc = $this->getRegistryCache();
-    if($cache = $rc->retrieve('all_nodes')){return $cache;}
+    $cid = "all_nodes:$tag:$name";
+    if($cache = $rc->retrieve($cid)){return $cache;}
     $nodes = parent::getNodes();
     $cache_nodes = array();
     foreach($nodes as $node){
       $cache_nodes[] = $node;
     }
-    $rc->create('all_nodes', $cache_nodes);
+    if(count($cache_nodes)){
+      $rc->create($cid, $cache_nodes);
+    }
     return $cache_nodes;
   }
 
   /**
    * Same again, but returning technicalInstallations
    */
-  public function getTechnicalInstallations(){
+  public function getTechnicalInstallations($tag = FALSE, $name = FALSE, $isoCountryCode = FALSE){
     $rc = $this->getRegistryCache();
-    if($cache = $rc->retrieve('all_technicalinstallations')){return $cache;}
+    $cid = "all_technicalinstallations:$tag:$name:$isoCountryCode";
+    if($cache = $rc->retrieve($cid)){return $cache;}
     $tis = parent::getTechnicalInstallations();
     $cache_tis = array();
     foreach($tis as $ti){
       $cache_tis[] = $ti;
     }
-    $rc->create('all_technicalinstallations', $cache_tis);
+    if(count($cache_tis)){
+      $rc->create($cid, $cache_tis);
+    }
     return $cache_tis;
   }
 
   /**
    * Override the getOrganizations() function, to enable caching.
    */
-  public function getOrganizations(){
+  public function getOrganizations($tag = FALSE, $name = FALSE, $isoCountryCode = FALSE){
     $rc = $this->getRegistryCache();
-    if($cache = $rc->retrieve('all_organizations')){return $cache;}
+    $cid = "all_organizations:$tag:$name:$isoCountryCode";
+    if($cache = $rc->retrieve($cid)){return $cache;}
     $organizations = parent::getOrganizations();
     $cache_organizations = array();
     foreach($organizations as $organization){
       $cache_organizations[] = $organization;
     }
-    $rc->create('all_organizations', $cache_organizations);
+    if(count($cache_organizations)){
+      $rc->create($cid, $cache_organizations);
+    }
     return $cache_organizations;
   }
 }
