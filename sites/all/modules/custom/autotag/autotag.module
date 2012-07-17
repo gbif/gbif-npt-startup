@@ -86,13 +86,24 @@ function autotag_search_text($text, $vid){
   ));
   $values = array();
   $insert = db_insert($temporary_table_name);
-  $insert->fields(array('words'));
+  $insert->fields(array(
+    'words'
+  ));
   foreach($words as $word){
     if(strlen($word < 256)){
-      $insert->values(array('words' => $word));
+      $insert->values(array(
+        'words' => $word
+      ));
     }
   }
-  $insert->execute();
+  try{
+    $insert->execute();
+  }
+  catch(Exception $e){
+    // FIXME - This currently does not work with 4-byte characters.  I need to
+    // change this code so that it does not use a temporary table.
+    return array();
+  }
   // Select the direct single word matches.
   $select = db_select('taxonomy_term_data', 't');
   $select->condition('vid', $vid);

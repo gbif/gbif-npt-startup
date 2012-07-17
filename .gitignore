@@ -12,3 +12,4 @@ dummy.php
 .DS_Store
 sites/all/modules/custom/feeds_xls/PHPExcel/
 sites/all/libraries/filemakerapi/
+scratchpad_1_database.php

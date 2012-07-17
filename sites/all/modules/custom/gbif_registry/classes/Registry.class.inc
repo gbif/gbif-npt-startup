@@ -35,10 +35,15 @@ namespace GBIF;
  */
 class Registry{
   // Note, the registryURL MUST HAVE A TRAILING SLASH.
-  // protected $registryURL = 'http://gbrds.gbif.org/registry/';
-  private $registryURL = 'http://localhost:8080/registry-ws/';
+  private $registryURL = 'http://gbrds.gbif.org/registry/';
 
-  private $organisationKey, $organisationPassword;
+  private $organisationKey;
+
+  private $organisationPassword;
+
+  private $user;
+
+  private $password;
 
   private $count = 0;
 
@@ -52,6 +57,7 @@ class Registry{
    * Basic singleton code copied straight from php.net
    */
   public static function singleton(){
+    if(!function_exists('curl_init')){throw new Exception('CURL functions not found');}
     if(!isset(self::$instance)){
       $className = __CLASS__;
       self::$instance = new $className();
@@ -107,15 +113,15 @@ class Registry{
    * Simple function that returns a GBIF\Nodes object that can then be itterated
    * over to potentially return a list of all nodes.
    */
-  public function getNodes(){
-    return new Nodes();
+  public function getNodes($tag = FALSE, $name = FALSE){
+    return new Nodes($tag, $name);
   }
 
   /**
    * Similar to the getNodes function, but this returns organizations.
    */
   public function getOrganizations(){
-    return new Organizations();
+    return new Organizations(FALSE, FALSE, FALSE, FALSE);
   }
 
   /**
@@ -128,8 +134,8 @@ class Registry{
   /**
    * Same again, but returning technicalInstallations
    */
-  public function getTechnicalInstallations(){
-    return new TechnicalInstallations();
+  public function getTechnicalInstallations($tag = FALSE, $name = FALSE, $isoCountryCode = FALSE){
+    return new TechnicalInstallations(FALSE, $tag, $name, $isoCountryCode);
   }
 
   /**
@@ -139,10 +145,27 @@ class Registry{
     return new Networks();
   }
 
+  public function getUser(){
+    return $this->user;
+  }
+
+  public function getPassword(){
+    return $this->password;
+  }
+
+  public function setUser($user){
+    $this->user = $user;
+  }
+
+  public function setPassword($password){
+    $this->password = $password;
+  }
+
   /**
    * http put
    *
    * FIXME - Need to add authentication to this.
+   * FIXME - Should this be data, or a filename?
    */
   public function put($path, $filename){
     $ch = curl_init($this->registryURL . $path);
@@ -164,13 +187,37 @@ class Registry{
    *
    * We use file_get_contents here purely for its simplicity.
    */
-  public function get($path){
-    if($html = @file_get_contents($this->registryURL . $path)){
+  public function get($path, Array $parameters = array()){
+    if($html = @file_get_contents($this->registryURL . $path . '?' . http_build_query($parameters))){
       return $html;
     }else{
       // FIXME: Perhaps should throw an error here rather than silently
       // failing.
       return '[]';
+    }
+  }
+
+  /**
+   * http post.
+   */
+  function post($path, $data){
+    $ch = curl_init($this->registryURL . $path);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_USERPWD, "{$this->user}:{$this->password}");
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+      "Content-Type: application/json",
+      "Accept: application/json"
+    ));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    $response = curl_exec($ch);
+    if(!curl_errno($ch)){
+      return $response;
+    }else{
+      return FALSE;
     }
   }
 
@@ -194,7 +241,9 @@ class Registry{
   /**
    * Simple wrapper to the get function that returns a json_decoded'd array.
    */
-  public function get_json($path){
-    return json_decode($this->get($path), TRUE);
+  public function get_json($path, Array $parameters = array()){
+    // FIXME - Need to tweak the path or parameters here to ensure that we are
+    // returned JSON.
+    return json_decode($this->get($path, $parameters), TRUE);
   }
 }

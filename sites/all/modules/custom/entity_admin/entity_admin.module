@@ -10,6 +10,7 @@ function entity_admin_admin_paths(){
     $class = $entity_info[$entity_type]['admin ui']['controller class'];
     if(@method_exists($class, 'ops')){
       $entity_path = entity_admin_entity_get_path($entity_type, $entity_info[$entity_type], '*');
+      $entity_path = str_replace('%', '*', $entity_path);
       foreach(array_keys($class::ops()) as $op){
         $paths[$entity_path . '/' . $op] = TRUE;
       }
@@ -49,12 +50,12 @@ function entity_admin_menu_local_tasks_alter(&$data, $router_item, $root_path){
  */
 function entity_admin_field_extra_fields(){
   $extra = array();
-  $entity_info = entity_admin_entity_get_info();
-  foreach(array_keys($entity_info) as $entity_type){
+  $entities_info = entity_admin_entity_get_info();
+  foreach($entities_info as $entity_type => $entity_info){
     // Is there a label in the entity key
-    if($label_key = entity_admin_entity_label_key($entity_info[$entity_type])){
-      foreach(array_keys(entity_admin_get_entities($entity_type)) as $type){
-        $extra[$entity_type][$type] = array(
+    if(is_array($entity_info['bundles']) && $label_key = entity_admin_entity_label_key($entity_info)){
+      foreach(array_keys($entity_info['bundles']) as $bundle){
+        $extra[$entity_type][$bundle] = array(
           'form' => array(
             'title' => array(
               'label' => t("Short title"),
@@ -167,7 +168,7 @@ function _entity_admin_entity_info_filter($entity_info){
 function entity_admin_class_uri($entity){
   $entity_info = $entity->entityInfo();
   return array(
-    'path' => str_replace(' ', '-', strtolower($entity_info['label'])) . '/' . $entity->identifier()
+    'path' => str_replace('_', '-', $entity->entityType()) . '/' . $entity->identifier()
   );
 }
 
@@ -209,7 +210,7 @@ function entity_admin_get_bundle_of_type($entity_info, $entity_type){
 }
 
 /**
- * Load multiple publications
+ * Load multiple entities
  */
 function entity_admin_load_multiple($entity_type, $ids = array(), $conditions = array(), $reset = FALSE){
   return entity_load($entity_type, $ids, $conditions, $reset);
@@ -242,7 +243,6 @@ function entity_admin_create($type, $values = array()){
  * Display an entity
  */
 function entity_admin_page_view($entity, $view_mode = 'full'){
-  $page_array = array();
   $entity_type = $entity->entityType();
   $id = $entity->identifier();
   $controller = entity_get_controller($entity_type);
@@ -381,10 +381,10 @@ function entity_admin_entity_form_submit(&$form, &$form_state){
 }
 
 /**
- * Form callback: confirmation form for deleting a publication.
+ * Form callback: confirmation form for deleting an entity.
  *
- * @param $publication
- * The publication to delete
+ * @param $entity
+ * The entity to delete
  *
  * @see confirm_form()
  */
@@ -404,14 +404,15 @@ function entity_admin_entity_delete_form($form, &$form_state, $entity){
 function entity_admin_entity_delete_form_submit($form, &$form_state){
   $entity = $form_state['entity'];
   $entity_type = $entity->entityType();
+  $entity_info = $entity->entityInfo();
   entity_delete($entity->entityType(), entity_id($entity_type, $entity));
-  drupal_set_message(t('The publication %title has been deleted.', array(
+  drupal_set_message(t('The %label %title has been deleted.', array(
+    '%label' => $entity_info['label'],
     '%title' => entity_label($entity_type, $entity)
   )));
   watchdog('entity admin', 'Deleted entity %title.', array(
     '%title' => entity_label($entity_type, $entity)
   ));
-  $entity_info = $entity->entityInfo();
   $form_state['redirect'] = $entity_info['admin ui']['path'];
 }
 
@@ -438,3 +439,36 @@ function entity_admin_metadata_form_entity($entity){
 function entity_admin_metadata_create_entity($values = array(), $entity_type){
   return entity_admin_create($entity_type, $values);
 }
+
+/*********************************************************************************************
+ * 
+ * VIEWS HOOKS
+ * 
+ ********************************************************************************************/
+/**
+ * Implementation of hook_views_api
+ */
+function entity_admin_views_api(){
+  $path = drupal_get_path('module', 'entity_admin');
+  return array(
+    'api' => '3',
+    'path' => $path . '/views'
+  );
+}
+
+function entity_admin_entity_load_simple($entity_type, $ids = FALSE, $conditions = array()){
+  $controller = new EntityAdminAPIController($entity_type);
+  return $controller->load($ids, $conditions);
+}
+
+function entity_admin_preprocess_views_view(&$variables){
+	
+	if($variables['view']->tag == 'entity admin'){
+		drupal_add_css(drupal_get_path('module', 'entity_admin') . '/css/entity-admin.css');
+	}
+	
+	
+}
+
+
+
