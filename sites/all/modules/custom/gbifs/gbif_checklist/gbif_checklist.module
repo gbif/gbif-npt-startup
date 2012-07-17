@@ -6,7 +6,7 @@
 define('GBIF_QUERY_URL', 'http://jawa.gbif.org:8080/checklistbank-search-ws/search?q=');
 define('GBIF_USAGE_URL', 'http://jawa.gbif.org:8080/checklistbank-ws/name_usage/');
 define('GBIF_REGISTRY_WS_DATASET_URL', 'http://jawa.gbif.org:8080/registry-ws/dataset/');
-define('GBIF_GBRDS_RESOURCE_URL', 'http://jawa.gbif.org/browse/agent?uuid=');
+define('GBIF_GBRDS_RESOURCE_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 
 /**
  * Implementation of hook_menu().
@@ -167,7 +167,7 @@ function gbif_checklist_gbif_checklist_form($form, $form_state) {
  * Callback for the ajax - return checklists that have matched term index
  */
 function gbif_checklist_classification_js($form, $form_state) {
-  $url = GBIF_QUERY_URL . urlencode($_POST['gbif-checklist-name']);
+  $url = GBIF_QUERY_URL . urlencode($_POST['gbif-checklist-name']) . '&limit=40';
   
   // From here the code treats the received response differently
   // from ScratchPads TCS, since GBIF use JSON in the new APIs.
@@ -229,7 +229,7 @@ function gbif_checklist_classification_js($form, $form_state) {
     '#parents' => array(
       'gbif-checklist-import-id'
     ),
-    '#prefix' => '<div id="gbif-checklist-import-full" style="clear:both">',
+    '#prefix' => '<div id="gbif-checklist-import-full" style="clear:both">'.$rangeText,
     '#suffix' => '</div>'
   );
   form_set_cache($form['#build_id'], $form, $form_state);

@@ -281,6 +281,7 @@ Header {
 }
 
 #section-header {
+  z-index: 1000;
 }
 
 #section-content {
@@ -291,6 +292,7 @@ Header {
 
 #map {
   margin: auto auto;
+  z-index: -100;
 }
 
 .map-title-fixed { position: fixed; top: 145px; color: #444; }
@@ -310,8 +312,10 @@ ul.map-tabs-relative li a.active { border-radius: 3px; border: none; background-
 #zone-preface-wrapper {
   border-bottom: #ccc solid 1px;
   height: 480px;
-  background: url("../images/NSLinenBackgroundPattern.png");
+  /*background: url("../images/texture-noise.png");*/
+  background-color: #d7f3fd;
   overflow: hidden;
+  z-index: -1000;
 }
 
 #zone-preface {
@@ -328,6 +332,7 @@ ul.map-tabs-relative li a.active { border-radius: 3px; border: none; background-
   font-size: 2.0em;
   position: absolute;
   top: 0px;
+  z-index: 100;
 }
 
 #regional-map-menu-wrapper {
@@ -342,9 +347,9 @@ ul#map-region-menu li {
   padding: 0.3em;
   
 }
-ul#map-region-menu li a { border-radius: 3px; border: 1px solid #fff; padding: 0.3em 1em; text-decoration: none; color: #fff;}
-ul#map-region-menu li a:hover { border-radius: 3px; border: 1px solid #ccc; padding: 0.3em 1em; background: #ccc; }
-ul#map-region-menu li a.active { border-radius: 3px; border: none; background-color: #09C; color: #fff; font-weight: bold; padding: 0.4em 1em; }
+ul#map-region-menu li a { border-radius: 3px; border: 1px solid #09C; padding: 0.3em 1em; text-decoration: none; color: #09C;}
+ul#map-region-menu li a:hover { border-radius: 3px; border: 1px solid #fff; padding: 0.3em 1em; background: #fff; }
+ul#map-region-menu li a.active { border-radius: 3px; border: none; background-color: #09C; color: #09C; font-weight: bold; padding: 0.4em 1em; }
 
 #zone-content { padding-top: 20px; }
 
@@ -365,6 +370,15 @@ ul#map-region-menu li a.active { border-radius: 3px; border: none; background-co
 #region-content h1 {
   color: #444;
   text-shadow: 1px 1px white;
+}
+
+#participant-list h3 {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+#participant-list h4 {
+  margin-bottom: 10px;
 }
 
 .block-title { color: #444; }
