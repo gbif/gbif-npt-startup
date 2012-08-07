@@ -8,6 +8,9 @@ function dwca_export_deliver_archive(){
     file_transfer('public://dwca.zip', array(
       'Content-Type' => 'application/zip'
     ));
+  }else{
+    drupal_set_message('The Darwincore Arhive for this site has not yet been created');
+    drupal_goto('/');
   }
 }
 

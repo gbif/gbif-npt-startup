@@ -4,11 +4,18 @@
  * Helper for the hook_cron().
  */
 function _dwca_export_cron(){
-  if(variable_get('dwca_export_rebuild', FALSE) && variable_get('dwca_export_zip_build_time', 0) < time() + 86400){
+  if(variable_get('dwca_export_rebuild', TRUE) && variable_get('dwca_export_zip_build_time', 0) < time() + 86400){
     // Get a list of views on which we operate.  FIXME - This should perhaps be
     // "altered" using a drupal_alter call.
     module_load_include('views_default.inc', 'dwca_export');
-    $views = dwca_export_views_default_views();
+    //$views = dwca_export_views_default_views();
+    $views = array();
+    foreach(module_implements('dwca_export') as $module){
+      if(function_exists($module . '_views_default_views')){
+        $func = $module . '_views_default_views';
+        $views = array_merge($views, $func());
+      }
+    }
     // Array of files to add to the zip.
     $files_to_add = array();
     foreach($views as $view){
@@ -48,17 +55,21 @@ function _dwca_export_cron(){
     $zip = new ZipArchive();
     if(!$zip->open($tmp_archive_file_name, ZipArchive::CREATE)){throw new Exception(t('Could not create temporary zip_archive for DwC-A'));}
     // add metadata
-    $zip->addFile(drupal_get_path('module', 'dwca_export') . '/static/meta.xml', 'meta.xml');
+    //$zip->addFile(drupal_get_path('module', 'dwca_export') . '/static/meta.xml', 'dwca/meta.xml');
+    $meta_string = file_get_contents(drupal_get_path('module', 'dwca_export') . '/static/meta.xml');
+    drupal_alter('dwca_export_meta_file', $meta_string);
+    $zip->addFromString('dwca/meta.xml', $meta_string);
     // We need to close after each file is added.  Fuck knows why PHP requires
     // this.
     $zip->close();
     // add the csv data files
     foreach($files_to_add as $filename){
       $result = $zip->open($tmp_archive_file_name);
-      $zip->addFile(drupal_realpath($filename), substr($filename, 9));
+      $zip->addFile(drupal_realpath($filename), 'dwca/' . substr($filename, 9));
       $zip->close();
       file_unmanaged_delete($filename);
     }
     if(!file_unmanaged_move($tmp_archive_file_name, 'public://dwca.zip', FILE_EXISTS_REPLACE)){throw new Exception(t('Unable to move the DwC-A'));}
+    variable_set('dwca_export_rebuild', FALSE);
   }
 }
