@@ -87,8 +87,8 @@ a {
   height: 50px;
 }
 
-#main-menu {
-  float: right;
+#zone-menu-wrapper {
+  margin-top: -5px;
 }
 
 #secondary-menu {
@@ -105,12 +105,13 @@ a {
 #region-menu ul li {
   display: inline;
   list-style: none;
+  top: -5px;
 }
 
 #region-menu ul li a {
   text-decoration: none;
   text-shadow: 0 1px white;
-  padding-bottom: 28px;
+  padding-bottom: 12px;
   color: #09C;
 }
 
@@ -128,6 +129,7 @@ a {
   padding: 0 0 0 0;
   font-family: DINOT-Medium;
   font-size: 1.15em;
+  height: 27px;
 }
 
 #block-superfish-1 {
@@ -363,8 +365,7 @@ ul#map-region-menu {
 }
 ul#map-region-menu li {
   display: inline;
-  padding: 0.3em;
-  
+  padding: 0.3em; 
 }
 ul#map-region-menu li a { border-radius: 3px; border: 1px solid #09C; padding: 0.3em 1em; text-decoration: none; color: #09C;}
 ul#map-region-menu li a:hover { border-radius: 3px; border: 1px solid #fff; padding: 0.3em 1em; background: #fff; }
