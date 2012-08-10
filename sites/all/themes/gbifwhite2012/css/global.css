@@ -24,6 +24,30 @@ a {
   text-decoration: none;
 }
 
+/* Typography */
+@font-face {
+  font-family: 'DINOT-Medium';
+  src: url('../fonts/DINOT-Medium/DINOT-Medium.eot');
+  src: url('../fonts/DINOT-Medium/DINOT-Medium.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/DINOT-Medium/DINOT-Medium.woff') format('woff'),
+       url('../fonts/DINOT-Medium/DINOT-Medium.ttf') format('truetype'),
+       url('../fonts/DINOT-Medium/DINOT-Medium.svg#FontinSansBoldItalic') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'DINOT-Regular';
+  src: url('../fonts/DINOT-Medium/DINOT-Regular.eot');
+  src: url('../fonts/DINOT-Medium/DINOT-Regular.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/DINOT-Medium/DINOT-Regular.woff') format('woff'),
+       url('../fonts/DINOT-Medium/DINOT-Regular.ttf') format('truetype'),
+       url('../fonts/DINOT-Medium/DINOT-Regular.svg#FontinSansBoldItalic') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 #region-user-first {
   top: -3px;
   height: 17px;
@@ -60,14 +84,7 @@ a {
 
 #zone-branding-wrapper {
   margin-top: 0px;
-  height: 58px;
-}
-
-#region-menu {
-  font-family: DINOT-Medium;
-  font-size: 1.15em;
-  margin-right: 0px;
-  width: 440px;
+  height: 50px;
 }
 
 #main-menu {
@@ -107,8 +124,10 @@ a {
 }
 
 #region-menu {
-  margin-top: 15px;
+  margin-right: 0px;
   padding: 0 0 0 0;
+  font-family: DINOT-Medium;
+  font-size: 1.15em;
 }
 
 #block-superfish-1 {
