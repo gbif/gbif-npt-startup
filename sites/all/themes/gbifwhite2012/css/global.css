@@ -47,6 +47,14 @@ a {
   font-style: normal;
 }
 
+/* Regions */
+div#edit-facet label {
+  font-size: 0.9em;
+  color:grey;
+}
+div#edit-facet input {
+  margin-top: -4px;
+}
 
 #region-user-first {
   top: -3px;
