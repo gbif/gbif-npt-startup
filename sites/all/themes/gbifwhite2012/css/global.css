@@ -38,11 +38,11 @@ a {
 
 @font-face {
   font-family: 'DINOT-Regular';
-  src: url('../fonts/DINOT-Medium/DINOT-Regular.eot');
-  src: url('../fonts/DINOT-Medium/DINOT-Regular.eot?#iefix') format('embedded-opentype'),
-       url('../fonts/DINOT-Medium/DINOT-Regular.woff') format('woff'),
-       url('../fonts/DINOT-Medium/DINOT-Regular.ttf') format('truetype'),
-       url('../fonts/DINOT-Medium/DINOT-Regular.svg#FontinSansBoldItalic') format('svg');
+  src: url('../fonts/DINOT-Regular/DINOT-Regular.eot');
+  src: url('../fonts/DINOT-Regular/DINOT-Regular.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/DINOT-Regular/DINOT-Regular.woff') format('woff'),
+       url('../fonts/DINOT-Regular/DINOT-Regular.ttf') format('truetype'),
+       url('../fonts/DINOT-Regular/DINOT-Regular.svg#FontinSansBoldItalic') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -54,6 +54,13 @@ div#edit-facet label {
 }
 div#edit-facet input {
   margin-top: -4px;
+}
+div#edit-facet {
+  margin-left: -20px;
+}
+
+.scratchpads-search-block-input .form-type-radios .form-type-radio {
+  margin: 0 5px 0 0!important; 
 }
 
 #region-user-first {
