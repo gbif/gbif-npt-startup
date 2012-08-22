@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implements hook_install()
+ */
+function nptstartup_install() {
+  // This seems not working.
+  drupal_set_title(st('Installing NPT Startup'));
+}

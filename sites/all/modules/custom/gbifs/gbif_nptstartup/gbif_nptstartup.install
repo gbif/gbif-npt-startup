@@ -1,0 +1,770 @@
+<?php
+
+function gbif_nptstartup_install(){
+  gbif_nptstartup_text_formats();
+  gbif_nptstartup_standard_blocks();
+  gbif_nptstartup_default_menu();
+  gbif_nptstartup_ckeditor_settings();
+  gbif_nptstartup_linkit_settings();
+
+  // Set the default theme to be "gbifwhite2012".
+  variable_set('theme_default', 'gbifwhite2012');
+  // Disable default theme.
+  theme_disable(array(
+    'bartik'
+  ));
+  // Enable NPT default theme.
+  theme_enable(array(
+    'gbifwhite2012'
+  ));
+  // Default site name and slogan. To be replaced by values from setup form
+  variable_get('site_name', 'NPT Startup');
+  variable_get('site_slogan', 'Participating in Development');
+
+
+  // Insert default pre-defined node types into the database. For a complete
+  // list of available node type attributes, refer to the node type API
+  // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
+  $type = array(
+    'type' => 'page',
+    'name' => st('Page'),
+    'base' => 'node_content',
+    'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+    'custom' => 1,
+    'modified' => 1,
+    'locked' => 0
+  );
+  $type = node_type_set_defaults($type);
+  node_type_save($type);
+  gbif_nptstartup_add_body_field($type);
+  // Set weight of body fieldasfasf
+  // Insert default pre-defined RDF mapping into the database.
+  rdf_mapping_save(array(
+    'type' => 'node',
+    'bundle' => 'page',
+    'mapping' => array(
+      'rdftype' => array(
+        'foaf:Document'
+      )
+    )
+  ));
+  variable_set('node_options_page', array(
+    'status'
+  ));
+  variable_set('comment_page', COMMENT_NODE_HIDDEN);
+  variable_set('node_submitted_page', FALSE);
+  // Enable user picture support and set the default to a square thumbnail option.
+  variable_set('user_pictures', '1');
+  variable_set('user_picture_dimensions', '1024x1024');
+  variable_set('user_picture_file_size', '800');
+  variable_set('user_picture_style', 'square_thumbnail');
+  variable_set('admin_theme', 'scratchpads_admin');
+  variable_set('node_admin_theme', '1');
+  /*
+   * Additional NPT Startup settings: 
+   */
+  // Date API stuff
+  variable_set('site_default_country', 'DK');
+  variable_set('date_default_timezone', 'Europe/Copenhagen');
+  variable_set('date_first_day', '1');
+  variable_set('date_format_long', 'l, F j, Y - g:ia');
+  variable_set('date_format_medium', 'Y-m-d H:i');
+  variable_set('date_format_short', 'Y-m-d');
+
+  // Apache Solr settings
+  variable_set('apachesolr_default_environment', 'solr');
+  variable_set('search_default_module', 'apachesolr_search');
+  variable_set('search_active_modules', array(
+    'apachesolr_search' => 'apachesolr_search',
+    'node' => 0,
+    'user' => 0
+  ));
+
+  // Set the image toolkit as imagemagick.
+  // THIS IS CURRENTLY NOT WORKING ON QUARTZ, AND NEEDS TO BE INVESTIGATED.
+  // variable_set('image_toolkit', 'imagemagick');
+  // Set the logging level
+
+  variable_set('error_level', ERROR_REPORTING_HIDE);
+  if($_SERVER['SERVER_ADDR'] == '157.140.127.10' || $_SERVER['SERVER_ADDR'] == '157.140.127.252'){
+    variable_set('error_level', ERROR_REPORTING_DISPLAY_ALL);
+  }
+  // Set the comment form defaults.
+  foreach(node_type_get_names() as $type => $name){
+    if($type != 'forum'){
+      variable_set('comment_form_location_' . $type, COMMENT_FORM_SEPARATE_PAGE);
+    }
+  }
+  
+  // Update the weight of the page body field
+  $instance = field_read_instance('node', 'body', 'page');
+  foreach(array_keys($instance['display']) as $display){
+    $instance['display'][$display]['weight'] = 0;
+  }
+  field_update_instance($instance);
+  
+  /**
+   * Update field_quick_delete field to long blob
+   */
+  db_change_field('field_quick_delete', 'entity', 'entity', array(
+    'type' => 'blob',
+    'not null' => TRUE,
+    'serialize' => TRUE,
+    'size' => 'big'
+  ));
+}
+
+/**
+ * Default text formats
+ */
+function gbif_nptstartup_text_formats() {
+  // Add text formats.
+  $filtered_html_format = array(
+    'format' => 'filtered_html',
+    'name' => 'Filtered HTML',
+    'weight' => 0,
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1
+      ),
+      // HTML filter.
+      'filter_html' => array(
+        'weight' => 1,
+        'status' => 1,
+        'settings' => array(
+          'allowed_html' => '<iframe> <hr> <i> <a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <table> <thead> <tbody> <tr> <th> <td> <caption> <img> <pre> <p> <sub> <sup> <br> <h3> <h4> <h5> <h6> <u>',
+          'filter_html_help' => 0,
+          'filter_html_nofollow' => 0
+        )
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 2,
+        'status' => 1
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1
+      ),
+      'media_filter' => array(
+        'weight' => 11,
+        'status' => 1
+      ),
+      'emptyparagraphkiller' => array(
+        'weight' => 12,
+        'status' => 1
+      )
+    )
+  );
+  $filtered_html_format = (object)$filtered_html_format;
+  filter_format_save($filtered_html_format);
+  
+  // Add comment format
+  $filtered_html_format->format = 'comment_filtered_html';
+  $filtered_html_format->name = 'Comment Filtered HTML';
+  $filtered_html_format->weight = 1;
+  // Use the same filters as filtered html format for comment format.
+  filter_format_save($filtered_html_format);
+}
+
+/**
+ * Standard blocks
+ */
+function gbif_nptstartup_standard_blocks() {
+  // Enable some standard blocks.
+  $values = array(
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'search',
+      'delta' => 'form',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => -1,
+      'region' => 'search',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'main-menu',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'menu',
+      'pages' => '',
+      'title' => '<none>',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'help',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'help',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'login',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'menu_block',
+      'delta' => 'scratchpads_pages-1',
+      'theme' => 'scratchpads',
+      'status' => 1,
+      'weight' => -10,
+      'region' => 'sidebar_first',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'creative_commons',
+      'delta' => 'creative_commons',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'footer_stretch',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    // Admin theme blocks
+    array(
+      'module' => 'scratchpads_help',
+      'delta' => 'scratchpads_help',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'help',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    // Dashboard blocks
+    array(
+      'module' => 'user',
+      'delta' => 'new',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_inactive',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'online',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'gbif_nptstartupsetup',
+      'delta' => 'gbif_nptstartupsetup',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'forum',
+      'delta' => 'active',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_inactive',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'forum',
+      'delta' => 'new',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_inactive',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'node',
+      'delta' => 'recent',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_main',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'comment',
+      'delta' => 'recent',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    )
+  );
+  foreach($values as $record){
+    db_merge('block')->key(array(
+      'module' => $record['module'],
+      'delta' => $record['delta'],
+      'theme' => $record['theme'],
+      'title' => $record['title']
+    ))->fields($record)->execute();
+  } 
+}
+
+/**
+ * CKEditor settings
+ */
+function gbif_nptstartup_ckeditor_settings() {
+    // CKEditor settings
+    module_enable(array(
+      'ckeditor'
+    ));
+    db_delete('ckeditor_settings')->condition('name', 'CKEditor Global Profile', '!=')->execute();
+    $default_settings = array(
+      'filters' => array(
+        'filter_html' => 1
+      ),
+      'ss' => '2',
+      'default' => 't',
+      'show_toggle' => 't',
+      'skin' => 'kama',
+      'uicolor' => 'default',
+      'uicolor_textarea' => '<p>Click the <strong>UI Color Picker</strong> button to set your color preferences.</p>',
+      'uicolor_user' => 'default',
+      'toolbar' => '[
+      [\'Bold\',\'Italic\',\'Underline\'],
+      [\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\'],
+      [\'NumberedList\',\'BulletedList\',\'-\',\'Subscript\',\'Superscript\',\'Blockquote\'],
+      [\'Link\',\'Unlink\',\'linkit\',\'Anchor\'],
+      \'/\',
+      [\'SelectAll\',\'Cut\',\'Copy\',\'Paste\',\'PasteText\',\'PasteFromWord\'],
+      [\'SpellChecker\',\'Scayt\'],
+      [\'Undo\',\'Redo\',\'Find\',\'Replace\',\'-\',\'RemoveFormat\'],
+      [\'Media\',\'Table\',\'HorizontalRule\',\'SpecialChar\',\'DrupalBreak\'],
+      [\'Maximize\']
+        ]',
+      'expand' => 't',
+      'width' => '100%',
+      'lang' => 'en',
+      'auto_lang' => 't',
+      'language_direction' => 'default',
+      'enter_mode' => 'p',
+      'shift_enter_mode' => 'br',
+      'font_format' => 'p;div;pre;address;h2;h3;h4;h5;h6',
+      'custom_formatting' => 'f',
+      'formatting' => array(
+        'custom_formatting_options' => array(
+          'indent' => 'indent',
+          'breakBeforeOpen' => 'breakBeforeOpen',
+          'breakAfterOpen' => 'breakAfterOpen',
+          'breakAfterClose' => 'breakAfterClose',
+          'breakBeforeClose' => 0,
+          'pre_indent' => 0
+        )
+      ),
+      'css_mode' => 'none',
+      'css_path' => '',
+      'css_style' => 'theme',
+      'styles_path' => '',
+      'filebrowser' => 'none',
+      'filebrowser_image' => '',
+      'filebrowser_flash' => '',
+      'UserFilesPath' => '%b%f/',
+      'UserFilesAbsolutePath' => '%d%b%f/',
+      'ckeditor_load_method' => 'ckeditor.js',
+      'ckeditor_load_time_out' => '0',
+      'forcePasteAsPlainText' => 't',
+      'html_entities' => 't',
+      'scayt_autoStartup' => 't',
+      'theme_config_js' => 'f',
+      'js_conf' => '',
+      'loadPlugins' => array(
+        'autogrow' => array(
+          'name' => 'autogrow',
+          'desc' => 'Auto Grow plugin',
+          'path' => '%base_path%%editor_path%plugins/autogrow/',
+          'buttons' => false,
+          'default' => 'f'
+        ),
+        'counter' => array(
+          'name' => 'counter',
+          'desc' => 'Plugin to count symbols, symbols without blanks and words',
+          'path' => '%base_path%%plugin_dir%counter/',
+          'buttons' => false,
+          'default' => 'f'
+        ),
+        'drupalbreaks' => array(
+          'name' => 'drupalbreaks',
+          'desc' => 'Plugin for inserting Drupal teaser and page breaks.',
+          'path' => '%base_path%%plugin_dir%drupalbreaks/',
+          'buttons' => array(
+            'DrupalBreak' => array(
+              'label' => 'DrupalBreak',
+              'icon' => 'images/drupalbreak.png'
+            )
+          ),
+          'default' => 't'
+        ),
+        'linkit' => array(
+          'name' => 'linkit',
+          'desc' => 'Support for Linkit module',
+          'path' => '%base_path%sites/all/modules/contrib/linkit/editors/ckeditor/',
+          'buttons' => array(
+            'linkit' => array(
+              'label' => 'Linkit',
+              'icon' => 'linkit.png'
+            )
+          )
+        ),
+        'media' => array(
+          'name' => 'media',
+          'desc' => 'Plugin for inserting images from Drupal media module',
+          'path' => '%base_path%%plugin_dir%media/',
+          'buttons' => array(
+            'Media' => array(
+              'label' => 'Media',
+              'icon' => 'images/icon.gif'
+            )
+          ),
+          'default' => 'f'
+        ),
+        'tableresize' => array(
+          'name' => 'tableresize',
+          'desc' => 'Table Resize plugin',
+          'path' => '%base_path%%editor_path%plugins/tableresize/',
+          'buttons' => false,
+          'default' => 't'
+        )
+      )
+    );
+    $limited_settings = array(
+      'filters' => array(
+        'filter_html' => 1
+      ),
+      'ss' => '2',
+      'default' => 't',
+      'show_toggle' => 't',
+      'skin' => 'kama',
+      'uicolor' => 'default',
+      'uicolor_textarea' => '<p>
+  	Click the <strong>UI Color Picker</strong> button to set your color preferences.</p>
+  ',
+      'uicolor_user' => 'default',
+      'toolbar' => '[
+      [\'Bold\',\'Italic\',\'Underline\'],
+      [\'NumberedList\',\'BulletedList\'],
+      [\'Undo\',\'Redo\'],
+      [\'SelectAll\',\'Cut\',\'Copy\',\'Paste\',\'PasteText\',\'PasteFromWord\'],
+      [\'Link\',\'Unlink\',\'linkit\',\'Anchor\'],
+      [\'Media\']
+  ]',
+      'expand' => 't',
+      'width' => '100%',
+      'lang' => 'en',
+      'auto_lang' => 't',
+      'language_direction' => 'default',
+      'enter_mode' => 'p',
+      'shift_enter_mode' => 'br',
+      'font_format' => 'p;div;pre;address;h2;h3;h4;h5;h6',
+      'custom_formatting' => 'f',
+      'formatting' => array(
+        'custom_formatting_options' => array(
+          'indent' => 'indent',
+          'breakBeforeOpen' => 'breakBeforeOpen',
+          'breakAfterOpen' => 'breakAfterOpen',
+          'breakAfterClose' => 'breakAfterClose',
+          'breakBeforeClose' => 0,
+          'pre_indent' => 0
+        )
+      ),
+      'css_mode' => 'none',
+      'css_path' => '',
+      'css_style' => 'theme',
+      'styles_path' => '',
+      'filebrowser' => 'none',
+      'filebrowser_image' => '',
+      'filebrowser_flash' => '',
+      'UserFilesPath' => '%b%f/',
+      'UserFilesAbsolutePath' => '%d%b%f/',
+      'ckeditor_load_method' => 'ckeditor.js',
+      'ckeditor_load_time_out' => '0',
+      'forcePasteAsPlainText' => 't',
+      'html_entities' => 't',
+      'scayt_autoStartup' => 't',
+      'theme_config_js' => 'f',
+      'js_conf' => '',
+      'loadPlugins' => array(
+        'autogrow' => array(
+          'name' => 'autogrow',
+          'desc' => 'Auto Grow plugin',
+          'path' => '%base_path%%editor_path%plugins/autogrow/',
+          'buttons' => false,
+          'default' => 'f'
+        ),
+        'linkit' => array(
+          'name' => 'linkit',
+          'desc' => 'Support for Linkit module',
+          'path' => '%base_path%sites/all/modules/contrib/linkit/editors/ckeditor/',
+          'buttons' => array(
+            'linkit' => array(
+              'label' => 'Linkit',
+              'icon' => 'linkit.png'
+            )
+          )
+        ),
+        'media' => array(
+          'name' => 'media',
+          'desc' => 'Plugin for inserting images from Drupal media module',
+          'path' => '%base_path%%plugin_dir%media/',
+          'buttons' => array(
+            'Media' => array(
+              'label' => 'Media',
+              'icon' => 'images/icon.gif'
+            )
+          ),
+          'default' => 'f'
+        )
+      )
+    );
+    // Insert the settings.
+    $query = db_insert('ckeditor_settings')->fields(array(
+      'name',
+      'settings'
+    ));
+    $query->values(array(
+      'name' => 'Default',
+      'settings' => serialize($default_settings)
+    ));
+    $query->values(array(
+      'name' => 'Limited',
+      'settings' => serialize($limited_settings)
+    ));
+    $query->execute();
+    // Associate profiles with formats.
+    db_delete('ckeditor_input_format')->execute();
+    $query = db_insert('ckeditor_input_format')->fields(array(
+      'name',
+      'format'
+    ));
+    $query->values(array(
+      'name' => 'Default',
+      'format' => 'filtered_html'
+    ));
+    $query->values(array(
+      'name' => 'Limited',
+      'format' => 'comment_filtered_html'
+    ));
+    $query->execute();
+}
+
+/**
+ * Linkit settings
+ */
+function gbif_nptstartup_linkit_settings() {
+  module_enable(array(
+    'linkit'
+  ));
+  db_merge('linkit_profiles')->key(array(
+    'name' => 'default'
+  ))->fields(array(
+    'name' => 'default',
+    'admin_title' => st('Default'),
+    'data' => serialize(array(
+      'plugins' => array(
+        'taxonomy' => array(
+          'weight' => '0',
+          'enabled' => 1
+        ),
+        'user' => array(
+          'weight' => '0',
+          'enabled' => 1
+        ),
+        'node' => array(
+          'weight' => '0',
+          'enabled' => 1
+        ),
+        'file' => array(
+          'weight' => '0',
+          'enabled' => 1
+        ),
+        'external' => array(
+          'weight' => '0',
+          'enabled' => 1
+        )
+      ),
+      'node' => array(
+        'result_description' => 'by [node:author] · [node:created:short]',
+        'content_types' => array(
+          'biblio' => 0,
+          'media_gallery' => 0,
+          'page' => 0,
+          'spm' => 0
+        ),
+        'include_unpublished' => 0,
+        'group_by_content_type' => 1
+      ),
+      'user' => array(
+        'result_description' => ''
+      ),
+      'taxonomy' => array(
+        'result_description' => '[term:vocabulary]',
+        'group_by_vocabulary' => 0
+      ),
+      'file' => array(
+        'result_description' => '[file:mime] · [file:size]',
+        'show_scheme' => 0,
+        'group_by_scheme' => 0,
+        'image_extra_info' => array(
+          'thumbnail' => 'thumbnail',
+          'dimensions' => 'dimensions'
+        )
+      ),
+      'autocomplete' => array(
+        'charLimit' => 3,
+        'wait' => 250,
+        'remoteTimeout' => 5000
+      ),
+      'attributes' => array(
+        'rel' => array(
+          'weight' => '0',
+          'enabled' => 0
+        ),
+        'class' => array(
+          'weight' => '0',
+          'enabled' => 0
+        ),
+        'accesskey' => array(
+          'weight' => '0',
+          'enabled' => 0
+        ),
+        'id' => array(
+          'weight' => '0',
+          'enabled' => 0
+        ),
+        'title' => array(
+          'weight' => '0',
+          'enabled' => 0
+        )
+      )
+    )),
+    'role_rids' => serialize(array(
+      2 => 1
+    )),
+    'weight' => -10
+  ))->execute();
+}
+
+/**
+ * Default permission
+ */
+function gbif_nptstartup_default_permission() {
+  // Allow visitor account creation with administrative approval.
+  variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+  // Enable default permissions for system roles.
+  $filtered_html_permission = filter_permission_name($filtered_html_format);
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array(
+    'access content',
+    'access comments',
+    $filtered_html_permission
+  ));
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array(
+    'access content',
+    'access comments',
+    'post comments',
+    'skip comment approval',
+    $filtered_html_permission
+  ));
+}
+
+/**
+ * Default menu
+ */
+function gbif_nptstartup_default_menu() {
+  // Create a Home link in the main menu.
+  $item = array(
+    'link_title' => st('Home'),
+    'link_path' => '<front>',
+    'menu_name' => 'main-menu'
+  );
+  menu_link_save($item);
+
+  // Delete all shortcut links - we'll allow users to edit these.  
+  menu_delete_links('shortcut-set-1');
+
+  // Update the menu router information.
+  menu_rebuild();
+  
+}
+
+/**
+ * Enable femail if forum is enabled.
+ */
+function gbif_nptstartup_update_7001(){
+  if(module_exists('forum')){
+    module_enable(array(
+      'femail'
+    ));
+  }
+}
+
+function gbif_nptstartup_update_7002(){
+  foreach(node_type_get_names() as $type => $name){
+    if($type != 'forum'){
+      variable_set('comment_form_location_' . $type, COMMENT_FORM_SEPARATE_PAGE);
+    }
+  }
+}

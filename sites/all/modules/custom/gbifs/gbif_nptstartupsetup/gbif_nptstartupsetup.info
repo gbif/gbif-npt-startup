@@ -1,0 +1,5 @@
+core = "7.x"
+name = "NPT Startup setup"
+description = "NPT Startup setup process"
+package = "GBIF"
+dependencies[] = formflow

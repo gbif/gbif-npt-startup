@@ -1,0 +1,72 @@
+@CHARSET "UTF-8";
+
+.block-gbif-nptstartupsetup .setup-complete{
+  border: 1px solid #D4D4D4;
+  padding: 1px;
+  margin-bottom: 5px;
+}
+
+.block-gbif-nptstartupsetup .zero-complete{
+  background: #BB1023;
+}
+
+.block-gbif-nptstartupsetup .half-complete{
+  background: #FCAD00;
+}
+
+.block-gbif-nptstartupsetup .complete{
+  background: #94C821;
+}
+
+.block-gbif-nptstartupsetup p{
+  float: left;
+  width: 100px;
+}
+
+.block-gbif-nptstartupsetupT a{
+  text-align: right;
+  display: block;
+}
+
+.gbif-nptstartupsetup-welcome-text {
+  width: 720px;
+}
+
+#gbif-nptstartupsetup-welcome-form h3 {
+  margin-bottom: 10px;
+}
+#gbif-nptstartupsetup-welcome-form p {
+  margin-bottom: 10px;
+}
+
+#gbif-nptstartupsetup-front-form label {
+  font-size: 1.1em;
+  margin-bottom: 5px;
+}
+
+.text-format-wrapper {
+  border: 1px solid #ddd;
+  margin:10px 0 10px 0;
+}
+
+.ckeditor_links {
+  padding-left: 10px;
+}
+
+div.text-format-wrapper div.description {
+  font-size: 1em;
+  padding-left: 20px;
+  margin-bottom: 20px;
+}
+
+.form-item.form-type-textarea.form-item-front-page-welcome-message-value {
+  border: none;
+}
+
+#edit-front-page-welcome-message-format {
+  border: none;
+}
+
+.fieldset-content.fieldset-wrapper.clearfix {
+  background: none;
+}
