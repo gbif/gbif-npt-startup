@@ -1,0 +1,86 @@
+<?php
+define('NPTSTARTUP_THEME_NAME', 'gbifwhite2012');
+
+
+/**
+ * 
+ * Implentation of hook_block_info_alter
+ * Adjust the blocks for this theme
+ * @param array $blocks
+ * @param string $theme
+ * @param array $code_blocks
+ */
+/* 
+function gbif_nptblocks_block_info_alter(&$blocks, $theme, $code_blocks){
+  switch($theme){
+    case 'gbif2012':
+      // Move the search box to the search region
+      $blocks['search']['form']['region'] = 'search';
+      break;
+    case 'gbifwhite2012':
+      // Move the search box to the search region
+      $blocks['search']['form']['region'] = 'search';
+      break;
+  }
+}
+*/
+
+/**
+ * Implements hook_block_info().
+ */
+function gbif_nptblocks_block_info() {
+  $blocks['credit_npt'] = array(
+    'info' => t('NPT Startup credit'),
+    'region' => 'credit_second',
+    'weight' => 1,
+    'theme' => NPTSTARTUP_THEME_NAME,
+    'status' => 1
+  );
+  $blocks['credit_orgs'] = array(
+    'info' => t('ViBRANT and GBIF credit'),
+    'region' => 'credit_stretch',
+    'weight' => 1,
+    'theme' => NPTSTARTUP_THEME_NAME,
+    'status' => 1
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function gbif_nptblocks_block_view($delta = '') {
+  $block = array();
+  switch($delta) {
+    case 'credit_npt':
+      $content = '<span class="nptcredit"><p><a href="http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/">' . t('The NPT Project') . '</a></p></span>';
+      $block['content'] = array(
+        '#markup' => $content
+      );
+      break;
+    case 'credit_orgs':
+    $path = drupal_get_path('module', 'gbif_nptblocks');
+    $options = array(
+      'html' => true,
+      'absolute' => true
+    );
+    $links = array(
+      l(theme('image', array(
+        'path' => $path . '/images/vibrant_44.png',
+        'alt' => 'ViBRANT logo',
+        'title' => 'ViBRANT'
+      )), 'http://vbrant.eu/', $options),
+      l(theme('image', array(
+        'path' => $path . '/images/gbif_48.png',
+        'alt' => 'GBIF logo',
+        'title' => 'GBIF'
+      )), 'http://www.gbif.org/', $options)
+    );
+    $block['content'] = array(
+      '#theme' => 'item_list',
+      '#items' => $links
+    );
+    break;
+  }
+  return $block;
+}

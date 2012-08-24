@@ -572,12 +572,6 @@ section #block-gbif-spdsht-available-templates {
   color: #eee;
   position: relative;
   background: #222;
-  height: 40px;
-}
-
-#zone-credit-wrapper .region-credit-first-inner {
-  font-size: 0.85em;
-  line-height: 40px;
 }
 
 #zone-credit-wrapper a {
@@ -588,6 +582,25 @@ section #block-gbif-spdsht-available-templates {
 #zone-credit-wrapper p {
   margin: 0px;
   padding: 0px;
+  font-size: 0.85em;
+  line-height: 40px;
+}
+
+#zone-credit-wrapper a:hover {
+  opacity: .4;
+}
+
+.nptcredit {
+  float: right;
+}
+
+#region-credit-second {
+  float: right;
+}
+
+#region-credit-stretch {
+  border-top: 1px solid;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Block settings */
@@ -598,11 +611,21 @@ section #block-gbif-spdsht-available-templates {
   margin: 0 auto;
   font-size: 0.95em;
   border-top: 1px solid;
-  border-color: rgba(0, 0, 0, 0.15);
-  padding-top: 20px;
+  border-color: rgba(255, 255, 255, 0.15);
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
-
-
+#block-creative-commons-creative-commons p{
+  margin-left: 105px;
+  line-height: 1.7em;
+}
+#region-credit-stretch .item-list ul {
+	margin: 1em 0 1em 0;
+	text-align: center;
+}
+.item-list ul li {
+  display: inline;
+}
 h3#modal-title {
   font-family: DINOT-Regular;
   font-size: 1.6em;
