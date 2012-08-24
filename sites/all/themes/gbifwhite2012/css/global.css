@@ -416,7 +416,6 @@ ul#map-region-menu li a.active { border-radius: 3px; border: none; background-co
   margin-bottom: 10px;
 }
 
-.block-title { color: #444; }
 
 #region-sidebar-second li {
   list-style: none;
@@ -530,7 +529,11 @@ section #block-gbif-spdsht-available-templates {
   height: 200px;
   padding: 20px;
   overflow: hidden;
+  background-color: rgba(30,50, 10, 0.078125);
+  /*
+  Textured background
   background: url("../images/footer_bkg_bw.jpg") repeat-x;
+  */
 }
 
 #zone-footer ul li {
@@ -586,6 +589,19 @@ section #block-gbif-spdsht-available-templates {
   margin: 0px;
   padding: 0px;
 }
+
+/* Block settings */
+.block-title { color: #444; }
+
+#block-creative-commons-creative-commons {
+  max-width: 480px;
+  margin: 0 auto;
+  font-size: 0.95em;
+  border-top: 1px solid;
+  border-color: rgba(0, 0, 0, 0.15);
+  padding-top: 20px;
+}
+
 
 h3#modal-title {
   font-family: DINOT-Regular;
