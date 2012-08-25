@@ -3,5 +3,6 @@ core = 7.x
 version = 0.0
 description = An intitial site setup for GBIF Nodes to build customised biodiversity portals.
 
-dependencies[] = gbif_nptstartup
-files[] = nptstartup.profile
+files[] = npt_start_up.profile
+
+dependencies[] = npt_startup

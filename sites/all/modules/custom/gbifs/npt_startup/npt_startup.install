@@ -1,11 +1,11 @@
 <?php
 
-function gbif_nptstartup_install(){
-  gbif_nptstartup_text_formats();
-  gbif_nptstartup_standard_blocks();
-  gbif_nptstartup_default_menu();
-  gbif_nptstartup_ckeditor_settings();
-  gbif_nptstartup_linkit_settings();
+function npt_startup_install(){
+  npt_startup_text_formats();
+  npt_startup_standard_blocks();
+  npt_startup_default_menu();
+  npt_startup_ckeditor_settings();
+  npt_startup_linkit_settings();
 
   // Set the default theme to be "gbifwhite2012".
   variable_set('theme_default', 'gbifwhite2012');
@@ -36,7 +36,7 @@ function gbif_nptstartup_install(){
   );
   $type = node_type_set_defaults($type);
   node_type_save($type);
-  gbif_nptstartup_add_body_field($type);
+  npt_startup_add_body_field($type);
   // Set weight of body fieldasfasf
   // Insert default pre-defined RDF mapping into the database.
   rdf_mapping_save(array(
@@ -117,7 +117,7 @@ function gbif_nptstartup_install(){
 /**
  * Default text formats
  */
-function gbif_nptstartup_text_formats() {
+function npt_startup_text_formats() {
   // Add text formats.
   $filtered_html_format = array(
     'format' => 'filtered_html',
@@ -173,7 +173,7 @@ function gbif_nptstartup_text_formats() {
 /**
  * Standard blocks
  */
-function gbif_nptstartup_standard_blocks() {
+function npt_startup_standard_blocks() {
   // Enable some standard blocks.
   $values = array(
     array(
@@ -259,7 +259,7 @@ function gbif_nptstartup_standard_blocks() {
       'theme' => 'gbifwhite2012',
       'status' => 1,
       'weight' => 10,
-      'region' => 'footer_stretch',
+      'region' => 'credit_stretch',
       'pages' => '',
       'title' => '',
       'cache' => -1
@@ -300,8 +300,8 @@ function gbif_nptstartup_standard_blocks() {
       'cache' => -1
     ),
     array(
-      'module' => 'gbif_nptstartupsetup',
-      'delta' => 'gbif_nptstartupsetup',
+      'module' => 'npt_setup',
+      'delta' => 'npt_setup',
       'theme' => 'scratchpads_admin',
       'status' => 1,
       'weight' => 0,
@@ -368,7 +368,7 @@ function gbif_nptstartup_standard_blocks() {
 /**
  * CKEditor settings
  */
-function gbif_nptstartup_ckeditor_settings() {
+function npt_startup_ckeditor_settings() {
     // CKEditor settings
     module_enable(array(
       'ckeditor'
@@ -614,7 +614,7 @@ function gbif_nptstartup_ckeditor_settings() {
 /**
  * Linkit settings
  */
-function gbif_nptstartup_linkit_settings() {
+function npt_startup_linkit_settings() {
   module_enable(array(
     'linkit'
   ));
@@ -711,7 +711,7 @@ function gbif_nptstartup_linkit_settings() {
 /**
  * Default permission
  */
-function gbif_nptstartup_default_permission() {
+function npt_startup_default_permission() {
   // Allow visitor account creation with administrative approval.
   variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
   // Enable default permissions for system roles.
@@ -733,7 +733,7 @@ function gbif_nptstartup_default_permission() {
 /**
  * Default menu
  */
-function gbif_nptstartup_default_menu() {
+function npt_startup_default_menu() {
   // Create a Home link in the main menu.
   $item = array(
     'link_title' => st('Home'),
@@ -753,7 +753,7 @@ function gbif_nptstartup_default_menu() {
 /**
  * Enable femail if forum is enabled.
  */
-function gbif_nptstartup_update_7001(){
+function npt_startup_update_7001(){
   if(module_exists('forum')){
     module_enable(array(
       'femail'
@@ -761,7 +761,7 @@ function gbif_nptstartup_update_7001(){
   }
 }
 
-function gbif_nptstartup_update_7002(){
+function npt_startup_update_7002(){
   foreach(node_type_get_names() as $type => $name){
     if($type != 'forum'){
       variable_set('comment_form_location_' . $type, COMMENT_FORM_SEPARATE_PAGE);

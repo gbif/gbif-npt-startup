@@ -28,7 +28,7 @@ function gbif_nptblocks_block_info_alter(&$blocks, $theme, $code_blocks){
 /**
  * Implements hook_block_info().
  */
-function gbif_nptblocks_block_info() {
+function npt_blocks_block_info() {
   $blocks['credit_npt'] = array(
     'info' => t('NPT Startup credit'),
     'region' => 'credit_second',
@@ -49,7 +49,7 @@ function gbif_nptblocks_block_info() {
 /**
  * Implements hook_block_view().
  */
-function gbif_nptblocks_block_view($delta = '') {
+function npt_blocks_block_view($delta = '') {
   $block = array();
   switch($delta) {
     case 'credit_npt':
@@ -59,7 +59,7 @@ function gbif_nptblocks_block_view($delta = '') {
       );
       break;
     case 'credit_orgs':
-    $path = drupal_get_path('module', 'gbif_nptblocks');
+    $path = drupal_get_path('module', 'npt_blocks');
     $options = array(
       'html' => true,
       'absolute' => true

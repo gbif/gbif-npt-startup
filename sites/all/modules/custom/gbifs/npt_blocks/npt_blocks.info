@@ -1,0 +1,6 @@
+name = NPT Blocks
+description = "Provide default blocks for NPT."
+package = GBIF
+core = 7.x
+files [] = npt_blocks.module
+#php = 5.3

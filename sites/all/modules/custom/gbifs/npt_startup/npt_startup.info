@@ -6,6 +6,7 @@ core = 7.x
 features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"
 
 ; Drupal core
+dependencies[] = aggregator
 dependencies[] = block
 dependencies[] = color
 dependencies[] = comment
@@ -93,4 +94,5 @@ dependencies[] = scratchpads_search_block
 ;dependencies[] = scratchpads_width_and_height
 
 ; NPT Startup modules
-dependencies[] = gbif_nptstartupsetup
+dependencies[] = npt_setup
+dependencies[] = npt_blocks

@@ -1,6 +1,0 @@
-name = GBIF Blocks
-description = "Provide correct region positioning for some GBIF related themes."
-package = GBIF
-core = 7.x
-files [] = gbif_blocks.module
-#php = 5.3

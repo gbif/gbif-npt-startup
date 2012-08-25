@@ -3,7 +3,7 @@
 /**
  * Implements hook_menu_default_menu_links().
  */
-function gbif_nptstartup_menu_default_menu_links(){
+function npt_startup_menu_default_menu_links(){
   $menu_links = array();
   // Exported menu link: management:http://help.scratchpads.eu/
   $menu_links['management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/'] = array(

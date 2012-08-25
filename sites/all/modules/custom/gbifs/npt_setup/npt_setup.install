@@ -3,7 +3,7 @@
 /**
  * Implementation of hook_install().
  */
-function gbif_nptstartupsetup_install(){
+function npt_setup_install(){
   // Set the scratchpads_setup to first step - this will increment through each of the steps
-  variable_set('gbif_nptstartupsetup', 0);
+  variable_set('npt_setup', 0);
 }

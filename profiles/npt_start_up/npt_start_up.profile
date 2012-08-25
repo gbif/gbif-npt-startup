@@ -3,7 +3,7 @@
 /**
  * Implements hook_install_tasks()
  */
-function nptstartup_install_tasks() {
+function npt_start_up_install_tasks() {
   $tasks = array(
     'node_definition_form' => array(
       'display_name' => st('NPT Startup settings'),
@@ -83,7 +83,7 @@ function node_definition_form_submit($form, &$form_state) {
 *
 * Allows the profile to alter the site configuration form.
 */
-function nptstartup_form_install_configure_form_alter(&$form, $form_state){
+function npt_start_up_form_install_configure_form_alter(&$form, $form_state){
 // Pre-populate the site name with the server name.
 $form['update_notifications']['update_status_module']['#default_value'] = array();
 }
