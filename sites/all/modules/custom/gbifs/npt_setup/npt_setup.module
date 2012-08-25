@@ -111,20 +111,27 @@ function npt_setup_welcome_form($form, &$form_state){
     drupal_goto();
   }
   $form['welcome'] = array(
-    '#markup' => t('<h3>Welcome to NPT Statup! Thank you for joining NPT project.</h3>')
+    '#type' => 'fieldset',
+    '#prefix' => t('<h3>Welcome to NPT setup!</h3>')
   );
-  $form['explanation'] = array(
-    '#markup' => t('<div class="gbif-nptstartupsetup-welcome-text"><p>You are about to go through a series of basic steps to provide NPT Startup site some initial settings and contents, so the site will scope well to fit the need of your node.</p><p>This is an one-time setup process. Once completed, you won\'t allow to modify the settings and settings by revisiting these forms. Instead, you\'ll go to individual configuations and content management to edit them.</p><p>We recommend you take a few minutes to go through them now.</p><p>Click continue to start the set up process.</p></div>')
+  $form['welcome']['explanation'] = array(
+    '#prefix' => '<div class="npt-setup-welcome-text">',
+    '#markup' => t('<p>Thank you for joining NPT project.</p><p>You are about to go through a series of basic steps to provide NPT Startup site some initial settings and contents, so the site will scope to fit the need of your node.</p><p>This is an one-time setup process. Once completed, you won\'t allow to modify the settings and settings by revisiting these forms. Instead, you\'ll go to individual configuations and content management to edit them.</p><p>We recommend you take a few minutes to go through them now.</p><p>Click continue to start the set up process.</p>'),
+    '#suffix' => '</div>'
   );
   return $form;
 }
 
 function npt_setup_front_form($form, &$form_state){
-  $form['front_page_welcome_message'] = array(
+  $form['front'] = array(
+    '#title' => t('Front page'),
+    '#type' => 'fieldset',
+    '#description' => t('Please enter an introductory message to welcome people who visit your site. <br/>This message will show on the front page.')
+  );
+  $form['front']['front_page_welcome_message'] = array(
     '#title' => t('Welcome message'),
     '#type' => 'text_format',
     '#format' => NULL,
-    '#description' => t('Please enter an introductory message to welcome people visting your site. This message will show on the front page.'),
     '#default_value' => variable_get('front_page_welcome_message'),
     '#required' => TRUE
   );
@@ -142,42 +149,46 @@ function npt_setup_front_form_submit($form, &$form_state){
 function npt_setup_about_form($form, &$form_state){
   $node_shortname = variable_get('gbif_participant_shortname');
   $title = isset($node_shortname) ? t('About ') . $node_shortname : t('About us');
-  $description = t('An <em>') . $title . t('</em> page will be automatically created for your site. <br/>An administrative contact and a technical contact will be inserted below the description.');
-  $form['about_us_title'] = array(
+  $description = t('An <em>@title</em> page will be automatically created for your site. <br/>An administrative contact and a technical contact will be inserted below the description.', array('@title' => $title));
+  $form['about'] = array(
+    '#title' => t('About us page'),
+    '#type' => 'fieldset',
+    '#description' => $description
+  );
+  $form['about']['about_us_title'] = array(
     '#type' => 'textfield',
     '#title' => t('The title of your "About us" page:'),
-    '#prefix' => $description,
     '#default_value' => $title,
     '#description' => t('The default title uses the Node short name you provided during installation. Feel free to change to whatever appropriate.'),
     '#required' => FALSE
   );
-  $form['about_us'] = array(
+  $form['about']['about_us'] = array(
     '#title' => t('The description of your "About us" page:'),
     '#type' => 'text_format',
     '#format' => NULL,
     '#required' => TRUE
   );
-  $form['admin_name'] = array(
+  $form['about']['admin_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Full name:'),
     '#prefix' => '<p>' . t('Administrative contact:') . '</p>',
     '#required' => TRUE,
     '#description' => t('For example, node manager.'),
   );
-  $form['admin_email'] = array(
+  $form['about']['admin_email'] = array(
     '#type' => 'textfield',
     '#title' => t('Email:'),
     '#required' => TRUE,
     '#description' => t('Please make sure the email is entered correctly'),
   );
-  $form['tech_name'] = array(
+  $form['about']['tech_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Full name:'),
     '#prefix' => '<p>' . t('Technical contact:') . '</p>',
     '#required' => TRUE,
     '#description' => t('For example, the developer or programmer that maintain this website.'),
   );
-  $form['tech_email'] = array(
+  $form['about']['tech_email'] = array(
     '#type' => 'textfield',
     '#title' => t('Email:'),
     '#required' => TRUE,
@@ -253,22 +264,25 @@ function npt_setup_synopsis_form($form, &$form_state) {
   $node_country = ($node_country == 'Chinese Taipei') ? 'Taiwan' : $node_country;
   
   $title = isset($node_country) ? t('Biodiversity in ') . $node_country : t('Synopsis of Biodiversity');
-  $description = t('An <em>') . $title . t('</em> page will be automatically created for your site. Use this form to introduce biodiversity in your country.');
+  $description = t('An <em>@title</em> page will be automatically created for your site. <br/>Use this form to introduce biodiversity of your country.', array('@title' => $title));
 
-  $form['synopsis_title'] = array(
+  $form['synopsis'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Synopsis of Biodiversity'),
+    '#description' => $description
+  );
+  $form['synopsis']['synopsis_title'] = array(
     '#type' => 'textfield',
     '#title' => t('The title of your "Synopsis of Biodiversity" page:'),
-    '#prefix' => $description,
     '#default_value' => $title,
     '#description' => t('The default title uses the GBIF participant country you provided during installation. Feel free to change to whatever appropriate.'),
     '#required' => FALSE
   );
-  $form['synopsis'] = array(
+  $form['synopsis']['synopsis_text'] = array(
     '#type' => 'text_format',
     '#title' => t('Synopsis of biodiversity:'),
     '#format' => NULL,
     '#required' => TRUE,
-    '#description' => t('Please provide a few paragraphs about the biodiversity of your country.'),
   );
   return $form;
 }
@@ -276,7 +290,7 @@ function npt_setup_synopsis_form($form, &$form_state) {
 function npt_setup_synopsis_form_submit($form, &$form_state) {
 
   // Prepare bodytext
-  $bodytext = $form_state['values']['synopsis']['value'];
+  $bodytext = $form_state['values']['synopsis_text']['value'];
 
   $node = new stdClass();
   $node->type = 'page';
@@ -286,7 +300,7 @@ function npt_setup_synopsis_form_submit($form, &$form_state) {
   $node->uid = 1;
   $node->body[$node->language][0]['value'] = $bodytext;
   $node->body[$node->language][0]['summary'] = text_summary($bodytext);
-  $node->body[$node->language][0]['format'] = $form_state['values']['synopsis']['format'];
+  $node->body[$node->language][0]['format'] = $form_state['values']['synopsis_text']['format'];
   $node->status = 1;
   $node->comment = 1;
   $node->promote = 0;
@@ -471,11 +485,6 @@ function npt_setup_block_view($delta = ''){
             '!percentage' => $percentage_complete
           ))
         ),
-        '#attached' => array(
-          'css' => array(
-            $path . '/css/gbif-nptstartupsetup.css'
-          )
-        )
       );
       if($percentage_complete < 100){
         $block['content']['link'] = array(

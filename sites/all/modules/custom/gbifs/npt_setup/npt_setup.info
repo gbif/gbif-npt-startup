@@ -2,4 +2,5 @@ core = "7.x"
 name = "NPT setup"
 description = "Provides several steps to establish intitial contents so the site is started as a node web presence."
 package = "GBIF"
+stylesheets[all][] = css/npt-setup.css
 dependencies[] = formflow
