@@ -474,7 +474,6 @@ section #block-gbif-spdsht-available-templates {
 }
 
 #zone-postscript-wrapper {
-  height: 180px;
   color: #666;
   padding: 10px;
   overflow: hidden;
@@ -516,9 +515,9 @@ section #block-gbif-spdsht-available-templates {
   opacity: .4;
 }
 
-#region-postscript-first { overflow: hidden; }
-#region-postscript-second { overflow: hidden; }
-#region-postscript-third { overflow: hidden; }
+#region-postscript-first div.item-list li { white-space: normal; text-indent: -5px; margin-left: 5px; margin-bottom: 8px; line-height: 1.1em;}
+#region-postscript-second div.item-list li { white-space: normal; text-indent: -5px; margin-left: 5px; margin-bottom: 8px; line-height: 1.1em;}
+#region-postscript-third div.item-list li { white-space: normal; text-indent: -5px; margin-left: 5px;}
 
 .more-link {
   float: left;
@@ -526,7 +525,6 @@ section #block-gbif-spdsht-available-templates {
 
 #zone-footer-wrapper {
   position: relative;
-  height: 200px;
   padding: 20px;
   overflow: hidden;
   background-color: rgba(30,50, 10, 0.078125);
@@ -623,7 +621,7 @@ section #block-gbif-spdsht-available-templates {
 	margin: 1em 0 1em 0;
 	text-align: center;
 }
-.item-list ul li {
+#block-npt-blocks-credit-orgs div.item-list ul li {
   display: inline;
 }
 h3#modal-title {
