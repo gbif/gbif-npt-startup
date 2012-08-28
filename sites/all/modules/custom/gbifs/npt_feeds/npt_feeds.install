@@ -1,7 +1,7 @@
 <?php
 
 function npt_feeds_install() {
-  npt_aggregator_default_feeds();
+  npt_feeds_default_feeds();
 }
 
 /**
