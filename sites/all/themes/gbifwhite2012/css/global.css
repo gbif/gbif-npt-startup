@@ -515,9 +515,9 @@ section #block-gbif-spdsht-available-templates {
   opacity: .4;
 }
 
-#region-postscript-first div.item-list li { white-space: normal; text-indent: -5px; margin-left: 5px; margin-bottom: 8px; line-height: 1.1em;}
-#region-postscript-second div.item-list li { white-space: normal; text-indent: -5px; margin-left: 5px; margin-bottom: 8px; line-height: 1.1em;}
-#region-postscript-third div.item-list li { white-space: normal; text-indent: -5px; margin-left: 5px; margin-bottom: 8px; line-height: 1.1em;}
+#region-postscript-first div.item-list li { white-space: normal; text-indent: -20px; margin-left: 20px; margin-bottom: 8px; line-height: 1.1em;}
+#region-postscript-second div.item-list li { white-space: normal; text-indent: -20px; margin-left: 20px; margin-bottom: 8px; line-height: 1.1em;}
+#region-postscript-third div.item-list li { white-space: normal; text-indent: -25px; margin-left: 25px; margin-bottom: 8px; line-height: 1.1em;}
 
 .more-link {
   float: left;
