@@ -1,0 +1,35 @@
+<?php
+
+function npt_feeds_install() {
+  npt_aggregator_default_feeds();
+}
+
+/**
+ * Default feeds
+ */
+function npt_feeds_default_feeds() {
+  // Subscribe some GBIF RSS feeds
+  $values = array(
+    array(
+      'title' => 'GBIF News',
+      'url' => 'http://imsgbif.gbif.org/rss.xml',
+      'refresh' => '3600',
+      'block' => 8
+    ),
+    array(
+      'title' => 'GBIF Latest Online Resources',
+      'url' => 'http://imsgbif.gbif.org/CMS_ORC/?rss=new',
+      'refresh' => '3600',
+      'block' => 8      
+    ),
+  );
+  foreach($values as $record) {
+    aggregator_save_feed($record);
+  }
+  
+  $result = db_query('SELECT f.fid, f.title, f.url, f.refresh, f.checked, f.link, f.description, f.hash, f.etag, f.modified, f.image, f.block FROM {aggregator_feed} f ORDER BY f.fid');
+  
+  foreach ($result as $feed) {
+    aggregator_refresh($feed);
+  }
+}

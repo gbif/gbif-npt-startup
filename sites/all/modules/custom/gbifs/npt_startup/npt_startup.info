@@ -1,6 +1,8 @@
 name = NPT Startup Tweak
 description = Tweaks a Drupal site into a NPT Startup instance
 core = 7.x
+package = GBIF
+version = 7.x-0.1
 
 ; Features
 features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"
@@ -43,6 +45,7 @@ dependencies[] = link
 dependencies[] = linkit
 dependencies[] = role_delegation
 dependencies[] = uuid
+dependencies[] = views
 
 ; Custom modules
 dependencies[] = creative_commons
@@ -84,7 +87,7 @@ dependencies[] = scratchpads_media_gallery
 ;dependencies[] = scratchpads_metadata_service
 ;dependencies[] = scratchpads_mollom
 ;dependencies[] = scratchpads_pages
-dependencies[] = scratchpads_roles_and_permissions
+;dependencies[] = scratchpads_roles_and_permissions
 dependencies[] = scratchpads_search_block
 ;dependencies[] = scratchpads_setup
 ;dependencies[] = scratchpads_solr
@@ -96,3 +99,5 @@ dependencies[] = scratchpads_search_block
 ; NPT Startup modules
 dependencies[] = npt_setup
 dependencies[] = npt_blocks
+dependencies[] = npt_role_and_permissions
+dependencies[] = npt_feeds

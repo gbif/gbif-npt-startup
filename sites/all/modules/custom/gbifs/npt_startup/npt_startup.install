@@ -2,6 +2,7 @@
 
 function npt_startup_install(){
   npt_startup_text_formats();
+  //npt_startup_default_feeds();
   npt_startup_standard_blocks();
   npt_startup_default_menu();
   npt_startup_ckeditor_settings();
@@ -70,7 +71,9 @@ function npt_startup_install(){
   variable_set('date_format_long', 'l, F j, Y - g:ia');
   variable_set('date_format_medium', 'Y-m-d H:i');
   variable_set('date_format_short', 'Y-m-d');
-
+  
+  variable_set('creative_commons_block_display_type', '80x15.png');
+  
   // Apache Solr settings
   variable_set('apachesolr_default_environment', 'solr');
   variable_set('search_default_module', 'apachesolr_search');
@@ -171,6 +174,49 @@ function npt_startup_text_formats() {
 }
 
 /**
+ * Default feeds
+ */
+function npt_startup_default_feeds() {
+  // Subscribe some GBIF RSS feeds
+  $values = array(
+    array(
+      'title' => 'GBIF News',
+      'url' => 'http://imsgbif.gbif.org/rss.xml',
+      'refresh' => '3600',
+      'checked' => 0,
+      'queued' => 0,
+      'modified' => 0,
+      'block' => 5
+    ),
+    array(
+      'title' => 'GBIF Latest Online Recources',
+      'url' => 'http://imsgbif.gbif.org/CMS_ORC/?rss=new',
+      'refresh' => '3600',
+      'checked' => 0,
+      'queued' => 0,
+      'modified' => 0,
+      'block' => 5      
+    ),
+  );
+  foreach($values as $record){
+    db_merge('aggregator_feed')->key(array(
+      'title' => $record['title'],
+      'url' => $record['url'],
+      'refresh' => $record['refresh'],
+      'checked' => $record['checked'],
+      'queued' => $record['queued'],
+      'modified' => $record['modified'],
+      'block' => $record['block']
+    ))->fields($record)->execute();
+  }
+  $result = db_query('SELECT f.fid, f.title, f.url, f.refresh, f.checked, f.link, f.description, f.hash, f.etag, f.modified, f.image, f.block FROM {aggregator_feed} f ORDER BY f.fid');
+  foreach ($result as $feed) {
+    aggregator_refresh($feed);
+  }
+  
+}
+
+/**
  * Standard blocks
  */
 function npt_startup_standard_blocks() {
@@ -259,7 +305,7 @@ function npt_startup_standard_blocks() {
       'theme' => 'gbifwhite2012',
       'status' => 1,
       'weight' => 10,
-      'region' => 'credit_stretch',
+      'region' => 'credit_first',
       'pages' => '',
       'title' => '',
       'cache' => -1

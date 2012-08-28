@@ -32,47 +32,18 @@
   color: black;
 }
 
-/*
 .npt-setup-welcome-text {
-  max-width: 720px;
+  max-width: 680px;
 }
 
-#npt-setup-welcome-form h3 {
+.npt-setup-welcome-text p {
   margin-bottom: 10px;
 }
-#npt-setup-welcome-form p {
-  margin-bottom: 10px;
-}
-
-#npt-setup-front-form label {
-  font-size: 1.1em;
-  margin-bottom: 5px;
-}
-
-.text-format-wrapper {
-  border: 1px solid #ddd;
-  margin:10px 0 10px 0;
-}
-
-.ckeditor_links {
-  padding-left: 10px;
-}
-
-div.text-format-wrapper div.description {
-  font-size: 1em;
-  padding-left: 20px;
-  margin-bottom: 20px;
-}
-
-.form-item.form-type-textarea.form-item-front-page-welcome-message-value {
+#edit-front-page-welcome-message-format,
+#edit-about-us-format,
+#edit-synopsis-text-format {
   border: none;
 }
-
-#edit-front-page-welcome-message-format {
-  border: none;
-}
-
-.fieldset-content.fieldset-wrapper.clearfix {
-  background: none;
-}
-*/
+#edit-front-page-welcome-message-format div.fieldset-content { padding: 5px; }
+#edit-about-us-format div.fieldset-content { padding: 5px; }
+#edit-synopsis-text-format div.fieldset-content { padding: 5px; }

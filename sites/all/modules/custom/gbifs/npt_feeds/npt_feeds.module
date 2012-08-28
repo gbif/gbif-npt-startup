@@ -1,0 +1,50 @@
+<?php
+
+/*
+ * Implements hook_block_info()
+ */
+function npt_feeds_block_info_alter(&$blocks, $theme, $code_blocks) {
+  $result = db_query('SELECT f.fid, f.title, f.url, f.refresh, f.checked, f.link, f.description, f.hash, f.etag, f.modified, f.image, f.block FROM {aggregator_feed} f ORDER BY f.fid');
+  $gbif_feed = array();
+  foreach ($result as $feed) {
+    if ($feed->title == 'GBIF News' || $feed->title == 'GBIF Latest Online Resources') {
+      $delta = 'feed-'.$feed->fid;
+      $gbif_feed[$feed->fid]['delta'] = $delta;
+      $gbif_feed[$feed->fid]['region'] = 'postscript_first';
+    }
+    if ($feed->title == 'GBIF Latest Online Resources') {
+      $delta = 'feed-'.$feed->fid;
+      $gbif_feed[$feed->fid]['delta'] = $delta;
+      $gbif_feed[$feed->fid]['region'] = 'postscript_second';
+    }
+  }
+
+  switch($theme) {
+    case 'gbifwhite2012':
+      foreach ($gbif_feed as $feedblock) {
+        $dlt = $feedblock['delta'];
+        $rgn = $feedblock['region'];
+        $blocks['aggregator'][$dlt]['status'] = 1;
+        $blocks['aggregator'][$dlt]['region'] = $rgn;
+      }
+      break;
+  }
+  $blocks['twitter_pull'][0]['status'] = 1;
+  $blocks['twitter_pull'][0]['region'] = 'postscript_third';
+}
+
+/*
+ * Implements of hook_twitter_pull_blocks()
+ */
+function npt_feeds_twitter_pull_blocks() {
+  return array(
+    0 => (object) array(
+      'delta' => '0',
+      'tweetkey' => '@gbif',
+      'title' => 'GBIF on Twitter',
+      'name' => 'GBIF on Twitter',
+      'number_of_items' => 3,
+      'theme_key' => 'twitter_pull_listing',
+    )
+  );
+}
