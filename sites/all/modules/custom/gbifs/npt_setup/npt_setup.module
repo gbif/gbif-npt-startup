@@ -40,6 +40,10 @@ function npt_setup_default_flows($name = null){
           'title' => 'Synopsis of biodiversity'
         ),
         array(
+          'form_id' => 'npt_setup_news_form',
+          'title' => 'News'
+        ),
+        array(
           'form_id' => 'npt_setup_licence_form',
           'title' => 'Licence type'
         ),
@@ -329,6 +333,51 @@ function npt_setup_synopsis_form_submit($form, &$form_state) {
   node_submit($node);
   node_save($node);
   
+}
+
+function npt_setup_news_form($form, &$form_state){
+  $form['news'] = array(
+    '#title' => t('News'),
+    '#type' => 'fieldset',
+    '#description' => t('Please provide your first news article. <br/>This article will show on the news page.')
+  );
+  $form['news']['news_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title:'),
+    '#description' => t('The title of your first news article.'),
+    '#required' => FALSE
+  );
+  $form['news']['news_article'] = array(
+    '#title' => t('News article'),
+    '#type' => 'text_format',
+    '#format' => NULL,
+    '#required' => FALSE
+  );
+  return $form;
+}
+
+function npt_setup_news_form_submit($form, &$form_state){
+
+  // Prepare bodytext
+  $bodytext = $form_state['values']['news_article']['value'];
+  $node = new stdClass();
+  $node->type = 'article';
+  node_object_prepare($node);
+  $node->title = $form_state['values']['news_title'];
+  $node->language = LANGUAGE_NONE;
+  $node->body[$node->language][0]['value'] = $bodytext;
+  $node->body[$node->language][0]['summary'] = text_summary($bodytext);
+  $node->body[$node->language][0]['format'] = $form_state['values']['news_article']['format'];
+  $node->status = 1;
+  $node->comment = 1;
+  $node->promote = 0;
+  $node->revision = 0;
+  $node->changed = $_SERVER['REQUEST_TIME'];
+  $node->created = $_SERVER['REQUEST_TIME'];
+  $node->field_article_type[$node->language][]['tid'] = 8;
+
+  node_submit($node);
+  node_save($node);
 }
 
 function npt_setup_licence_form($form, &$form_state){

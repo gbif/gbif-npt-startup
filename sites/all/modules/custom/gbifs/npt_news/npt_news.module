@@ -1,0 +1,18 @@
+<?php
+/**
+ * @file
+ * Code for the npt_news feature.
+ */
+
+include_once('npt_news.features.inc');
+
+function npt_news_menu_link_alter(&$item) {
+  $items_to_hide = array('article');
+  if (in_array($item['link_path'], $items_to_hide)) {
+    $item['hidden'] = 1;
+  }
+  $items_to_promote = array('news');
+  if (in_array($item['link_path'], $items_to_promote)) {
+    $item['weight'] = 0;
+  }
+}

@@ -22,22 +22,36 @@ function npt_startup_install(){
   variable_get('site_name', 'NPT Startup');
   variable_get('site_slogan', 'Participating in Development');
 
+  npt_startup_vocabularies();
 
-  // Insert default pre-defined node types into the database. For a complete
-  // list of available node type attributes, refer to the node type API
-  // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
-  $type = array(
-    'type' => 'page',
-    'name' => st('Page'),
-    'base' => 'node_content',
-    'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
-    'custom' => 1,
-    'modified' => 1,
-    'locked' => 0
+  // Insert default pre-defined node types
+  $types = array(
+    array(
+      'type' => 'page',
+      'name' => st('Page'),
+      'base' => 'node_content',
+      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
+    array(
+      'type' => 'article',
+      'name' => st('Article'),
+      'base' => 'node_content',
+      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
   );
-  $type = node_type_set_defaults($type);
-  node_type_save($type);
-  npt_startup_add_body_field($type);
+  foreach ($types as $type) {
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    npt_startup_add_body_field($type);
+  }
+  
+  
   // Set weight of body fieldasfasf
   // Insert default pre-defined RDF mapping into the database.
   rdf_mapping_save(array(
@@ -221,7 +235,7 @@ function npt_startup_default_feeds() {
  */
 function npt_startup_standard_blocks() {
   // Enable some standard blocks.
-  $values = array(
+  $blocks = array(
     array(
       'module' => 'system',
       'delta' => 'main',
@@ -401,13 +415,13 @@ function npt_startup_standard_blocks() {
       'cache' => -1
     )
   );
-  foreach($values as $record){
+  foreach($blocks as $block){
     db_merge('block')->key(array(
-      'module' => $record['module'],
-      'delta' => $record['delta'],
-      'theme' => $record['theme'],
-      'title' => $record['title']
-    ))->fields($record)->execute();
+      'module' => $block['module'],
+      'delta' => $block['delta'],
+      'theme' => $block['theme'],
+      'title' => $block['title']
+    ))->fields($block)->execute();
   } 
 }
 
@@ -793,6 +807,58 @@ function npt_startup_default_menu() {
 
   // Update the menu router information.
   menu_rebuild();
+  
+}
+
+function npt_startup_vocabularies() {
+  // Insert default pre-defined vocabularies
+  $vocabularies = array(
+    'article_type' => array(
+      'name' => 'Article Type',
+      'machine_name' => 'article_type',
+      'description' => 'Term to categorise articles',
+      'hierarchy' => '0',
+      'module' => 'taxonomy',
+      'weight' => '0',
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+  );
+  foreach ($vocabularies as $vocabulary) {
+    $vocabulary = (object)$vocabulary;
+    taxonomy_vocabulary_save($vocabulary);
+  }
+  // Insert default terms for article_type
+  $terms = array(
+    array(
+      'name' => 'news'
+    ),
+    array(
+      'name' => 'blog'
+    ),
+    array(
+      'name' => 'log'
+    )
+  );
+  $vocabulary = taxonomy_vocabulary_machine_name_load('article_type');
+  foreach ($terms as $term) {
+    $term = (object)$term;
+    $term->vid = $vocabulary->vid;
+    taxonomy_term_save($term);
+  }
   
 }
 
