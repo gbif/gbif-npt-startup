@@ -34,7 +34,7 @@ function npt_nodestats_admin_settingsform() {
     '#type' => 'submit',
     '#value' => t('Analyse now'),
     '#submit' => array('npt_nodestats_analyse_submit'),
-    '#prefix' => '<p>'. t('Analyse professional publications by authors from %country or biodiversity about %country, according to GBIF Public Library maintained on Mendeley.<br/>Please note this may take a while, as there are more than thousands of documents to go through.', array('%country' => $country)).'</p>',
+    '#prefix' => '<p>'. t('Analyse professional publications by authors from %country or biodiversity about %country, according to GBIF Public Library maintained on Mendeley.<br/>Please note this may take longer than expected.', array('%country' => $country)).'</p>',
   );
   $form['npt_nodestats_update_interval'] = array(
     '#title' => t('Automatic update interval'),
@@ -111,13 +111,17 @@ function npt_nodestats_analyse_submit() {
   $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_nodestats/documents.json'))));
   $analysed_docs_authored = array();
   $analysed_docs_about = array();
+  $analysed_result = array();
   
   foreach ($documents as $k => $doc) {
-    if (in_array($tag_authored, $doc->tags)) {
-      $analysed_docs_authored[] = $doc;
-    }
-    if (in_array($tag_about, $doc->tags)) {
-      $analysed_docs_about[] = $doc;
+    // Only retrieve documents with UUID
+    if (isset($doc->uuid)) {
+      if (in_array($tag_authored, $doc->tags)) {
+        $analysed_docs_authored[] = $doc;
+      }
+      if (in_array($tag_about, $doc->tags)) {
+        $analysed_docs_about[] = $doc;
+      }
     }
     unset($documents[$k]);
   }
@@ -125,9 +129,19 @@ function npt_nodestats_analyse_submit() {
   if (count($documents) == 0) drupal_set_message(t('Analysis finished.'));
   
   $authored_doc_count = count($analysed_docs_authored);
+  $analysed_result['authored']['count'] = $authored_doc_count;
+
   $about_doc_count = count($analysed_docs_about);
+  $analysed_result['about']['count'] = $about_doc_count;
   
   if ($authored_doc_count > 0) {
+    // Insert publication_outlet from Mendeley detail call
+    foreach ($analysed_docs_authored as $adoc) {
+      $url = MENDELEY_DOC_DETAIL_URL . $adoc->uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $detail = json_decode(file_get_contents($url));
+      $adoc->publication_outlet = $detail->publication_outlet;
+    }
+    
     $authored_json = json_encode($analysed_docs_authored);
     $authored_doc = file_save_data($authored_json, file_build_uri('npt_nodestats/authored_doc.json'), FILE_EXISTS_REPLACE);
     
@@ -137,12 +151,23 @@ function npt_nodestats_analyse_submit() {
       array('%country' => $country)
     ));
     
-    if ($authored_doc == TRUE) drupal_set_message(t('Authored documents saved.'));
+    if ($authored_doc == TRUE) {
+      drupal_set_message(t('Authored documents saved.'));
+      $analysed_result['authored']['file'] = 'authored_doc.json';
+    }
   } else {
     drupal_set_message(t('In GBIF Public Library, so far no document found authored by scientists from %country.', array('%country' => $country)));
   }
 
+
   if ($about_doc_count > 0) {
+    // Insert publication_outlet from Mendeley detail call
+    foreach ($analysed_docs_about as $adoc) {
+      $url = MENDELEY_DOC_DETAIL_URL . $adoc->uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $detail = json_decode(file_get_contents($url));
+      $adoc->publication_outlet = $detail->publication_outlet;
+    }
+
     $about_json = json_encode($analysed_docs_about);
     $about_doc = file_save_data($about_json, file_build_uri('npt_nodestats/about_doc.json'), FILE_EXISTS_REPLACE);
 
@@ -152,8 +177,13 @@ function npt_nodestats_analyse_submit() {
       array('%country' => $country)
     ));
     
-    if ($about_doc == TRUE) drupal_set_message(t('About documents saved.'));
+    if ($about_doc == TRUE) {
+      drupal_set_message(t('About documents saved.'));
+      $analysed_result['about']['file'] = 'about_doc.json';      
+    }
   } else {
     drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of %country.', array('%country' => $country)));    
   }
+  
+  variable_set('npt_nodestats_publication', $analysed_result);
 }

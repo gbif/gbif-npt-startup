@@ -7,6 +7,8 @@
 */
 
 define('GBIF_NPT_SERVICE_URL', 'http://burke.gbif.org/gbif/stats/services');
+define('NPT_MENDELEY_CONSUMER_KEY', '571f50a5930cf872cd4c6d129ea99b2b04ffe07de');
+define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
 
 /**
  * Implementation of hook_menu().
@@ -213,6 +215,88 @@ function npt_nodestats_global_view() {
   }
 
   $page_content .= '</p>';
+
+  // Publication
+  
+  $analysed_result = variable_get('npt_nodestats_publication');
+  
+  $page_content .= '<h4>Professional publication</h4>';
+  
+  if ($analysed_result['authored']['count'] > 0) {
+    $page_content .= '<p>';
+    $output = format_plural($analysed_result['authored']['count'],
+      'There is 1 publication authored by scientists from %country:',
+      'There are @count publications authored by scientists from %country:',
+      array('%country' => $country)
+    );
+    $output .= '<ol class="mendeley-citation">';
+    
+    $authored_docs = json_decode(file_get_contents(file_build_uri('npt_nodestats/'. $analysed_result['authored']['file'])));
+    
+    foreach ($authored_docs as $adoc) {
+      $output .= '<li>';
+      
+      // author
+      for ($i = 0; $i < count($adoc->authors); $i++) {
+        $output .= $adoc->authors[$i]->surname.', '. substr($adoc->authors[$i]->forename, 0, 1) . '.';
+        $output .= ', ';          
+      }
+      // year 
+      $output .= $adoc->year. '. ';
+      $output .= $adoc->title. '. ';
+      $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
+      $output .= $adoc->volume;
+      $output .= '('.$adoc->issue.'), ';
+      $output .= 'p.'.$adoc->pages.'. ';
+      $output .= 'Available at: ';
+      $output .= l($adoc->url, $adoc->url).'.';
+      
+      $output .= '</li>';
+    }
+    $output .= '</ol>';
+    $page_content .= $output;
+    $output = '';
+    $page_content .= '</p>';
+  }
+  
+  if ($analysed_result['about']['count'] > 0) {
+    $page_content .= '<p>';
+    $output = format_plural($analysed_result['about']['count'],
+      'There is 1 publication about biodiversity in %country:',
+      'There are @count publications about biodiversity in %country:',
+      array('%country' => $country)
+    );
+    $output .= '<ol class="mendeley-citation">';
+    
+    $authored_docs = json_decode(file_get_contents(file_build_uri('npt_nodestats/'. $analysed_result['about']['file'])));
+    
+    foreach ($authored_docs as $adoc) {
+      $output .= '<li>';
+      
+      // author
+      for ($i = 0; $i < count($adoc->authors); $i++) {
+        $output .= $adoc->authors[$i]->surname.', '. substr($adoc->authors[$i]->forename, 0, 1) . '.';
+        $output .= ', ';          
+      }
+      // year 
+      $output .= $adoc->year. '. ';
+      $output .= $adoc->title. '. ';
+      $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
+      $output .= $adoc->volume;
+      $output .= '('.$adoc->issue.'), ';
+      $output .= 'p.'.$adoc->pages.'. ';
+      $output .= 'Available at: ';
+      $output .= l($adoc->url, $adoc->url).'.';
+      
+      $output .= '</li>';
+    }
+    $output .= '</ol>';
+    $page_content .= $output;
+    $output = '';
+    $page_content .= '</p>';
+  }
+
+  $page_content .= '<p>('.t('Depending on how it is categorised, a publication may be listed twice.').')</p>';
   $page_content .= '</div>';
   $page_content .= '</article>';
 

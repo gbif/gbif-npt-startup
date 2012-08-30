@@ -665,3 +665,6 @@ div.modal-forms-modal-content .form-item label {
 #chart {
   float: right;
 }
+
+.mendeley-citation { padding-left: 40px; }
+.mendeley-citation li { margin-bottom: 8px; }
