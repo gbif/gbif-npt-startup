@@ -1,0 +1,305 @@
+<?php
+/*
+
+  ToDo: 5) Think about what kind of chart makes best sense.
+        6) Count on top of chart.
+
+*/
+
+define('GBIF_NPT_SERVICE_URL', 'http://burke.gbif.org/gbif/stats/services');
+
+/**
+ * Implementation of hook_menu().
+ */
+function npt_nodestats_menu() {
+  $items['npt/nodestats'] = array(
+    'title' => 'Facts',
+    'description' => 'Statistics about GBIF Network',
+    'page callback' => 'npt_nodestats_global_view',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
+    'weight' => 1
+  );
+  $items['admin/config/nodestats'] = array(
+    'title' => 'NPT Node Statistics',
+    'description' => 'Available options for configuring the Node Statistics retrieved from GBIFS.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/nodestats/settings'] = array(
+    'title' => 'NPT Node Statistics Configuration',
+    'description' => 'Configurations and various options to update statistics.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('npt_nodestats_admin_settingsform'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'npt_nodestats.admin.inc',
+  );
+  return $items;
+}
+
+/*
+ * Implementation of hook_library()
+ */
+function npt_nodestats_library() {
+  $libraries['d3'] = array(
+    'title' => 'd3 data visualisation',
+    'website' => 'http://d3js.org',
+    'version' => '2.9.1',
+    'js' => array(
+      /*
+      'http://d3js.org/d3.v2.js' => array(
+        'type' => 'external',
+        'weight' => -20,
+      ),
+      */
+      drupal_get_path('module', 'npt_nodestats') . '/js/d3.v2.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),      
+      drupal_get_path('module', 'npt_nodestats') . '/js/d3.geo.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),  
+  );
+  $libraries['gbif_global_overview'] = array(
+    'title' => 'GBIF global overview',
+    'website' => 'http://data.gbif.org',
+    'version' => '0',
+    'js' => array(
+      drupal_get_path('module', 'npt_nodestats') . '/js/global_map_front.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+      drupal_get_path('module', 'npt_nodestats') . '/js/jquery.dataTables.min.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 21,
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'npt_nodestats') . '/css/published.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'npt_nodestats') . '/css/dataGrid.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'npt_nodestats') . '/css/map.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'npt_nodestats') . '/css/colorbrewer.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+    ),
+  );
+  return $libraries;
+}
+
+/*
+ * Default overview page
+ * Could be a global view but right now is just a placeholder.
+ */
+function npt_nodestats_global_view() {
+
+  $participant_shortname = variable_get('gbif_participant_shortname');
+  $participant_node = variable_get('gbif_participant_node');
+  $node_value = explode('-', $participant_node);
+  $iso_a2 = $node_value[0];
+  $country = $node_value[1];
+
+  $page_title = $country . t(' as a GBIF participant');
+  drupal_set_title($page_title);
+
+  $page_content = '';
+  $page_content .= '<div class="gallery" id="chart">';
+  $page_content .= '</div>';
+  $page_content .= '<article>';
+  $page_content .= '<p>';
+  $page_content .= t('This page shows membership status and data publishing statistics of GBIF %country.', array('%country' => $country));
+  $page_content .= '</p>';
+
+
+
+  $json_location['membership']['world'] = file_create_url(file_build_uri('npt_nodestats/membership_world.json'));
+  $membership = json_decode(file_get_contents($json_location['membership']['world']), TRUE);
+  $facts = $membership['country'][$country];
+  
+
+  
+  $page_content .= '<div id="participant-list">';
+
+  $page_content .= '<h4>GBIF Membership</h4>';
+  $page_content .= '<p>';
+  $page_content .= 'Status: ' . $facts['GBIFMembership'] . '<br/>';
+  $page_content .= 'MOU Signature: <br/>';
+  $page_content .= '<span style="padding-left: 20px;">2007: ' . $facts['MOU2007'] . '</span><br/>';
+  $page_content .= '<span style="padding-left: 20px;">2012: ' . $facts['MOU2012'] . '</span><br/>';
+  $page_content .= '</p>';
+
+  $page_content .= '<h4>Data publishing</h4>';
+  $page_content .= '<p>';
+
+  $output = '';
+  // Organisation in the Registry
+  if ($facts['agents']['Org'] > 0) {
+    $output = format_plural($facts['agents']['Org'],
+      '%gbif_country has 1 organisation registered with GBIF.',
+      '%gbif_country has @count organisations registered with GBIF.',
+      array('%gbif_country' => $country)
+    );
+    $page_content .= $output . '<br/>';
+    $output = '';
+  }
+  // IPT in the Registry
+  if ($facts['agents']['IPT'] > 0) {
+    $output = format_plural($facts['agents']['IPT'],
+      '%gbif_country has installed 1 Integrated Publishing Toolkit, IPT, now publishing data through GBIF.',
+      '%gbif_country has installed @count Integrated Publishing Toolkits, IPTs, now publishing data through GBIF.',
+      array('%gbif_country' => $country)
+    );
+    $page_content .= $output . '<br/>';
+    $output = '';
+  }
+  // Checklists
+  if ($facts['agents']['ChecklistDataset'] > 0) {
+    $output = format_plural($facts['agents']['ChecklistDataset'],
+      '%gbif_country has published 1 checklist dataset, ',
+      '%gbif_country has published @count checklist datasets, ',
+      array('%gbif_country' => $country)
+    );
+    $output .= format_plural($facts['agents']['ChecklistRecord'],
+      'which consists 1 name record.',
+      'which consist @count name records.'
+    );
+    $page_content .= $output . '<br/>';
+    $output = '';
+  }
+  // Occurrence
+  if ($facts['stats']['dataset_count'] > 0) {
+    $output = format_plural($facts['stats']['dataset_count'],
+      '%gbif_country has published 1 occurrence dataset, ',
+      '%gbif_country has published @count occurrence datasets, ',
+      array('%gbif_country' => $country)
+    );
+
+    $georef_percent = $facts['stats']['occurrence_georeferenced_count'] / $facts['stats']['occurrence_count'] * 100;
+    $georef_percent = round($georef_percent, 2) . ' %';
+
+    $output .= format_plural($facts['stats']['occurrence_count'],
+      'which consists 1 occurrence record, with %georef_percent geo-referenced',
+      'which consist @count occurrence records, with %georef_percent geo-referenced',
+      array('%georef_percent' => $georef_percent)
+    );
+    
+    $output .= format_plural($facts['stats']['occurrence_georeferenced_count'],
+      ' (1 record).',
+      ' (@count records).'
+    );
+    $page_content .= $output . '<br/>';
+    $output = '';
+  }
+
+  $page_content .= '</p>';
+  $page_content .= '</div>';
+  $page_content .= '</article>';
+
+  return $page_content;
+}
+
+
+
+
+/**
+ * Implementation of hook_cron()
+ */
+function npt_nodestats_cron() {
+  $interval = variable_get('npt_nodestats_update_interval', 3600);
+  $last_run = variable_get('npt_nodestats_last_update');
+  $since = time() - $last_run;
+  if ($since >= $interval) {
+    $stats = npt_nodestats_stats_retrieve();
+    $geo = geojson_retrieve();
+    $publication = publication_retrieve();
+
+    if ($stats != FALSE && $geo != FALSE && $publication != FALSE) {
+      watchdog('npt_nodestats', 'NPT node statistics updated.');
+      variable_set('npt_nodestats_last_update', time());      
+    } else {
+      watchdog('npt_nodestats', 'NPT node statistics is not completely updated. Please investigate', NULL, WATCHDOG_WARNING, $link = NULL);
+    }
+  } else {
+    watchdog('npt_nodestats', 'NPT node statistics is not updated because the update interval is yet reached.');    
+  }
+}
+
+/*
+ * Retrieve data publishing statistics from GBIFS
+ */
+function npt_nodestats_stats_retrieve() {
+
+  $membershipsGlobalJSON = file_get_contents(GBIF_NPT_SERVICE_URL . '/membership/world');
+  $membershipsGlobalJSON_file = file_save_data($membershipsGlobalJSON, file_build_uri('npt_nodestats/membership_world.json'), FILE_EXISTS_REPLACE);
+  
+  if ($membershipsGlobalJSON_file != FALSE) {
+    drupal_set_message(t('Statistics of participants retrieved.'));
+    return TRUE;
+  } else {
+    drupal_set_message(t('There was an error in retrieving statistics. Please investigate.'), 'warning');
+    return FALSE;
+  }
+}
+
+/*
+ * Retrieve json map from GBIFS
+ */
+function geojson_retrieve() {
+  $geoJSON = file_get_contents(GBIF_NPT_SERVICE_URL . '/geo');
+  $geoFile = 'npt_nodestats/geo_world.json';
+  $geoFileURI = file_build_uri($geoFile);
+  $json_file = file_save_data($geoJSON, $geoFileURI, FILE_EXISTS_REPLACE);
+
+  if ($geoJSON != FALSE && $json_file != FALSE) {
+    drupal_set_message(t('Map successfully retrieved.'));
+    return TRUE;
+  } else {
+    drupal_set_message(t('There was an error in retrieving map. Please investigate.'), 'warning');
+    return FALSE;
+  }
+}
+
+/*
+ * Retrieve Mendeley publication list from GBIFS
+ */
+function publication_retrieve() {
+  $files = array('/documents', '/publication');
+  
+  foreach ($files as $file) {
+    $json_file = file_get_contents(GBIF_NPT_SERVICE_URL . $file);
+    $publication_file = 'npt_nodestats/'.$file.'.json';
+    $publication_saved[] = file_save_data($json_file, file_build_uri($publication_file), FILE_EXISTS_REPLACE);    
+  }
+
+
+  if (in_array(FALSE, $publication_saved) == FALSE) {
+    drupal_set_message(t('Publication successfully retrieved.'));
+    return TRUE;
+  } else {
+    drupal_set_message(t('There was an error in retrieving publication. Please investigate.'), 'warning');
+    return FALSE;
+  }
+
+  
+}

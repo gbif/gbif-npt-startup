@@ -1,0 +1,8 @@
+name = "NPT Node Statistics"
+description = "Provides updated data publishing/literature statistics of this NPT instance."
+version = 0.1
+package = GBIF
+core = 7.x
+configure = admin/config/nodestats/settings
+
+dependencies[] = npt_startup
