@@ -28,7 +28,6 @@ function npt_nodestats_enable() {
   
   // Retrieve all stats
   npt_nodestats_cron();
-
 }
 
 /**
@@ -46,4 +45,6 @@ function npt_nodestats_uninstall() {
     drupal_set_message('GBIF Statistics file successfully deleted.');
   }
   */
+  variable_del('npt_nodestats_update_interval');
+  variable_del('npt_nodestats_last_update');
 }
