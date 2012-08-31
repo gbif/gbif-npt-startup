@@ -143,7 +143,7 @@ function npt_nodestats_global_view() {
   
   $page_content .= '<div id="participant-list">';
 
-  $page_content .= '<h4>GBIF Membership</h4>';
+  $page_content .= '<h4>GBIF Participation</h4>';
   $page_content .= '<p>';
   $page_content .= 'Status: ' . $facts['GBIFMembership'] . '<br/>';
   $page_content .= 'MOU Signature: <br/>';
@@ -158,8 +158,8 @@ function npt_nodestats_global_view() {
   // Organisation in the Registry
   if ($facts['agents']['Org'] > 0) {
     $output = format_plural($facts['agents']['Org'],
-      '%gbif_country has 1 organisation registered with GBIF.',
-      '%gbif_country has @count organisations registered with GBIF.',
+      '%gbif_country has 1 data publisher registered with GBIF.',
+      '%gbif_country has @count data publishers registered with GBIF.',
       array('%gbif_country' => $country)
     );
     $page_content .= $output . '<br/>';
@@ -201,8 +201,8 @@ function npt_nodestats_global_view() {
     $georef_percent = round($georef_percent, 2) . ' %';
 
     $output .= format_plural($facts['stats']['occurrence_count'],
-      'which consists 1 occurrence record, with %georef_percent geo-referenced',
-      'which consist @count occurrence records, with %georef_percent geo-referenced',
+      'which consists of 1 occurrence record, with %georef_percent geo-referenced',
+      'which consist of @count occurrence records, with %georef_percent geo-referenced',
       array('%georef_percent' => $georef_percent)
     );
     
