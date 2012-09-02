@@ -17,7 +17,7 @@ function node_definition_form() {
   drupal_set_title(st('NPT Startup settings'));
 
   // Get the list of GBIF country nodes
-  $jsonurl = 'http://burke.gbif.org/gbif/stats/services/membership/world';
+  $jsonurl = 'http://npt.gbif.org/gbif/stats/services/membership/world';
   $node = json_decode(file_get_contents($jsonurl));
   $nodelist = array();
   foreach ($node->country as $country => $attr) {
