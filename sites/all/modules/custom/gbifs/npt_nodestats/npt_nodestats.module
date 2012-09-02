@@ -6,7 +6,7 @@
 
 */
 
-define('GBIF_NPT_SERVICE_URL', 'http://burke.gbif.org/gbif/stats/services');
+define('GBIF_NPT_SERVICE_URL', 'http://npt.gbif.org/gbif/stats/services');
 define('NPT_MENDELEY_CONSUMER_KEY', '571f50a5930cf872cd4c6d129ea99b2b04ffe07de');
 define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
 
