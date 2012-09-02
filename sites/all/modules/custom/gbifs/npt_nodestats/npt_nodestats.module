@@ -130,7 +130,7 @@ function npt_nodestats_global_view() {
   $page_content .= '</div>';
   $page_content .= '<article>';
   $page_content .= '<p>';
-  $page_content .= t('This page shows membership status and data publishing statistics of GBIF %country.', array('%country' => $country));
+  $page_content .= t('This page shows membership status and data publishing statistics of GBIF @country.', array('@country' => $country));
   $page_content .= '</p>';
 
 
@@ -158,9 +158,9 @@ function npt_nodestats_global_view() {
   // Organisation in the Registry
   if ($facts['agents']['Org'] > 0) {
     $output = format_plural($facts['agents']['Org'],
-      '%gbif_country has 1 data publisher registered with GBIF.',
-      '%gbif_country has @count data publishers registered with GBIF.',
-      array('%gbif_country' => $country)
+      '@country has 1 data publisher registered with GBIF.',
+      '@country has @count data publishers registered with GBIF.',
+      array('@country' => $country)
     );
     $page_content .= $output . '<br/>';
     $output = '';
@@ -168,9 +168,9 @@ function npt_nodestats_global_view() {
   // IPT in the Registry
   if ($facts['agents']['IPT'] > 0) {
     $output = format_plural($facts['agents']['IPT'],
-      '%gbif_country has installed 1 Integrated Publishing Toolkit, IPT, now publishing data through GBIF.',
-      '%gbif_country has installed @count Integrated Publishing Toolkits, IPTs, now publishing data through GBIF.',
-      array('%gbif_country' => $country)
+      '@country has installed 1 Integrated Publishing Toolkit, IPT, now publishing data through GBIF.',
+      '@country has installed @count Integrated Publishing Toolkits, IPTs, now publishing data through GBIF.',
+      array('@country' => $country)
     );
     $page_content .= $output . '<br/>';
     $output = '';
@@ -178,9 +178,9 @@ function npt_nodestats_global_view() {
   // Checklists
   if ($facts['agents']['ChecklistDataset'] > 0) {
     $output = format_plural($facts['agents']['ChecklistDataset'],
-      '%gbif_country has published 1 checklist dataset, ',
-      '%gbif_country has published @count checklist datasets, ',
-      array('%gbif_country' => $country)
+      '@country has published 1 checklist dataset, ',
+      '@country has published @count checklist datasets, ',
+      array('@country' => $country)
     );
     $output .= format_plural($facts['agents']['ChecklistRecord'],
       'which consists 1 name record.',
@@ -192,21 +192,21 @@ function npt_nodestats_global_view() {
   // Occurrence
   if ($facts['stats']['dataset_count'] > 0) {
     $output = format_plural($facts['stats']['dataset_count'],
-      '%gbif_country has published 1 occurrence dataset, ',
-      '%gbif_country has published @count occurrence datasets, ',
-      array('%gbif_country' => $country)
+      '@country has published 1 occurrence dataset, ',
+      '@country has published @count occurrence datasets, ',
+      array('@country' => $country)
     );
 
     $georef_percent = $facts['stats']['occurrence_georeferenced_count'] / $facts['stats']['occurrence_count'] * 100;
     $georef_percent = round($georef_percent, 2) . ' %';
 
-    $output .= format_plural($facts['stats']['occurrence_count'],
+    $output .= format_plural(number_format($facts['stats']['occurrence_count']),
       'which consists of 1 occurrence record, with %georef_percent geo-referenced',
       'which consist of @count occurrence records, with %georef_percent geo-referenced',
       array('%georef_percent' => $georef_percent)
     );
     
-    $output .= format_plural($facts['stats']['occurrence_georeferenced_count'],
+    $output .= format_plural(number_format($facts['stats']['occurrence_georeferenced_count']),
       ' (1 record).',
       ' (@count records).'
     );
@@ -225,9 +225,9 @@ function npt_nodestats_global_view() {
   if ($analysed_result['authored']['count'] > 0) {
     $page_content .= '<p>';
     $output = format_plural($analysed_result['authored']['count'],
-      'There is 1 publication authored by scientists from %country:',
-      'There are @count publications authored by scientists from %country:',
-      array('%country' => $country)
+      'There is 1 publication authored by scientists from @country:',
+      'There are @count publications authored by scientists from @country:',
+      array('@country' => $country)
     );
     $output .= '<ol class="mendeley-citation">';
     
@@ -262,9 +262,9 @@ function npt_nodestats_global_view() {
   if ($analysed_result['about']['count'] > 0) {
     $page_content .= '<p>';
     $output = format_plural($analysed_result['about']['count'],
-      'There is 1 publication about biodiversity in %country:',
-      'There are @count publications about biodiversity in %country:',
-      array('%country' => $country)
+      'There is 1 publication about biodiversity in @country:',
+      'There are @count publications about biodiversity in @country:',
+      array('@country' => $country)
     );
     $output .= '<ol class="mendeley-citation">';
     
@@ -357,7 +357,7 @@ function geojson_retrieve() {
   $json_file = file_save_data($geoJSON, $geoFileURI, FILE_EXISTS_REPLACE);
 
   if ($geoJSON != FALSE && $json_file != FALSE) {
-    drupal_set_message(t('Map successfully retrieved.'));
+    drupal_set_message(t('Map layer successfully retrieved.'));
     return TRUE;
   } else {
     drupal_set_message(t('There was an error in retrieving map. Please investigate.'), 'warning');
@@ -415,7 +415,7 @@ function npt_nodestats_analyse() {
     unset($documents[$k]);
   }
   
-  if (count($documents) == 0) drupal_set_message(t('Analysis finished.'));
+  if (count($documents) == 0) drupal_set_message(t('Finished analysing documents for @country.', array('@country' => $country)));
   
   $authored_doc_count = count(deduplicate($analysed_docs_authored));
   $analysed_result['authored']['count'] = $authored_doc_count;
@@ -436,18 +436,17 @@ function npt_nodestats_analyse() {
     $authored_json = json_encode($analysed_docs_authored);
     $authored_doc = file_save_data($authored_json, file_build_uri('npt_nodestats/authored_doc.json'), FILE_EXISTS_REPLACE);
     
-    drupal_set_message(format_plural($authored_doc_count,
-      'There is a publication authored by scientists from %country',
-      'There are @count publications authored by scientists from %country',
-      array('%country' => $country)
-    ));
-    
     if ($authored_doc == TRUE) {
-      drupal_set_message(t('Authored documents saved.'));
+      drupal_set_message(format_plural($authored_doc_count,
+        'There is a publication authored by scientists from @country, results saved.',
+        'There are @count publications authored by scientists from @country, results saved.',
+        array('@country' => $country)
+      ));
+    
       $analysed_result['authored']['file'] = 'authored_doc.json';
     }
   } else {
-    drupal_set_message(t('In GBIF Public Library, so far no document found authored by scientists from %country.', array('%country' => $country)));
+    drupal_set_message(t('In GBIF Public Library, so far no document found authored by scientists from @country.', array('@country' => $country)));
   }
 
   // Publications about biodiversity in a country
@@ -462,18 +461,17 @@ function npt_nodestats_analyse() {
     $about_json = json_encode($analysed_docs_about);
     $about_doc = file_save_data($about_json, file_build_uri('npt_nodestats/about_doc.json'), FILE_EXISTS_REPLACE);
 
-    drupal_set_message(format_plural($about_doc_count,
-      'There is a publication about biodiversity of %country',
-      'There are @count publications about biodiversity of %country',
-      array('%country' => $country)
-    ));
-    
     if ($about_doc == TRUE) {
-      drupal_set_message(t('About documents saved.'));
+      drupal_set_message(format_plural($about_doc_count,
+        'There is a publication about biodiversity of @country, results saved.',
+        'There are @count publications about biodiversity of @country, results saved.',
+        array('@country' => $country)
+      ));
+    
       $analysed_result['about']['file'] = 'about_doc.json';      
     }
   } else {
-    drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of %country.', array('%country' => $country)));    
+    drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of @country.', array('@country' => $country)));    
   }
   
   variable_set('npt_nodestats_publication', $analysed_result);

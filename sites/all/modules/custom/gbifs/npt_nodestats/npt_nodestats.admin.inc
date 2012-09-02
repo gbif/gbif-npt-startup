@@ -79,17 +79,7 @@ function npt_nodestats_update_submit($form, &$form_state) {
     $tasks_to_run = array_intersect_key($tasks, $to_update);
     
     foreach ($tasks_to_run as $task) {
-      switch ($task) {
-        case 'npt_nodestats_stats_retrieve':
-          npt_nodestats_stats_retrieve();
-          break;
-        case 'geojson_retrieve':
-          geojson_retrieve();
-          break;
-        case 'publication_retrieve':
-          publication_retrieve();
-          break;
-      }
+      $task();
     }
     
     //drupal_set_message(t('Statistics of @chosen updated.', array('@chosen' => $to_update_text)));  

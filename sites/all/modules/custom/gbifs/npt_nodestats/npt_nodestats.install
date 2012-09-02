@@ -26,8 +26,6 @@ function npt_nodestats_enable() {
   
   variable_set('mendeley_tags', $mendeley_tags);
   
-  // Retrieve all stats
-  npt_nodestats_cron();
 }
 
 /**
