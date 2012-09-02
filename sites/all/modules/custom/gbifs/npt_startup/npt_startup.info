@@ -101,6 +101,4 @@ dependencies[] = scratchpads_search_block
 dependencies[] = npt_setup
 dependencies[] = npt_blocks
 dependencies[] = npt_role_and_permissions
-dependencies[] = npt_feeds
 dependencies[] = npt_news
-dependencies[] = npt_nodestats

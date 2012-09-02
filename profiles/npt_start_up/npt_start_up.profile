@@ -76,6 +76,8 @@ function node_definition_form_submit($form, &$form_state) {
     
     // Setting site slogan
     if (isset($values['site_slogan'])) variable_set('site_slogan', $values['site_slogan']);
+    
+    module_enable(array('npt_nodestats', 'npt_feeds'), TRUE);
 }
 
 /**
