@@ -377,12 +377,17 @@ function gm3_menu(){
  * streetViewControl: false
  */
 function gm3_settings(){
+  // If centre coordinates are stored in a variable called 'centre_crd', then use it as default.
+  // Otherwise centred on Europe.
+  
+  $centre_crd = variable_get('centre_crd');
+  
   return variable_get('gm3_default_settings', array(
     'width' => '100%',
     'height' => '500px',
     'center' => array(
-      'latitude' => 52,
-      'longitude' => 0
+      'latitude' => (isset($centre_crd['lat']) == TRUE) ? $centre_crd['lat'] : 52,
+      'longitude' => (isset($centre_crd['lng']) == TRUE) ? $centre_crd['lng'] : 0
     ),
     //'backgroundColor' => 'white',
     'disableDefaultUI' => FALSE,

@@ -67,13 +67,31 @@ function node_definition_form_submit($form, &$form_state) {
     $values = $form_state['values'];
     $country = explode('-', $values['node_country']);
     $country[1] = ($country[1] == 'Chinese Taipei') ? 'Taiwan' : $country[1];
+    $iso_a2 = $country[0];
+
     $shortname = $values['node_shortname'];
     
     // Assigning this site to a GBIF Participant
     variable_set('gbif_participant_node', $values['node_country']);
     // Registering short name
     variable_set('gbif_participant_shortname', $values['node_shortname']);
+
+    // Setting centre coordinates
+    $url = 'http://www.geognos.com/api/en/countries/info/' . $iso_a2 . '.json';
+
+    $geoJSON = json_decode(file_get_contents($url));
+
+    $lat = $geoJSON->Results->GeoPt[0];
+    $lng = $geoJSON->Results->GeoPt[1];
+
+    $centre_crd = array(
+        'lat' => (isset($lat)) ? $lat : 0,
+        'lng' => (isset($lng)) ? $lng : 0
+    );
+
+    variable_set('centre_crd', $centre_crd);
     
+
     // Setting site slogan
     if (isset($values['site_slogan'])) variable_set('site_slogan', $values['site_slogan']);
     
