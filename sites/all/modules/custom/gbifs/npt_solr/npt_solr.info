@@ -1,0 +1,5 @@
+name = NPT solr settings
+description = Based on ScratchPads solr settings, provide settings that fit NPT.
+package = GBIF
+core = "7.x"
+dependencies[] = "scratchpads_solr"

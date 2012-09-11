@@ -64,12 +64,12 @@ dependencies[] = tree_widget
 dependencies[] = tui
 
 ; Scratchpads modules
-;dependencies[] = scratchpads_apachesolr_instant
+dependencies[] = scratchpads_apachesolr_instant
 dependencies[] = scratchpads_autotag
 ;dependencies[] = scratchpads_backend
-;dependencies[] = scratchpads_biblio
-;dependencies[] = scratchpads_biblio_autocomplete_tweak
-;dependencies[] = scratchpads_biblio_search
+dependencies[] = scratchpads_biblio
+dependencies[] = scratchpads_biblio_autocomplete_tweak
+dependencies[] = scratchpads_biblio_search
 ;dependencies[] = scratchpads_blocks
 dependencies[] = scratchpads_cleanup
 ;dependencies[] = scratchpads_colour
@@ -88,13 +88,11 @@ dependencies[] = scratchpads_media_gallery
 ;dependencies[] = scratchpads_metadata_service
 ;dependencies[] = scratchpads_mollom
 ;dependencies[] = scratchpads_pages
-;dependencies[] = scratchpads_roles_and_permissions
 dependencies[] = scratchpads_search_block
-;dependencies[] = scratchpads_setup
-;dependencies[] = scratchpads_solr
-;dependencies[] = scratchpads_species
-;dependencies[] = scratchpads_taxonomic_name_field
-;dependencies[] = scratchpads_user
+dependencies[] = scratchpads_solr
+dependencies[] = scratchpads_species
+dependencies[] = scratchpads_taxonomic_name_field
+dependencies[] = scratchpads_user
 ;dependencies[] = scratchpads_width_and_height
 
 ; NPT Startup modules
@@ -102,3 +100,4 @@ dependencies[] = npt_setup
 dependencies[] = npt_blocks
 dependencies[] = npt_role_and_permissions
 dependencies[] = npt_news
+dependencies[] = npt_solr
