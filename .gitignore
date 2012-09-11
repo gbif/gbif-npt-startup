@@ -6,6 +6,7 @@
 .settings
 sites/all/modules/contrib/examples/
 sites/10088.npt.bkolocal/
+sites/10088.spads.bkolocal/
 sites/10088.tools.bkolocal/
 sites/all/themes/gbif2012/
 dummy.php
