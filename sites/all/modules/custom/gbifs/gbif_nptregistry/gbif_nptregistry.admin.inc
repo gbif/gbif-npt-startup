@@ -15,14 +15,14 @@ function gbif_nptregistry_admin_settings() {
   // Get an array of node types with internal names as keys and
   // "friendly names" as values. E.g.,
   // array('page' => 'Basic Page', 'article' => 'Articles')
-$jsonurl = "http://gbrdsdev.gbif.org/registry/node.json";
-$json = file_get_contents($jsonurl,0,null,null);
-$json_output = json_decode($json);
-foreach ($json_output as $node) {
-  $nodes[$node->key] = $node->name;
-}
+  $jsonurl = "http://gbrds.gbif.org/registry/node.json";
+  $json = file_get_contents($jsonurl,0,null,null);
+  $json_output = json_decode($json);
+  foreach ($json_output as $node) {
+    $nodes[$node->key] = $node->name;
+  }
 
-asort($nodes);
+  asort($nodes);
 
 //$nodes = ksort($options);
 /*  $types = node_type_get_types();
