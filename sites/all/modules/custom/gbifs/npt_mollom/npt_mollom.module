@@ -1,0 +1,6 @@
+<?php
+
+/**
+ * The current setup of mollom for NPT is just to provide another set of keys that works.
+ * So the module is basically empty. 
+ */
