@@ -344,7 +344,7 @@ function scratchpads_species_preprocess_views_view(&$vars){
           $view->execute();
           if(!count($view->result)){
             $vars['classes_array'] = array(
-              'grid-8 alpha omega'
+              'grid-16 alpha omega'
             );
           }
         }
