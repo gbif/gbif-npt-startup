@@ -19,6 +19,22 @@
  */
 class ScratchpadsNodeMigration extends DrupalNode6Migration{
 
+  /**
+   * Allow for multiple biological classifications which need to be merged into the taxon name field
+   *
+   * @var array
+   */
+  protected $biologicalClassifications = array();
+
+  public function getBiologicalClassifications(){
+    return $this->biologicalClassifications;
+  }
+
+  /**
+   * Long text fields we'll need to parse files etc.,
+   *
+   * @var array
+   */
   protected $longTextFields = array();
 
   public function getLongTextFields(){
@@ -42,6 +58,7 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
   public function sourceFieldList(){
     $fields = parent::sourceFieldList();
     $fields['file_attachment'] = t('Attached files');
+    $fields['menu'] = t('Menu');
     return $fields;
   }
 
@@ -68,15 +85,30 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
           }else{
             $field_name = 'taxonomy_forums';
           }
-          $sourceMigration = scratchpads_migrate_term_machine_name($vocabulary->name);
+          $sourceMigration = scratchpads_migrate_get_machine_name('Term', $vocabulary->name);
+          // Handle multiple biological classifications
+          if($field_name == 'field_taxonomic_name'){
+            $this->biologicalClassifications[] = $delta;
+            // If we already have a mapped biological classification, add as unmapped source, we'll merge in perpareRow
+            if(count($this->biologicalClassifications) > 1){
+              $this->addUnmigratedSources(array(
+                $delta
+              ));
+              continue;
+            }
+          }
           // Remove any existing mapping
           $this->removeFieldMapping($field_name);
-          $this->addFieldMapping($field_name, $delta)->sourceMigration($sourceMigration);
+          $this->removeFieldMapping($field_name . ':source_type');
+          $this->removeFieldMapping($field_name . ':create_term');
+          $this->addFieldMapping($field_name, $delta);
           $this->addFieldMapping($field_name . ':source_type')->defaultValue('tid');
           $this->addFieldMapping($field_name . ':create_term')->defaultValue(false);
         }else{
           // Do nothing with Image Galleries vocab
-          $this->addFieldMapping(NULL, $delta);
+          $this->addUnmigratedSources(array(
+            $delta
+          ));
         }
       }elseif($delta == 'file_attachment'){
         // Does this node type have a file_field?
@@ -206,15 +238,23 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
     }
     // Get the group ID
     if(!empty($row->group_nid)){
-      $group_id = db_query('SELECT gid FROM {og} WHERE og.etid = :group_nid', array(
-        ':group_nid' => $row->group_nid
-      ))->fetchField();
-      if($group_id){
-        $row->group_nid = $group_id;
-      }else{
-        watchdog('scratchpads_migrate', 'Could not find group id for group node %group_nid', array(
-          '%group_nid' => $row->group_nid
-        ), WATCHDOG_ERROR);
+      // Get the group type
+      $query = Database::getConnection('default', $this->sourceConnection)->select('node', 'n');
+      $query->addField('n', 'type');
+      $query->condition('n.nid', $row->group_nid);
+      $group_type = $query->execute()->fetchField();
+      // Skip publication group types. May need to add other ones here too
+      if($group_type != 'publication'){
+        $group_id = db_query('SELECT gid FROM {og} WHERE og.etid = :group_nid', array(
+          ':group_nid' => $row->group_nid
+        ))->fetchField();
+        if($group_id){
+          $row->group_nid = $group_id;
+        }else{
+          watchdog('scratchpads_migrate', 'Could not find group id for group node %group_nid', array(
+            '%group_nid' => $row->group_nid
+          ), WATCHDOG_ERROR);
+        }
       }
     }
     if(isset($row->og_public)){
@@ -233,7 +273,8 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
     $query = Database::getConnection('default', $this->sourceConnection)->select('url_alias', 'a');
     $query->addField('a', 'dst');
     $query->condition('a.src', 'node/' . $row->nid);
-    $row->path = $query->execute()->fetchField();
+    // We're not using path, as SP1 nodes have multiple aliases
+    $row->url_alias = $query->execute()->fetchCol();
     // Does this node have files attached?
     $query = Database::getConnection('default', $this->sourceConnection)->select('upload', 'u');
     $query->addField('u', 'fid');
@@ -252,35 +293,70 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
         $row->{$longTextField} = $this->parseImages($row->{$longTextField});
       }
     }
+    // Is there a menu item for this node?
+    $query = Database::getConnection('default', $this->sourceConnection)->select('menu_links', 'ml');
+    $query->addField('ml', 'link_title');
+    $query->condition('link_path', 'node/' . $row->nid);
+    $menu_title = $query->execute()->fetchField();
+    // All we want to get is the menu title
+    // We'll add this to the top level main menu and re-organise by hand afterwards
+    if($menu_title){
+      $row->menu = array(
+        'menu_name' => PRIMARY_MENU_NAME,
+        'module' => 'menu',
+        'link_title' => $menu_title,
+        'weight' => 1,
+        'parent' => PRIMARY_MENU_NAME . ':0',
+        'parent_depth_limit' => 0
+      );
+    }
+    // Are there multiple biological classifcations?
+    if(count($this->biologicalClassifications) > 1){
+      $mapped_classification = array_shift($this->biologicalClassifications);
+      if(!isset($row->{$mapped_classification})){
+        $row->{$mapped_classification} = array();
+      }
+      foreach($this->biologicalClassifications as $unmapped_classifcation){
+        if(isset($row->{$unmapped_classifcation})){
+          $row->{$mapped_classification} = array_merge($row->{$mapped_classification}, $row->{$unmapped_classifcation});
+        }
+      }
+    }
   }
 
   protected function parseImages($html){
     if(strpos($html, '<img') !== false){
-      $dom = new DOMDocument();
-      $dom->loadHTML($html);
-      $dom->normalizeDocument();
-      $items = $dom->getElementsByTagName('img');
-      for($i = 0; $i < $items->length; $i++){
-        // Does this img have a parent anchor tag
-        $parent_node = $items->item($i)->parentNode;
-        if($parent_node->tagName == 'a'){
-          $href = $parent_node->getAttribute('href');
-          if(strpos($href, 'files') !== false){
-            if($new_href = $this->saveFile($href)){
-              $new_href .= '?width=600&height=600';
-              $parent_node->removeAttribute('href');
-              $parent_node->setAttribute('href', $new_href);
-              $parent_node->setAttribute('class', 'colorbox-inline');
+      try{
+        $dom = new DOMDocument();
+        $dom->loadHTML($html);
+        $dom->normalizeDocument();
+        $items = $dom->getElementsByTagName('img');
+        for($i = 0; $i < $items->length; $i++){
+          // Does this img have a parent anchor tag
+          $parent_node = $items->item($i)->parentNode;
+          if($parent_node->tagName == 'a'){
+            $href = $parent_node->getAttribute('href');
+            if(strpos($href, 'files') !== false){
+              if($new_href = $this->saveFile($href)){
+                $new_href .= '?width=600&height=600';
+                $parent_node->removeAttribute('href');
+                $parent_node->setAttribute('href', $new_href);
+                $parent_node->setAttribute('class', 'colorbox-inline');
+              }
             }
           }
+          $src = $items->item($i)->getAttribute('src');
+          if($new_href = $this->saveFile($src)){
+            $items->item($i)->removeAttribute('src');
+            $items->item($i)->setAttribute('src', $new_href);
+          }
         }
-        $src = $items->item($i)->getAttribute('src');
-        if($new_href = $this->saveFile($src)){
-          $items->item($i)->removeAttribute('src');
-          $items->item($i)->setAttribute('src', $new_href);
-        }
+        $dom->encoding = 'UTF-8';
+        $html = $dom->saveHTML();
       }
-      $html = $dom->saveHTML();
+      catch(Exception $e){
+        watchdog('scratchpads_migrate', t('Malformed HTML'), WATCHDOG_ERROR);
+      }
     }
     return $html;
   }
@@ -339,7 +415,7 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
       '%source_id' => $nid
     ));
     $node->type = $this->destination->getBundle();
-    $node->uid = 1;
+    $node->uid = 0;
     $node->status = 0;
     $node->nid = $nid;
     $node->vid = $nid;

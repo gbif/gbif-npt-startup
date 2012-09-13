@@ -1,6 +1,82 @@
 <?php
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function media_multiselect_form_file_entity_add_upload_multiple_alter(&$form, &$form_state, $form_id){
+  // Add an additional submit function if we're being called from a popup. This
+  // will prevent the redirect from being set to file/[fid]/edit and correctly
+  // show the library tab.
+  $form['#submit'][] = 'media_multiselect_temporary_submit_function';
+}
+
+/**
+ * Callback to ensure that the redirect for the media upload form is correctly
+ * set, and not being fucked up by the media module.
+ * Note, this is NOT dynamic, and is actually pretty shit.
+ */
+function media_multiselect_temporary_submit_function($form, &$form_state){
+  if($_GET['render'] == 'media-popup'){
+    $query = _scratchpads_tweaks_get_media_browser_query();
+    $query['enabledPlugins'] = array(
+      'media_default--media_browser_1' => 'media_default--media_browser_1'
+    );
+    $form_state['redirect'] = array(
+      'media/browser',
+      array(
+        'query' => $query
+      )
+    );
+  }else{
+    $form_state['redirect'] = 'admin/content';
+  }
+}
+
+/**
+ * Simple function to return the options for the media browser page.
+ */
+function _scratchpads_tweaks_get_media_browser_query(){
+  return array(
+    'render' => isset($_GET['render']) ? $_GET['render'] : '',
+    'types' => '',
+    'activePlugins' => '',
+    'enabledPlugins' => '',
+    'schemes' => array(
+      'public' => 'public'
+    ),
+    'file_directory' => '',
+    'file_extensions' => variable_get('upload_extensions_default', 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp'),
+    'max_filesize' => file_upload_max_size(),
+    'uri_scheme' => 'public',
+    'multiselect' => 'true',
+    'plugins' => 'undefined'
+  );
+}
+
+/**
+ * Implements hook_watchdog().
+ * 
+ * This function simply adds an additional entry to the dblog (if dblog is
+ * enabled) that displays the full trace of a PHP error.
+ */
+function scratchpads_tweaks_watchdog(array $log_entry){
+  if($log_entry['type'] == 'php' && module_exists('dblog') && variable_get('scratchpads_tweaks_extra_debug', FALSE)){
+    Database::getConnection('default', 'default')->insert('watchdog')->fields(array(
+      'uid' => $log_entry['uid'],
+      'type' => substr($log_entry['type'], 0, 64),
+      'message' => $log_entry['message'] . '<br/>' . module_exists('devel') ? kpr(debug_backtrace(), TRUE) : print_r(debug_backtrace(), TRUE),
+      'variables' => serialize($log_entry['variables']),
+      'severity' => $log_entry['severity'],
+      'link' => substr($log_entry['link'], 0, 255),
+      'location' => $log_entry['request_uri'],
+      'referer' => $log_entry['referer'],
+      'hostname' => substr($log_entry['ip'], 0, 128),
+      'timestamp' => $log_entry['timestamp']
+    ))->execute();
+  }
+}
+
+/**
  * Implements hook_date_formats()
  */
 function scratchpads_tweaks_date_formats(){
@@ -22,6 +98,67 @@ function scratchpads_tweaks_date_formats(){
  * This function ensures that all required modules are enabled.
  */
 function scratchpads_tweaks_cron(){
+  // Don't report if we're a "dev" or D6 upgrade site.
+  if(substr($_SERVER['HTTP_HOST'], 0, 3) != 's2.' && substr($_SERVER['HTTP_HOST'], 0, 4) != 'dev.' && strpos($_SERVER['HTTP_HOST'], 'training') === FALSE && strpos($_SERVER['HTTP_HOST'], 'taxon.name') === FALSE){
+    // Once a day we'll report that we exist to a central repository which can
+    // then build a list of all Scratchpads.
+    if(variable_get('scratchpad_last_reported', 0) < time() - 86400){ // Seconds in a day
+      // Send the update to our central server
+      $central_servers = variable_get('scratchpad_central_servers', array(
+        'http://dev.scratchpads.eu/'
+      ));
+      $result = db_query('SELECT COUNT(*) AS count, type FROM node GROUP BY type');
+      foreach($result as $row){
+        $nodes[$row->type] = $row->count;
+      }
+      $users = db_query("SELECT COUNT(uid) AS users FROM users WHERE status = 1 AND uid > 1")->fetchField(); //Total users
+      $users_login = db_query("SELECT COUNT(uid) AS users FROM users WHERE login != 0")->fetchField(); //Total users logged in
+      $users_week = db_query("SELECT COUNT(uid) AS users FROM users WHERE login > UNIX_TIMESTAMP()-604800")->fetchField(); //Week users
+      $users_month = db_query("SELECT COUNT(uid) AS users FROM users WHERE login > UNIX_TIMESTAMP()-2592000")->fetchField(); //Month users
+      $results = db_query("SELECT mail FROM {users} u, {users_roles} ur WHERE u.uid = ur.uid AND rid = 5");
+      foreach($results as $row){
+        $mails[] = $row->mail;
+      }
+      $report_data = array(
+        'site_url' => $_SERVER['HTTP_HOST'],
+        'site_title' => variable_get('site_name', 'Scratchpad'),
+        'site_mission' => variable_get('front_page_welcome_message', ''),
+        'nodes' => $nodes,
+        'users' => array(
+          'login' => $users_login,
+          'total' => $users,
+          'week' => $users_week,
+          'month' => $users_month
+        ),
+        'views' => 0,
+        'maintainer_emails' => $mails,
+        'last_login_time' => db_query('SELECT access FROM {users} WHERE uid > 1 ORDER BY access DESC LIMIT 1;')->fetchField(),
+        'last_node_changed_time' => db_query('SELECT created FROM {node} ORDER BY created DESC LIMIT 1')->fetchField(),
+        'profile' => variable_get('install_profile', 'scratchpad_profile')
+      );
+      foreach($central_servers as $central_server){
+        file_get_contents($central_server . 'report_scratchpad/?data=' . urlencode(serialize($report_data))); // Could run into GET limits here. Ho hum!
+      }
+      variable_set('scratchpad_last_reported', time());
+    }
+    if(variable_get('scratchpad_last_updated', 0) < time() - 86400 && !in_array("http://" . $_SERVER['HTTP_HOST'] . "/", variable_get('scratchpad_central_servers', array(
+      'http://dev.scratchpads.eu/'
+    )))){ // 86400 = seconds in a day
+      // Also update the sites list for this site
+      $central_servers = variable_get('scratchpad_central_servers', array(
+        'http://dev.scratchpads.eu/'
+      ));
+      $sites = array();
+      foreach($central_servers as $central_server){
+        $content = file_get_contents($central_server . 'scratchpads/serial');
+        if($content){
+          $sites = array_merge($sites, unserialize($content));
+        }
+      }
+      variable_set('scratchpad_sites_list', $sites);
+      variable_set('scratchpad_last_updated', time());
+    }
+  }
   // Note, we need to parse the scratchpads_tweaks info file ourselves as it
   // has its dependencies removed to allow required modules to be removed.
   $tweaks_info = drupal_parse_info_file(drupal_get_path('module', 'scratchpads_tweaks') . '/scratchpads_tweaks.info');
@@ -88,6 +225,13 @@ function scratchpads_tweaks_shutdown($reset = FALSE){
 function scratchpads_tweaks_node_type_insert($info){
   // Set the default for all comment forms to be on separate pages.
   variable_get('comment_form_location_' . $info->type, COMMENT_FORM_SEPARATE_PAGE);
+}
+
+/**
+ * Implements hook_preprocess_HOOK
+ */
+function scratchpads_tweaks_preprocess_comment(&$variables){
+  $variables['classes_array'][] = $variables['zebra'];
 }
 
 /**

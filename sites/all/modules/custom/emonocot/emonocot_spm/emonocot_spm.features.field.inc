@@ -57,8 +57,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 55
+          'type' => 'biblio_ref',
+          'weight' => 33
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -89,7 +89,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '29'
+        'weight' => '33'
       )
     )
   );
@@ -130,7 +130,7 @@ function emonocot_spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => 81
+          'weight' => 80
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -150,7 +150,7 @@ function emonocot_spm_field_default_fields(){
       'label' => 'Anatomy',
       'required' => 0,
       'settings' => array(
-        'text_processing' => '0',
+        'text_processing' => '1',
         'user_register_form' => FALSE
       ),
       'widget' => array(
@@ -160,7 +160,7 @@ function emonocot_spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '88'
+        'weight' => '80'
       )
     )
   );
@@ -212,8 +212,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 82
+          'type' => 'biblio_ref',
+          'weight' => 81
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -244,7 +244,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '89'
+        'weight' => '81'
       )
     )
   );
@@ -296,8 +296,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 60
+          'type' => 'biblio_ref',
+          'weight' => 43
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -328,7 +328,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '26'
+        'weight' => '43'
       )
     )
   );
@@ -380,8 +380,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 47
+          'type' => 'biblio_ref',
+          'weight' => 19
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -412,7 +412,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '13'
+        'weight' => '19'
       )
     )
   );
@@ -464,8 +464,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 40
+          'type' => 'biblio_ref',
+          'weight' => 5
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -548,8 +548,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 41
+          'type' => 'biblio_ref',
+          'weight' => 7
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -593,22 +593,34 @@ function emonocot_spm_field_default_fields(){
       'entity_types' => array(),
       'field_name' => 'field_spm_em_cult_ref',
       'foreign keys' => array(
-        'format' => array(
+        'nid' => array(
           'columns' => array(
-            'format' => 'format'
+            'nid' => 'nid'
           ),
-          'table' => 'filter_format'
+          'table' => 'node'
         )
       ),
       'indexes' => array(
-        'format' => array(
-          0 => 'format'
+        'nid' => array(
+          0 => 'nid'
         )
       ),
-      'module' => 'text',
-      'settings' => array(),
+      'module' => 'node_reference',
+      'settings' => array(
+        'referenceable_types' => array(
+          'biblio' => 'biblio',
+          'media_gallery' => 0,
+          'page' => 0,
+          'spm' => 0
+        ),
+        'view' => array(
+          'args' => array(),
+          'display_name' => 'references_1',
+          'view_name' => 'biblio_citation'
+        )
+      ),
       'translatable' => '0',
-      'type' => 'text_long'
+      'type' => 'node_reference'
     ),
     'field_instance' => array(
       'bundle' => 'spm',
@@ -618,10 +630,10 @@ function emonocot_spm_field_default_fields(){
       'display' => array(
         'default' => array(
           'label' => 'above',
-          'module' => 'text',
+          'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'text_default',
-          'weight' => 76
+          'type' => 'biblio_ref',
+          'weight' => 73
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -641,17 +653,18 @@ function emonocot_spm_field_default_fields(){
       'label' => 'Cultivation Reference',
       'required' => 0,
       'settings' => array(
-        'text_processing' => '0',
         'user_register_form' => FALSE
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => 'node_reference',
         'settings' => array(
-          'rows' => '5'
+          'autocomplete_match' => 'contains',
+          'autocomplete_path' => 'node_reference/autocomplete',
+          'size' => '60'
         ),
-        'type' => 'text_textarea',
-        'weight' => '83'
+        'type' => 'node_reference_autocomplete',
+        'weight' => '73'
       )
     )
   );
@@ -692,7 +705,7 @@ function emonocot_spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => 75
+          'weight' => 72
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -712,7 +725,7 @@ function emonocot_spm_field_default_fields(){
       'label' => 'Cultivation',
       'required' => 0,
       'settings' => array(
-        'text_processing' => '0',
+        'text_processing' => '1',
         'user_register_form' => FALSE
       ),
       'widget' => array(
@@ -722,7 +735,7 @@ function emonocot_spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '82'
+        'weight' => '72'
       )
     )
   );
@@ -774,8 +787,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 61
+          'type' => 'biblio_ref',
+          'weight' => 45
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -806,7 +819,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '28'
+        'weight' => '45'
       )
     )
   );
@@ -858,8 +871,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 48
+          'type' => 'biblio_ref',
+          'weight' => 21
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -890,7 +903,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '15'
+        'weight' => '21'
       )
     )
   );
@@ -942,8 +955,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 49
+          'type' => 'biblio_ref',
+          'weight' => 17
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1026,8 +1039,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 72
+          'type' => 'biblio_ref',
+          'weight' => 67
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1058,7 +1071,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '75'
+        'weight' => '67'
       )
     )
   );
@@ -1110,8 +1123,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 62
+          'type' => 'biblio_ref',
+          'weight' => 23
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1142,7 +1155,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '30'
+        'weight' => '23'
       )
     )
   );
@@ -1194,8 +1207,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 63
+          'type' => 'biblio_ref',
+          'weight' => 49
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1226,7 +1239,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '32'
+        'weight' => '49'
       )
     )
   );
@@ -1278,8 +1291,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 64
+          'type' => 'biblio_ref',
+          'weight' => 51
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1310,7 +1323,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '34'
+        'weight' => '51'
       )
     )
   );
@@ -1362,8 +1375,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 59
+          'type' => 'biblio_ref',
+          'weight' => 39
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1394,7 +1407,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '38'
+        'weight' => '39'
       )
     )
   );
@@ -1446,8 +1459,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 39
+          'type' => 'biblio_ref',
+          'weight' => 3
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1530,8 +1543,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 50
+          'type' => 'biblio_ref',
+          'weight' => 23
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1562,7 +1575,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '19'
+        'weight' => '23'
       )
     )
   );
@@ -1614,8 +1627,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 51
+          'type' => 'biblio_ref',
+          'weight' => 25
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1646,7 +1659,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '21'
+        'weight' => '25'
       )
     )
   );
@@ -1698,8 +1711,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 65
+          'type' => 'biblio_ref',
+          'weight' => 53
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1730,7 +1743,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '36'
+        'weight' => '53'
       )
     )
   );
@@ -1782,8 +1795,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 52
+          'type' => 'biblio_ref',
+          'weight' => 27
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1814,7 +1827,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '23'
+        'weight' => '27'
       )
     )
   );
@@ -1866,8 +1879,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 66
+          'type' => 'biblio_ref',
+          'weight' => 55
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1898,7 +1911,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '38'
+        'weight' => '55'
       )
     )
   );
@@ -1950,8 +1963,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 67
+          'type' => 'biblio_ref',
+          'weight' => 57
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1982,7 +1995,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '40'
+        'weight' => '57'
       )
     )
   );
@@ -2034,8 +2047,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 42
+          'type' => 'biblio_ref',
+          'weight' => 9
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2066,7 +2079,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '9'
+        'weight' => 9
       )
     )
   );
@@ -2118,8 +2131,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 43
+          'type' => 'biblio_ref',
+          'weight' => 11
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2150,7 +2163,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '11'
+        'weight' => 11
       )
     )
   );
@@ -2202,8 +2215,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 53
+          'type' => 'biblio_ref',
+          'weight' => 29
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2234,7 +2247,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '25'
+        'weight' => '29'
       )
     )
   );
@@ -2286,8 +2299,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 68
+          'type' => 'biblio_ref',
+          'weight' => 59
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2318,7 +2331,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '42'
+        'weight' => '59'
       )
     )
   );
@@ -2370,8 +2383,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 54
+          'type' => 'biblio_ref',
+          'weight' => 31
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2402,7 +2415,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '27'
+        'weight' => '31'
       )
     )
   );
@@ -2454,8 +2467,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 78
+          'type' => 'biblio_ref',
+          'weight' => 75
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2486,7 +2499,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '85'
+        'weight' => '75'
       )
     )
   );
@@ -2527,7 +2540,7 @@ function emonocot_spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => 77
+          'weight' => 74
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2547,7 +2560,7 @@ function emonocot_spm_field_default_fields(){
       'label' => 'Phenology',
       'required' => 0,
       'settings' => array(
-        'text_processing' => '0',
+        'text_processing' => '1',
         'user_register_form' => FALSE
       ),
       'widget' => array(
@@ -2557,7 +2570,7 @@ function emonocot_spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '84'
+        'weight' => '74'
       )
     )
   );
@@ -2609,8 +2622,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 58
+          'type' => 'biblio_ref',
+          'weight' => 41
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2641,7 +2654,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '40'
+        'weight' => '41'
       )
     )
   );
@@ -2693,8 +2706,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 80
+          'type' => 'biblio_ref',
+          'weight' => 79
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2725,7 +2738,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '87'
+        'weight' => '79'
       )
     )
   );
@@ -2766,7 +2779,7 @@ function emonocot_spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => 79
+          'weight' => 78
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2786,7 +2799,7 @@ function emonocot_spm_field_default_fields(){
       'label' => 'Pollination',
       'required' => 0,
       'settings' => array(
-        'text_processing' => '0',
+        'text_processing' => '1',
         'user_register_form' => FALSE
       ),
       'widget' => array(
@@ -2796,7 +2809,7 @@ function emonocot_spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '86'
+        'weight' => '78'
       )
     )
   );
@@ -2848,8 +2861,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 70
+          'type' => 'biblio_ref',
+          'weight' => 63
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2880,7 +2893,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '46'
+        'weight' => '63'
       )
     )
   );
@@ -2932,8 +2945,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 44
+          'type' => 'biblio_ref',
+          'weight' => 13
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3016,8 +3029,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 71
+          'type' => 'biblio_ref',
+          'weight' => 65
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3048,7 +3061,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '48'
+        'weight' => '65'
       )
     )
   );
@@ -3100,8 +3113,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 73
+          'type' => 'biblio_ref',
+          'weight' => 69
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3132,7 +3145,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '77'
+        'weight' => '69'
       )
     )
   );
@@ -3184,8 +3197,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 56
+          'type' => 'biblio_ref',
+          'weight' => 35
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3216,7 +3229,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '31'
+        'weight' => '35'
       )
     )
   );
@@ -3257,7 +3270,7 @@ function emonocot_spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => 37
+          'weight' => 82
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3277,7 +3290,7 @@ function emonocot_spm_field_default_fields(){
       'label' => 'Taxonomic Notes',
       'required' => 0,
       'settings' => array(
-        'text_processing' => '0',
+        'text_processing' => '1',
         'user_register_form' => FALSE
       ),
       'widget' => array(
@@ -3287,7 +3300,7 @@ function emonocot_spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '42'
+        'weight' => '82'
       )
     )
   );
@@ -3339,8 +3352,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 57
+          'type' => 'biblio_ref',
+          'weight' => 37
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3371,7 +3384,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '33'
+        'weight' => '37'
       )
     )
   );
@@ -3423,8 +3436,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 45
+          'type' => 'biblio_ref',
+          'weight' => 15
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3507,8 +3520,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 38
+          'type' => 'biblio_ref',
+          'weight' => 83
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3539,7 +3552,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '43'
+        'weight' => '83'
       )
     )
   );
@@ -3591,8 +3604,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 46
+          'type' => 'biblio_ref',
+          'weight' => 17
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3675,8 +3688,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 69
+          'type' => 'biblio_ref',
+          'weight' => 61
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3707,7 +3720,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '44'
+        'weight' => '61'
       )
     )
   );
@@ -3759,8 +3772,8 @@ function emonocot_spm_field_default_fields(){
           'label' => 'above',
           'module' => 'node_reference',
           'settings' => array(),
-          'type' => 'node_reference_default',
-          'weight' => 74
+          'type' => 'biblio_ref',
+          'weight' => 71
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -3791,7 +3804,7 @@ function emonocot_spm_field_default_fields(){
           'size' => '60'
         ),
         'type' => 'node_reference_autocomplete',
-        'weight' => '79'
+        'weight' => '71'
       )
     )
   );

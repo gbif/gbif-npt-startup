@@ -20,10 +20,17 @@ function spm_field_default_fields(){
       'display' => array(
         'default' => array(
           'label' => 'above',
-          'module' => 'taxonomy',
-          'settings' => array(),
-          'type' => 'taxonomy_term_reference_link',
-          'weight' => '2'
+          'module' => 'taxonomy_formatter',
+          'settings' => array(
+            'element_class' => '',
+            'element_option' => '- None -',
+            'links_option' => 1,
+            'separator_option' => ', ',
+            'wrapper_class' => '',
+            'wrapper_option' => '- None -'
+          ),
+          'type' => 'taxonomy_term_reference_csv',
+          'weight' => '1'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -176,9 +183,11 @@ function spm_field_default_fields(){
       'display' => array(
         'default' => array(
           'label' => 'above',
-          'module' => 'styles',
-          'settings' => array(),
-          'type' => 'styles_file_scratchpads_media_gallery_thumbnail',
+          'module' => 'file_entity',
+          'settings' => array(
+            'file_view_mode' => 'file_styles_square_thumbnail'
+          ),
+          'type' => 'file_rendered',
           'weight' => '100'
         ),
         'linked_node' => array(
@@ -207,9 +216,10 @@ function spm_field_default_fields(){
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'media',
+        'module' => 'media_multiselect',
         'settings' => array(
           'allowed_schemes' => array(
+            'module' => 0,
             'public' => 'public'
           ),
           'allowed_types' => array(
@@ -219,13 +229,13 @@ function spm_field_default_fields(){
             'video' => 'video'
           ),
           'browser_plugins' => array(
-            'library' => 0,
             'media_default--media_browser_1' => 0,
+            'media_default--media_browser_my_files' => 0,
             'upload' => 0
           ),
           'progress_indicator' => 'throbber'
         ),
-        'type' => 'media_generic',
+        'type' => 'media_multiselect',
         'weight' => '100'
       )
     )
@@ -267,7 +277,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '20'
+          'weight' => '42'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -297,7 +307,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '25'
+        'weight' => '42'
       )
     )
   );
@@ -338,7 +348,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '9'
+          'weight' => '18'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -368,7 +378,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '12'
+        'weight' => '18'
       )
     )
   );
@@ -409,7 +419,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '2'
+          'weight' => '4'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -439,7 +449,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '3'
+        'weight' => '4'
       )
     )
   );
@@ -480,7 +490,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '3'
+          'weight' => '6'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -551,7 +561,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '21'
+          'weight' => '44'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -581,7 +591,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '26'
+        'weight' => '44'
       )
     )
   );
@@ -622,7 +632,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '10'
+          'weight' => '20'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -652,7 +662,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '13'
+        'weight' => '20'
       )
     )
   );
@@ -764,7 +774,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '34'
+          'weight' => '66'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -794,7 +804,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '39'
+        'weight' => '66'
       )
     )
   );
@@ -906,7 +916,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '23'
+          'weight' => '48'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -936,7 +946,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '28'
+        'weight' => '48'
       )
     )
   );
@@ -977,7 +987,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '24'
+          'weight' => '50'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1007,7 +1017,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '29'
+        'weight' => '50'
       )
     )
   );
@@ -1048,7 +1058,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '32'
+          'weight' => '38'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1078,7 +1088,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '37'
+        'weight' => '38'
       )
     )
   );
@@ -1119,7 +1129,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '1'
+          'weight' => '2'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1190,7 +1200,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '12'
+          'weight' => '22'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1220,7 +1230,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '15'
+        'weight' => '22'
       )
     )
   );
@@ -1261,7 +1271,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '13'
+          'weight' => '24'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1291,7 +1301,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '16'
+        'weight' => '24'
       )
     )
   );
@@ -1332,7 +1342,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '25'
+          'weight' => '52'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1362,7 +1372,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '30'
+        'weight' => '52'
       )
     )
   );
@@ -1403,7 +1413,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '4'
+          'weight' => '8'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1433,7 +1443,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '7'
+        'weight' => '8'
       )
     )
   );
@@ -1474,7 +1484,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '26'
+          'weight' => '54'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1504,7 +1514,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '31'
+        'weight' => '54'
       )
     )
   );
@@ -1545,7 +1555,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '27'
+          'weight' => '56'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1575,7 +1585,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '32'
+        'weight' => '56'
       )
     )
   );
@@ -1616,7 +1626,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '14'
+          'weight' => '26'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1646,7 +1656,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '17'
+        'weight' => '26'
       )
     )
   );
@@ -1687,7 +1697,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '5'
+          'weight' => '10'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1717,7 +1727,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '8'
+        'weight' => '10'
       )
     )
   );
@@ -1758,7 +1768,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '28'
+          'weight' => '58'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1788,7 +1798,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '33'
+        'weight' => '58'
       )
     )
   );
@@ -1829,7 +1839,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '15'
+          'weight' => '28'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1859,7 +1869,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '18'
+        'weight' => '28'
       )
     )
   );
@@ -1900,7 +1910,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '16'
+          'weight' => '30'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -1930,7 +1940,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '19'
+        'weight' => '30'
       )
     )
   );
@@ -1971,7 +1981,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '33'
+          'weight' => '40'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2001,7 +2011,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '38'
+        'weight' => '40'
       )
     )
   );
@@ -2042,7 +2052,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '17'
+          'weight' => '32'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2072,7 +2082,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '20'
+        'weight' => '32'
       )
     )
   );
@@ -2113,7 +2123,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '30'
+          'weight' => '62'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2143,7 +2153,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '35'
+        'weight' => '62'
       )
     )
   );
@@ -2184,7 +2194,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '6'
+          'weight' => '12'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2214,7 +2224,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '9'
+        'weight' => '12'
       )
     )
   );
@@ -2255,7 +2265,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '31'
+          'weight' => '64'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2285,7 +2295,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '36'
+        'weight' => '64'
       )
     )
   );
@@ -2326,7 +2336,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '35'
+          'weight' => '68'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2356,7 +2366,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '40'
+        'weight' => '68'
       )
     )
   );
@@ -2397,7 +2407,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '18'
+          'weight' => '34'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2427,7 +2437,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '21'
+        'weight' => '34'
       )
     )
   );
@@ -2468,7 +2478,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '19'
+          'weight' => '36'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2498,7 +2508,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '22'
+        'weight' => '36'
       )
     )
   );
@@ -2539,7 +2549,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '7'
+          'weight' => '14'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2569,7 +2579,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '10'
+        'weight' => '14'
       )
     )
   );
@@ -2610,7 +2620,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '8'
+          'weight' => '16'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2640,7 +2650,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '11'
+        'weight' => '16'
       )
     )
   );
@@ -2681,7 +2691,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '29'
+          'weight' => '60'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2711,7 +2721,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '34'
+        'weight' => '60'
       )
     )
   );
@@ -2752,7 +2762,7 @@ function spm_field_default_fields(){
           'module' => 'text',
           'settings' => array(),
           'type' => 'text_default',
-          'weight' => '36'
+          'weight' => '70'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -2782,7 +2792,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '41'
+        'weight' => '70'
       )
     )
   );

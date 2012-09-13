@@ -20,7 +20,7 @@ class DrupalVocabularyMigration extends DrupalMigration{
       'hierarchy',
       'weight'
     ));
-    $this->addFieldMapping(NULL, 'classification_type');
+    $this->addFieldMapping('biological_classification', 'classification_type');
     $this->addFieldMapping(NULL, 'module');
   }
 
@@ -41,6 +41,7 @@ class DrupalVocabularyMigration extends DrupalMigration{
     ), 'IN');
     // We're not migrating image galleries vocabulary
     $query->condition('name', 'Image Galleries', '!=');
+    $query->condition('name', '', '!=');
     $query->leftJoin('scratchpads_migrate_biological_classification', 'mbc', 'v.vid = mbc.vid');
     $query->addField('mbc', 'type', 'classification_type');
     return $query;
@@ -64,5 +65,9 @@ class DrupalVocabularyMigration extends DrupalMigration{
       db_update('taxonomy_vocabulary')->expression('vid', 'vid + 10000000')->condition('vid', $vids, 'NOT IN')->execute();
       db_update('taxonomy_term_data')->expression('vid', 'vid + 10000000')->condition('vid', $vids, 'NOT IN')->execute();
     }
+  }
+
+  protected function postImport(){
+    drupal_flush_all_caches();
   }
 }

@@ -276,6 +276,10 @@ function scratchpads_biblio_tabular($variables){
  * Implements hook_preprocess_page().
  */
 function scratchpads_preprocess_page(&$vars){
+  // Resize the logo so it uses the thumbnail image style
+  if(variable_get('resize_logo', 1) && $vars['logo']){
+    $vars['logo'] = image_style_url('thumbnail', basename($vars['logo']));
+  }
   if(isset($vars['tabs']) && empty($vars['tabs']['#primary'])){
     $vars['tabs'] = array();
   }
@@ -305,6 +309,7 @@ function scratchpads_preprocess_zone(&$vars){
  * Implements hook_preprocess_html().
  */
 function scratchpads_preprocess_html(&$vars){
+  global $base_url;
   $path = drupal_get_path('theme', 'scratchpads');
   $vars['beta'] = theme('image', array(
     'path' => $path . '/images/beta.png',
@@ -314,6 +319,8 @@ function scratchpads_preprocess_html(&$vars){
     'width' => 77,
     'height' => 77
   ));
+  // Add a class for a specific domain to allow for some site only CSS (eg, Vlads logo)
+  $vars['attributes_array']['class'][] = 'site-' . parse_url($base_url, PHP_URL_HOST);
 }
 
 function scratchpads_user_login_block($variables){
