@@ -1,6 +1,10 @@
 /* This file will hold styles for the mobile version of your website (mobile first). */
 /* This also can include ANY global CSS that applies site-wide. Unless overwritten by a more specific style rule, CSS declarations in global.css will apply site-wide. */
 
+div.error {
+  display: normal;
+}
+
 html {
   height: 100%;
 }
@@ -533,6 +537,9 @@ section #block-gbif-spdsht-available-templates {
   background: url("../images/footer_bkg_bw.jpg") repeat-x;
   */
 }
+
+#region-footer-stretch a { text-decoration: none;}
+#region-footer-stretch p { margin-bottom: 0;}
 
 #zone-footer ul li {
   color: #333;
