@@ -537,8 +537,8 @@ section #block-gbif-spdsht-available-templates {
   padding:10px;
   border-radius: 5px;
   border: 1px solid #eee;
-  float: right;
   margin-top: 60px;
+  margin-left: 30px;
 }
 
 .front-page-sidebar div#block-npt-blocks-howto-publish {
@@ -547,6 +547,10 @@ section #block-gbif-spdsht-available-templates {
 
 #block-npt-blocks-howto-publish div.item-list ul { margin: 0; list-style: square; }
 #block-npt-blocks-howto-publish div.item-list ul li { margin: 0; }
+
+#block-views-eol-images-front-block {
+  
+}
 
 #block-views-eol-images-front-block div.views-row {
   display: inline-block;
