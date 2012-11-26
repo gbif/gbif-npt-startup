@@ -19,12 +19,14 @@ files[] = vocabulary.inc
 
 
 ; Source classes
+files[] = sources/block.inc
 files[] = sources/citation.inc
 files[] = sources/comment.inc
 files[] = sources/content_type.inc
 files[] = sources/field.inc
 files[] = sources/field_body.inc
 files[] = sources/field_content_profile.inc
+files[] = sources/field_content_profile_body.inc
 files[] = sources/field_profile.inc
 files[] = sources/field_group.inc
 files[] = sources/field_image.inc
@@ -32,10 +34,12 @@ files[] = sources/field_image_taxonomy.inc
 files[] = sources/field_taxonomy.inc
 files[] = sources/field_vocabulary.inc
 files[] = sources/field_vocabulary_itis.inc
+files[] = sources/field_file_attachment.inc
 files[] = sources/file.inc
 files[] = sources/image.inc
 files[] = sources/image_gallery.inc
 files[] = sources/forum.inc
+files[] = sources/language.inc
 files[] = sources/node.inc
 files[] = sources/node_blog.inc
 files[] = sources/node_countriesmap.inc
@@ -44,13 +48,16 @@ files[] = sources/node_darwincorelocation.inc
 files[] = sources/node_spm.inc
 files[] = sources/node_biblio.inc
 files[] = sources/og.inc
+files[] = sources/profile.inc
 files[] = sources/path_redirect.inc
 files[] = sources/term.inc
 files[] = sources/user.inc
+files[] = sources/user_picture.inc
 files[] = sources/variable.inc
 files[] = sources/vocabulary.inc
 
 ; Destination classes
+files[] = destinations/block.inc
 files[] = destinations/citation.inc
 files[] = destinations/date.migrate.inc
 files[] = destinations/content_type.inc
@@ -67,5 +74,6 @@ files[] = destinations/node_biblio.inc
 files[] = destinations/path_redirect.inc
 files[] = destinations/term.inc
 files[] = destinations/user.inc
+files[] = destinations/profile.inc
 files[] = destinations/variable.inc
 files[] = destinations/vocabulary.inc

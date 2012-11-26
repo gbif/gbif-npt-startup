@@ -65,6 +65,9 @@ function feeds_xls_download_populated_template($feeds_importer, $bid = FALSE){
  * Populate the XLS file with data.
  */
 function feeds_xls_populate_template_with_data($feeds_importer, &$context){
+  // Increase the memory limit
+  ini_set('memory_limit', '1024M');
+  ini_set('max_execution_time', 240);
   if(!isset($context['sandbox']['progress'])){
     // Calculate the total number of rows to add to this file.
     // Use the processor class to guess what entity type we're importing (this
@@ -78,27 +81,31 @@ function feeds_xls_populate_template_with_data($feeds_importer, &$context){
     $context['sandbox']['row'] = 0;
     switch($entity_guess){
       case 'node':
-        $bundle = $feeds_importer->processor->config['content_type'];
-        $bundle_key = 'type';
-        $table = 'node';
+        $results = db_select('node', 'e')->fields('e', array(
+          'nid'
+        ))->condition('type', $feeds_importer->processor->config['content_type'])->execute();
         $entity_key = 'nid';
         $context['sandbox']['entity'] = 'node';
         break;
       case 'term':
         // The bundle for a term is actually the vid.
         $vocabulary = taxonomy_vocabulary_machine_name_load($feeds_importer->processor->config['vocabulary']);
-        $bundle = $vocabulary->vid;
+        $results = db_select('taxonomy_term_data', 'e')->fields('e', array(
+          'tid'
+        ))->condition('vid', $vocabulary->vid)->execute();
         $entity_key = 'tid';
-        $bundle_key = 'vid';
         $entity_guess = 'taxonomy_term';
-        $table = 'taxonomy_term_data';
         $context['sandbox']['entity'] = 'taxonomy_term';
+        break;
+      case 'file':
+        $results = db_select('file_managed', 'e')->fields('e', array(
+          'fid'
+        ))->condition('type', $feeds_importer->processor->config['bundle'])->condition('uri', 'public://eolapi/%', 'NOT LIKE')->execute();
+        $entity_key = 'fid';
+        $context['sandbox']['entity'] = 'file';
         break;
     }
     $context['sandbox']['progress'] = 0;
-    $results = db_select($table, 'e')->fields('e', array(
-      $entity_key
-    ))->condition($bundle_key, $bundle)->execute();
     foreach($results as $row){
       $context['sandbox']['entity_ids'][] = $row->{$entity_key};
     }
@@ -157,6 +164,8 @@ function feeds_xls_populate_template_with_data($feeds_importer, &$context){
             foreach($entity->{$target[0]}[$language] as $value){
               if($target[1] == 'nid'){
                 $cell_values[] = $value['nid'];
+              }elseif($target[1] == 'uid'){
+                $cell_values[] = $value['uid'];
               }
             }
           }
@@ -196,21 +205,81 @@ function feeds_xls_populate_template_with_data($feeds_importer, &$context){
               if(is_array($entity->{$mapping['target']}) && count($entity->{$mapping['target']})){
                 foreach($entity->{$mapping['target']} as $language => $values){
                   $cell_values = array();
+                  $implosion = '|';
                   foreach($entity->{$mapping['target']}[$language] as $value){
                     foreach($value as $key => $item){
-                      switch($key){
-                        case 'tid':
-                          // Links to a term.  We need to load the term, and get the
-                          // value
-                          $term = taxonomy_term_load($item);
-                          $cell_values[] = $term->name;
-                        default:
-                          $cell_values[] = $item;
-                          break;
+                      // Change to the allowed values array().
+                      $field = field_info_field($mapping['target']);
+                      if($field && @isset($field['settings']['allowed_values'][$item])){
+                        $item = $field['settings']['allowed_values'][$item];
+                      }
+                      if($item){
+                        switch($key){
+                          case 'tid':
+                            // Links to a term.  We need to load the term, and get the
+                            // value
+                            $term = taxonomy_term_load($item);
+                            $cell_values[] = $term->name;
+                            break;
+                          case 'licence':
+                            $licences = creative_commons_get_licence_types();
+                            $cell_values[] = $licences[$item];
+                            break;
+                          default:
+                            $cell_values[] = $item;
+                            break;
+                          // The following cases should not be saved to the file
+                          case 'safe_value':
+                          case 'format':
+                            break;
+                          // Handle gm3 fields together.
+                          case 'latitude':
+                          case 'longitude':
+                          case 'region_id':
+                          case 'polygon':
+                          case 'polyline':
+                          case 'rectangle':
+                          case 'gm3_type':
+                            $field = field_info_field($mapping['target']);
+                            switch($field['type']){
+                              // Polygon data.
+                              case 'gm3_region':
+                              case 'gm3_rectangle':
+                              case 'gm3_polygon':
+                              case 'gm3_polyline':
+                                $implosion = "\n";
+                                $cell_values[] = $item;
+                                break;
+                              case 'gm3_point':
+                                // Only enter the data once!
+                                if($key == 'latitude'){
+                                  $implosion = "\n";
+                                  $cell_values[] = "POINT:({$value['latitude']},{$value['longitude']})";
+                                }
+                                break 2;
+                              case 'gm3_combination':
+                                if($key == 'gm3_type'){
+                                  // Get the field, and work out which one we have.
+                                  $implosion = "\n";
+                                  $type = array_pop(explode("_", $item));
+                                  if($type == 'region'){
+                                    // Fuck me, I am SHIT!
+                                    if(isset($value['region_id']) && $value['region_id']){
+                                      $cell_values[] = 'REGION:' . $value['region_id'];
+                                    }
+                                  }else{
+                                    if(isset($value[$type]) && $value[$type]){
+                                      $cell_values[] = strtoupper($type) . ':' . $value[$type];
+                                    }
+                                  }
+                                }
+                                break 2;
+                            }
+                        }
                       }
                     }
                   }
-                  $objPHPExcel->getActiveSheet()->setCellValue($cell, implode('|', $cell_values));
+                  $objPHPExcel->getActiveSheet()->setCellValue($cell, implode($implosion, $cell_values));
                 }
               }elseif(is_string($entity->{$mapping['target']})){
                 $objPHPExcel->getActiveSheet()->setCellValue($cell, $entity->{$mapping['target']});
@@ -250,6 +319,9 @@ function feeds_xls_redirect_to_populated_file($success, $results, $operations){
  * Callback function to provide the template.
  */
 function feeds_xls_download_template($feeds_importer){
+  // Increase the memory limit
+  ini_set('memory_limit', '1024M');
+  ini_set('max_execution_time', 240);
   if(get_class($feeds_importer->parser) == 'FeedsExcelParser'){
     if(!$feeds_importer->parser->config['no_headers']){
       feeds_xls_download_template_helper($feeds_importer);
@@ -366,6 +438,11 @@ function feeds_xls_download_template_helper($feeds_importer, $output = 'php://ou
           $allowed_values = call_user_func($field['settings']['allowed_values_function'], $field);
         }else if(isset($field['settings']['allowed_values']) && is_array($field['settings']['allowed_values'])){
           $allowed_values = $field['settings']['allowed_values'];
+          // Especially for the creative_commons module
+          // FIXME - there must be a nicer way of doing this.
+          if($field['type'] == 'creative_commons'){
+            $allowed_values = creative_commons_get_licence_types();
+          }
         }else if($field['type'] == 'node_reference'){
           // If the view name is set, we can not do anything.
           if(!$field['settings']['view']['view_name']){

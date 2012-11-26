@@ -24,7 +24,7 @@ class DrupalFieldContentProfileMigration extends DrupalFieldMigration{
     parent::__construct($arguments);
     // Map to user:user entity
     $this->removeFieldMapping('entity_type');
-    $this->addFieldMapping('entity_type')->defaultValue('user');
+    $this->addFieldMapping('entity_type', 'entity_type')->defaultValue('user');
     $this->removeFieldMapping('bundle');
     $this->addFieldMapping('bundle')->defaultValue('user');
   }
@@ -43,5 +43,22 @@ class DrupalFieldContentProfileMigration extends DrupalFieldMigration{
     $query->condition('i.type_name', 'profile');
     $query->condition('f.field_name', array_keys($this->getFieldNameMappings()), 'NOT IN');
     return $query;
+  }
+
+  /**
+   * Implementation of Migration::prepareRow().
+   */
+  public function prepareRow($row){
+    
+    $row->entity_type = 'user';
+    
+    if(parent::prepareRow($row) === FALSE){return FALSE;}
+    // D7 has user picture, so we'll use that for images
+    if($row->widget_module == 'imagefield'){
+      watchdog('scratchpads_migrate', t('Skipped image field %label'), array(
+        '%label' => $row->label
+      ), WATCHDOG_INFO);
+      return false;
+    }
   }
 }

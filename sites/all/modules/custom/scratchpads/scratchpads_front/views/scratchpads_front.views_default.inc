@@ -143,7 +143,7 @@ function scratchpads_front_views_default_views(){
   $handler->display->display_options['arguments']['type']['table'] = 'node';
   $handler->display->display_options['arguments']['type']['field'] = 'type';
   $handler->display->display_options['arguments']['type']['title_enable'] = 1;
-  $handler->display->display_options['arguments']['type']['title'] = 'Recent %1s';
+  $handler->display->display_options['arguments']['type']['title'] = t('Recent %1s');
   $handler->display->display_options['arguments']['type']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['type']['default_argument_skip_url'] = 0;
   $handler->display->display_options['arguments']['type']['summary']['number_of_records'] = '0';
@@ -334,6 +334,18 @@ function scratchpads_front_views_default_views(){
   $handler->display->display_options['filters']['status']['value'] = array(
     1 => '1'
   );
+  /* Filter criterion: File: Path */
+  $handler->display->display_options['filters']['uri']['id'] = 'uri';
+  $handler->display->display_options['filters']['uri']['table'] = 'file_managed';
+  $handler->display->display_options['filters']['uri']['field'] = 'uri';
+  $handler->display->display_options['filters']['uri']['operator'] = 'not';
+  $handler->display->display_options['filters']['uri']['value'] = '/eolapi/';
+  /* Filter criterion: File: Path */
+  $handler->display->display_options['filters']['uri_1']['id'] = 'uri_1';
+  $handler->display->display_options['filters']['uri_1']['table'] = 'file_managed';
+  $handler->display->display_options['filters']['uri_1']['field'] = 'uri';
+  $handler->display->display_options['filters']['uri_1']['operator'] = 'not';
+  $handler->display->display_options['filters']['uri_1']['value'] = '/pictures/';
   /* Display: Latest images */
   $handler = $view->new_display('block', 'Latest images', 'block_1');
   $views['front_page_slideshow'] = $view;

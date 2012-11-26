@@ -51,8 +51,7 @@ class ScratchpadsNodeDarwincoreMigration extends ScratchpadsNodeMigration{
       'earliestdatecollected' => 'field_date_collected'
     );
     parent::__construct($arguments);
-    $this->addFieldMapping('field_taxonomic_name:source_type')->defaultValue('tid');
-    $this->addFieldMapping('field_taxonomic_name:create_term')->defaultValue(false);
+    // Add location
     $this->addFieldMapping('field_location', 'locationnode')->sourceMigration('Darwincorelocation');
     // There isn't a media field
     $this->addUnmigratedDestinations(array(
@@ -117,6 +116,12 @@ class ScratchpadsNodeDarwincoreMigration extends ScratchpadsNodeMigration{
     return $query;
   }
 
+  protected function countQuery(){
+    $query = parent::countQuery();
+    $query->innerJoin('darwincore', 'd', 'd.vid = n.vid');
+    return $query;
+  }
+
   public function prepareRow($row){
     parent::prepareRow($row);
     foreach($this->termMappings as $delta => $term_mapping){
@@ -148,6 +153,18 @@ class ScratchpadsNodeDarwincoreMigration extends ScratchpadsNodeMigration{
         $collected_date['to'] = str_replace('-', '/', $row->latestdatecollected);
       }
       $row->earliestdatecollected = drupal_json_encode($collected_date);
+    }
+    // Sometimes taxonomic name field is missing
+    // Check it's not in the classification  
+    if(!isset($row->taxonomicname)){
+      $vids = array_keys(variable_get('biological_vids', array()));
+      if(count($vids)){
+        foreach($vids as $vid){
+          if(isset($row->{$vid})){
+            $row->taxonomicname = reset($row->{$vid});
+          }
+        }
+      }
     }
   }
 }

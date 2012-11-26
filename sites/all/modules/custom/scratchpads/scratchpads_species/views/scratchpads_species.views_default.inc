@@ -764,6 +764,7 @@ function scratchpads_species_views_default_views(){
   $handler->display->display_options['fields']['field_spm_map']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_spm_map']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['field_spm_map']['click_sort_column'] = 'region_id';
+  $handler->display->display_options['fields']['field_spm_map']['type'] = 'gm3_text';
   $handler->display->display_options['fields']['field_spm_map']['settings'] = array(
     'display_convex_hull' => '0'
   );
@@ -777,6 +778,7 @@ function scratchpads_species_views_default_views(){
   $handler->display->display_options['fields']['field_map']['table'] = 'field_data_field_map';
   $handler->display->display_options['fields']['field_map']['field'] = 'field_map';
   $handler->display->display_options['fields']['field_map']['relationship'] = 'field_location_nid';
+  $handler->display->display_options['fields']['field_map']['label'] = '';
   $handler->display->display_options['fields']['field_map']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['absolute'] = 0;
@@ -790,12 +792,13 @@ function scratchpads_species_views_default_views(){
   $handler->display->display_options['fields']['field_map']['alter']['strip_tags'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['field_map']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['field_map']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_map']['element_default_classes'] = 1;
   $handler->display->display_options['fields']['field_map']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_map']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_map']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['field_map']['click_sort_column'] = 'latitude';
+  $handler->display->display_options['fields']['field_map']['type'] = 'gm3_text';
   $handler->display->display_options['fields']['field_map']['settings'] = array(
     'display_convex_hull' => '0'
   );
@@ -1400,7 +1403,7 @@ function scratchpads_species_views_default_views(){
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   /* Display: Master */
-      $handler = $view->new_display('default', 'Master', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Literature';
   $handler->display->display_options['css_class'] = 'alpha omega biblio';
   $handler->display->display_options['use_ajax'] = TRUE;
@@ -1418,32 +1421,32 @@ function scratchpads_species_views_default_views(){
   $handler->display->display_options['style_options']['group_rendered'] = 1;
   $handler->display->display_options['style_options']['columns'] = array(
     'biblio_authors' => 'biblio_authors',
+    'title' => 'title',
     'biblio_year' => 'biblio_year',
-    'title' => 'title'
   );
-  $handler->display->display_options['style_options']['default'] = 'biblio_authors';
+  $handler->display->display_options['style_options']['default'] = 'biblio_year';
   $handler->display->display_options['style_options']['info'] = array(
     'biblio_authors' => array(
-      'sortable' => 1,
+      'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
-      'empty_column' => 0
-    ),
-    'biblio_year' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0
+      'empty_column' => 0,
     ),
     'title' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
-      'empty_column' => 0
-    )
+      'empty_column' => 0,
+    ),
+    'biblio_year' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
   );
   $handler->display->display_options['style_options']['override'] = 1;
   $handler->display->display_options['style_options']['sticky'] = 0;
@@ -1572,7 +1575,7 @@ function scratchpads_species_views_default_views(){
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   /* Display: Master */
-      $handler = $view->new_display('default', 'Master', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Distribution';
   $handler->display->display_options['css_class'] = 'alpha omega';
   $handler->display->display_options['access']['type'] = 'perm';
@@ -1593,6 +1596,7 @@ function scratchpads_species_views_default_views(){
   $handler->display->display_options['fields']['field_map']['table'] = 'field_data_field_map';
   $handler->display->display_options['fields']['field_map']['field'] = 'field_map';
   $handler->display->display_options['fields']['field_map']['relationship'] = 'field_location_nid';
+  $handler->display->display_options['fields']['field_map']['label'] = '';
   $handler->display->display_options['fields']['field_map']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['absolute'] = 0;
@@ -1606,12 +1610,13 @@ function scratchpads_species_views_default_views(){
   $handler->display->display_options['fields']['field_map']['alter']['strip_tags'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['field_map']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['field_map']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['field_map']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_map']['element_default_classes'] = 1;
   $handler->display->display_options['fields']['field_map']['hide_empty'] = 0;
   $handler->display->display_options['fields']['field_map']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_map']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['field_map']['click_sort_column'] = 'latitude';
+  $handler->display->display_options['fields']['field_map']['type'] = 'gm3_text';
   $handler->display->display_options['fields']['field_map']['settings'] = array(
     'display_convex_hull' => FALSE
   );

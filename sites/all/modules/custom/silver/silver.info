@@ -7,5 +7,6 @@ dependencies[] = feeds
 dependencies[] = taxonomy
 dependencies[] = feeds_tamper
 dependencies[] = feeds_xls
+dependencies[] = feeds_file_processor
 dependencies[] = auto_nodetitle
 features[ctools][] = "feeds:feeds_importer_default:1"

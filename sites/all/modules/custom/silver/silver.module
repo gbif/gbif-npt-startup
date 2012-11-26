@@ -13,7 +13,10 @@ function silver_feeds_presave(FeedsSource $source, $entity){
   // Unset empty fields
   foreach($entity as $key => $value){
     if(substr($key, 0, 6) == 'field_' && is_array($value)){
-      if(isset($value[LANGUAGE_NONE][0]['value']) && !$value[LANGUAGE_NONE][0]['value']){
+      // Load the field to check if we're numeric.  If we are, we can skip this
+      // step.
+      $field = field_info_field($key);
+      if(isset($value[LANGUAGE_NONE][0]['value']) && !$value[LANGUAGE_NONE][0]['value'] && !(isset($field['settings']['allowed_values']) && isset($field['settings']['allowed_values'][$value[LANGUAGE_NONE][0]['value']]))){
         unset($entity->$key);
       }
     }
@@ -159,6 +162,14 @@ function silver_silver(){
         'administer taxonomy'
       ),
       'form_id' => 'silver_taxonomy_excel_form'
+    ),
+    array(
+      'type' => 'Files',
+      'name' => 'Excel file update',
+      'access arguments' => array(
+        'edit file'
+      ),
+      'form_id' => 'silver_file_excel_form'
     )
   );
 }
@@ -383,6 +394,29 @@ function silver_taxonomy_excel_form(){
       '#title' => '',
       '#options' => $taxonomies,
       '#empty_option' => t('Select vocabulary'),
+      '#ajax' => array(
+        'callback' => 'silver_ajax_callback',
+        'wrapper' => 'silver_import_subform_feeds'
+      )
+    ),
+    '#suffix' => '<div id="silver_import_subform_feeds"></div>'
+  );
+}
+
+/**
+ * silver_file_excel_form
+ */
+function silver_file_excel_form(){
+  $entity_info = entity_get_info('file');
+  foreach($entity_info['bundles'] as $file_type => $file_type_info){
+    $file_types['file_importer_' . $file_type] = check_plain($file_type_info['label']);
+  }
+  return array(
+    'silver_import_subform_feeds' => array(
+      '#type' => 'select',
+      '#title' => '',
+      '#options' => $file_types,
+      '#empty_option' => t('Select file type'),
       '#ajax' => array(
         'callback' => 'silver_ajax_callback',
         'wrapper' => 'silver_import_subform_feeds'

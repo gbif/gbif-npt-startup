@@ -165,8 +165,7 @@ function gm3_field_field_insert($entity_type, $entity, $field, $instance, $langc
         // Strip point: from the string first.
         $items[0] = str_replace('point:', '', strtolower($items[0]));
         _gm3_field_get_array_from_points_string($items[0], $new_items);
-      }
-      if(count($items)){
+      }else if(count($items)){
         _gm3_field_get_array_from_points_string($items[0]['map'], $new_items);
       }
       $items = $new_items;
@@ -176,7 +175,7 @@ function gm3_field_field_insert($entity_type, $entity, $field, $instance, $langc
     case 'gm3_polyline':
       $new_items = array();
       if(is_string($items[0])){
-        $items[0] = str_replace(substr($field['type'], 4) . ':', '', strtolower($items[0]));
+        $items[0] = str_replace(substr(strtoupper($field['type']), 4) . ':', '', strtoupper($items[0]));
         _gm3_field_get_array_from_poly_string($items[0], $new_items, substr($field['type'], 4));
       }
       if(count($items)){
@@ -201,6 +200,11 @@ function gm3_field_field_insert($entity_type, $entity, $field, $instance, $langc
             $line_parts = explode(':', $line);
             if(count($line_parts) > 1){
               $type = "gm3_" . strtolower(array_shift($line_parts));
+              foreach($line_parts as $key => $part){
+                if(!trim($part)){
+                  unset($line_parts[$key]);
+                }
+              }
               $items[0]['map']['children'][$type][] = implode(':', $line_parts);
             }
           }
@@ -242,7 +246,8 @@ function gm3_field_feeds_processor_targets_alter(&$targets, $entity_type, $bundl
     'gm3_polygon',
     'gm3_polyline',
     'gm3_rectangle',
-    'gm3_combination'
+    'gm3_combination',
+    'gm3_region' // Should be in the gm3_region_field module, but it's easy here!
   );
   foreach(field_info_instances($entity_type, $bundle_name) as $name => $instance){
     $info = field_info_field($name);
@@ -262,6 +267,9 @@ function gm3_field_feeds_processor_targets_alter(&$targets, $entity_type, $bundl
  * Callback to set the value for a GM3 field.
  */
 function gm3_field_feeds_set_target_text($source, $entity, $target, $value){
+  if(is_array($value)){
+    $value = $value[0];
+  }
   $info = field_info_field($target);
   $field = isset($entity->$target) ? $entity->$target : array();
   $field['und'][] = $value;
@@ -294,7 +302,7 @@ function _gm3_field_get_array_from_poly_string($value, &$items, $poly_type, $typ
 function _gm3_field_get_array_from_points_string($value, &$items, $type = FALSE){
   if(is_array($value) || strlen(trim($value))){
     if(is_string($value)){
-      $value = explode("|", $value);
+      $value = preg_split("/[\n\r|]+/", $value);
     }
     foreach($value as $lat_lng){
       $lat_lng = preg_replace('/[)(]/', '', $lat_lng);
@@ -803,6 +811,7 @@ function gm3_field_field_formatter_view($entity_type, $entity, $field, $instance
           'map' => array(
             'id' => $id,
             'libraries' => array(
+              'polygon' => array(),
               substr($field['type'], 4) => array(
                 substr($field['type'], 4) . 's' => $polys
               )
@@ -961,7 +970,8 @@ function gm3_field_field_widget_form(&$form, &$form_state, $field, $instance, $l
           'placeholder' => '(' . t('Latitude') . ', ' . t('Longitude') . ')'
         ),
         '#default_value' => _gm3_field_get_points_string_from_array($items),
-        '#type' => $data_field_type
+        '#type' => $data_field_type,
+        '#maxlength' => 10000000
       );
       break;
     case 'gm3_polyline_gm3':
@@ -986,6 +996,7 @@ function gm3_field_field_widget_form(&$form, &$form_state, $field, $instance, $l
           'map' => array(
             'id' => $element['#field_name'],
             'libraries' => array(
+              'polygon' => array(),
               $poly_type => array(
                 $poly_type . 's' => $polys
               ),
@@ -1012,7 +1023,8 @@ function gm3_field_field_widget_form(&$form, &$form_state, $field, $instance, $l
           )
         ),
         '#default_value' => $default_value_string,
-        '#type' => $data_field_type
+        '#type' => $data_field_type,
+        '#maxlength' => 10000000
       );
       break;
     case 'gm3_combination_gm3':
@@ -1076,6 +1088,7 @@ function gm3_field_field_widget_form(&$form, &$form_state, $field, $instance, $l
             ));
             $widget['children']['gm3_point'] = array(
               '#type' => $data_field_type,
+              '#maxlength' => 10000000,
               '#title' => t('Point'),
               '#attributes' => array(
                 'class' => array(

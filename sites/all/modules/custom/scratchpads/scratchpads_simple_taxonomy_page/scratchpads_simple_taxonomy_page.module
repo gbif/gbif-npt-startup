@@ -37,11 +37,22 @@ function scratchpads_simple_taxonomy_page_theme(){
 function scratchpads_simple_taxonomy_page_form_taxonomy_form_vocabulary_alter(&$form, &$form_state, $form_id){
   if(!isset($form_state['confirm_delete'])){
     $vids = variable_get('none_biological_vids', array());
+    $default_value = 0;
+    if(isset($form['vid'])){
+      // Vocabulary already exists, default to off
+      if(isset($vids[$form['vid']['#value']])){
+        // Set before, use the setting.
+        $default_value = $vids[$form['vid']['#value']];
+      }
+    }else{
+      // New vocabulary, default to on.
+      $default_value = 1;
+    }
     $form['display_tab'] = array(
       '#title' => t('Display tab'),
       '#description' => t('Check this box to add a menu item linking to this vocabulary.'),
       '#type' => 'checkbox',
-      '#default_value' => (isset($form['vid']) && isset($vids[$form['vid']['#value']])) ? $vids[$form['vid']['#value']] : 1,
+      '#default_value' => $default_value,
       '#states' => array(
         'visible' => array(
           ':input[name="biological_classification"]' => array(
@@ -66,6 +77,13 @@ function scratchpads_simple_taxonomy_page_taxonomy_term_insert($term){
       drupal_register_shutdown_function('menu_rebuild');
     }
   }
+}
+
+/**
+ * Implements hook_taxonomy_term_update()
+ */
+function scratchpads_simple_taxonomy_page_taxonomy_term_update($term){
+  scratchpads_simple_taxonomy_page_taxonomy_term_insert($term);
 }
 
 /**
@@ -151,8 +169,34 @@ function scratchpads_simple_taxonomy_page_taxonomy_form_vocabulary_submit($form,
         unset($none_biological_vids[$vid]);
       }
     }
-    $none_biological_vids[$form_state['vid']] = $form_state['values']['display_tab'];
+    $none_biological_vids[$form_state['vid']] = !$form_state['values']['biological_classification'] ? $form_state['values']['display_tab'] : 0;
     variable_set('none_biological_vids', $none_biological_vids);
+  }
+}
+
+/**
+ * Implementation of hook_page_alter().
+ * 
+ * FIXME - We need to check for the presence of a facet filter.
+ */
+function scratchpads_simple_taxonomy_page_menu_local_tasks_alter(&$data, $router_item, $root_path){
+  if($router_item['path'] == 'nontaxonomy/term/%' && $term = taxonomy_term_load(arg(2))){
+    if(taxonomy_term_edit_access($term)){
+      $data['tabs'][0]['output'][] = array(
+        '#theme' => 'menu_local_task',
+        '#link' => array(
+          'title' => t('Edit'),
+          'href' => 'taxonomy/term/' . $term->tid . '/edit',
+          'localized_options' => array(
+            'attributes' => array(
+              'title' => t('Edit this term')
+            )
+          )
+        )
+      );
+      $data['tabs'][0]['output'][0]['#active'] = TRUE;
+      $data['tabs'][0]['count'] = 2;
+    }
   }
 }
 

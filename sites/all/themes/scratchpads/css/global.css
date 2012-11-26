@@ -193,6 +193,10 @@ table th a img{
   text-align: right;
 }
 
+#zone-slide-top-wrapper .scratchpads-slide-toggle-body {
+  display: none;
+}
+
 #zone-slide-top-wrapper form#user-login-form{
   padding: 20px 0 30px 0;
 }
@@ -266,6 +270,9 @@ a.scratchpads-slide-toggle{
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }  
+body.multilingual #zone-slide-top-wrapper a.scratchpads-slide-toggle{
+  right: 80px;
+}
 
 #zone-slide-bottom-wrapper a.scratchpads-slide-toggle{
   top: -20px;
@@ -278,6 +285,29 @@ a.scratchpads-slide-toggle{
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   line-height: 14px;
+}
+
+body.multilingual #zone-slide-top-wrapper #block-scratchpads-multilingual-language-switcher a.scratchpads-slide-toggle{
+  right: 0;
+}
+
+#zone-slide-top-wrapper #block-scratchpads-multilingual-language-switcher ul {
+  list-style: none;
+  list-style-image: none;
+  float: right;
+  margin-top: 8px;
+}
+
+#zone-slide-top-wrapper #block-scratchpads-multilingual-language-switcher li {
+  list-style: none;
+  list-style-image: none;
+  float: left;
+  margin-right: 12px;
+}
+
+#zone-slide-top-wrapper #block-scratchpads-multilingual-language-switcher a.session-active{
+  text-decoration: none;
+  font-weight: bold;
 }
 
 
@@ -294,6 +324,9 @@ a.scratchpads-slide-toggle{
   top: 0;
   text-align: right;
 }
+body.multilingual #region-secondary-menu {
+  right: 150px;
+}
 
 .logged-in #region-secondary-menu{
   right: 0;
@@ -308,6 +341,10 @@ a.scratchpads-slide-toggle{
 #region-secondary-menu ul.links li a{
   color: #fff;
   font-size: 0.9em;
+}
+
+.site-name-slogan{
+  float: none!important;
 }
 
 h1.site-name, 
@@ -556,6 +593,10 @@ h2.site-name {
   text-align: right;
 }
 
+.node .submitted .user-picture{
+  display:inline;
+}
+
 /* STRIPY DIV GROUPS */
 
 .node .stripy-div-group{
@@ -676,6 +717,25 @@ table.biblio th{
 table.biblio td{
   min-width: 100px;
 }
+
+/* biblio export block */
+#block-scratchpads-biblio-search-search-export {
+  margin-bottom: 1em;
+}
+#block-scratchpads-biblio-search-search-export div.biblio-links-info {
+  float: left;
+  margin: 0 0.5em 0 0;
+}
+#block-scratchpads-biblio-search-search-export ul {
+  margin: 0;
+  padding: 0;
+}
+#block-scratchpads-biblio-search-search-export ul li {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  float: left;
+}
+
 /****************** BLOG ****************/
 .view-blog-page .views-row-odd,
 .view-blog-page .views-row-even{
@@ -698,6 +758,35 @@ table.biblio td{
 /****************** SPM *****************/
 .node-spm .field-name-field-spm-map{
   margin-top: 10px;
+}
+
+/****************** EVENTS *****************/
+body.page-event #region-content div.view-event-calendar div.item-list div.views-field-title{
+  font-size: 1.6em;
+  font-family: 'FontinSansRegular', Gerogia, serif;
+  font-weight: normal;
+  letter-spacing: -0.05em;
+}
+
+body.page-event #region-content div.view-event-calendar div.item-list div.views-field-field-event-date {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+body.page-event #region-content div.view-event-calendar div.item-list div.views-field-created,
+body.page-event #region-content div.view-event-calendar div.item-list div.views-field-name{
+  float: right;
+  color: #888;
+  font-size: 0.9em;  
+}
+
+body.page-event #region-content div.view-event-calendar div.item-list div.views-field-created:after{
+  content: "-- ";
+}
+
+article.node-event div.field-name-field-event-date {
+  font-weight: bold;
+  margin-bottom: 12px;
 }
 
 /****************** Overlay *****************/
@@ -769,7 +858,10 @@ div.contextual-links-wrapper ul.contextual-links{
    z-index:2!important;
 }
 
-
+#cboxLoadedContent .contextual-links-wrapper{
+  right:26px;
+  top:15px;
+}
 
 /****************** CONTACT FORMS *****************/
 

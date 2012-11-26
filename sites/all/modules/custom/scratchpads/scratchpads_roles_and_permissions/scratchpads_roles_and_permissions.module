@@ -6,11 +6,15 @@
 function scratchpads_roles_and_permissions_module_implements_alter(&$implementations, $hook){
   if($hook == 'scratchpads_default_permissions'){
     $implementations = array_merge($implementations, array(
+      'aggregator' => FALSE,
       'biblio' => FALSE,
       'block' => FALSE,
       'comment' => FALSE,
+      'comment_notify' => FALSE,
       'contextual' => FALSE,
       'dashboard' => FALSE,
+      'entityconnect' => FALSE,
+      'exif_custom' => FALSE,
       'feeds' => FALSE,
       'field_group' => FALSE,
       'file_entity' => FALSE,
@@ -39,7 +43,8 @@ function scratchpads_roles_and_permissions_module_implements_alter(&$implementat
       'webform' => FALSE,
       'role_delegation' => FALSE,
       'legal' => FALSE,
-      'forum' => FALSE
+      'forum' => FALSE,
+      'feeds_xls' => FALSE
     ));
   }
 }

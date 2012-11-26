@@ -1,0 +1,10 @@
+name = "Interface Language"
+description = "Provides and allows for the translation of the user interface"
+configure = admin/config/regional
+
+core = "7.x"
+dependencies[] = "locale"
+
+package = Other
+tool = true
+php = "5.2.4"

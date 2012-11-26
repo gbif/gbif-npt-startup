@@ -28,6 +28,18 @@ function scratchpads_roles_and_permissions_scratchpads_default_permissions(){
 }
 
 /**
+ * EntityConnect module
+ */
+function entityconnect_scratchpads_default_permissions(){
+  return array(
+    'contributor' => array(
+      'entityconnect add button',
+      'entityconnect edit button'
+    )
+  );
+}
+
+/**
  * Contact module
  */
 function contact_scratchpads_default_permissions(){
@@ -446,6 +458,17 @@ function file_entity_scratchpads_default_permissions(){
 }
 
 /**
+ * Feeds XLS module (Possibly may release it to Drupal).
+ */
+function feeds_xls_scratchpads_default_permissions(){
+  return array(
+    'editor' => array(
+      'feeds xls allow download'
+    )
+  );
+}
+
+/**
  * Field group module
  *
  * Implements hook_scratchpads_default_permissions().
@@ -529,6 +552,38 @@ function comment_scratchpads_default_permissions(){
 }
 
 /**
+ * Comment notify module
+ *
+ * Implements hook_scratchpads_default_permissions().
+ */
+function comment_notify_scratchpads_default_permissions(){
+  return array(
+    'authenticated user' => array(
+      'subscribe to comments'
+    ),
+    'maintainer' => array(
+      'administer comment notify'
+    )
+  );
+}
+
+/**
+ * Aggregator module
+ *
+ * Implements hook_scratchpads_default_permissions().
+ */
+function aggregator_scratchpads_default_permissions(){
+  return array(
+    'anonymous user' => array(
+      'access news feeds'
+    ),
+    'editor' => array(
+      'administer news feeds'
+    )
+  );
+}
+
+/**
  * Biblio module
  *
  * Implements hook_scratchpads_default_permissions().
@@ -550,7 +605,27 @@ function biblio_scratchpads_default_permissions(){
       'import from file',
       'edit biblio authors',
       'edit by all biblio authors'
+    ),
+    'maintainer' => array(
+      'administer biblio'
     )
+  );
+}
+
+/**
+ * EXIF Custom module
+ * 
+ * Implements hook_scratchpads_default_permissions().
+ */
+function exif_custom_scratchpads_default_permissions(){
+  return array(
+    'contributor' => array(
+      'have default image metadata profile',
+      'view image metadata',
+    ),
+    'maintainer' => array(
+      'administer image metadata',
+    ),
   );
 }
 

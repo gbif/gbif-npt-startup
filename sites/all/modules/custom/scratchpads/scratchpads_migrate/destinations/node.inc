@@ -12,6 +12,10 @@ class ScratchpadsMigrateDestinationNode extends MigrateDestinationNode{
     return $fields;
   }
 
+  public function prepare($entity, stdClass $source_row){
+    parent::prepare($entity, $source_row);
+  }
+
   public function import(stdClass $node, stdClass $row){
     // Hackery - add the missing TID for forum topics
     if(property_exists($node, 'taxonomy_forums') && empty($node->taxonomy_forums[0]) && isset($row->tid)){
@@ -35,16 +39,6 @@ class ScratchpadsMigrateDestinationNode extends MigrateDestinationNode{
       unset($node->{OG_AUDIENCE_FIELD});
     }
     $status = parent::import($node, $row);
-    // Save all the URL aliases
-    if(isset($row->url_alias)){
-      foreach($row->url_alias as $url_alias){
-        $path = array(
-          'alias' => $url_alias,
-          'source' => 'node/' . $node->nid,
-          'language' => isset($node->language) ? $node->language : LANGUAGE_NONE
-        );
-      }
-    }
     return $status;
   }
 

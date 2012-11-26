@@ -1,6 +1,25 @@
 <?php
 
 /**
+ * Implements hook_init()
+ */
+function scratchpads_tweaks_init(){
+  setlocale(LC_ALL, 'C.UTF-8');
+  if($_GET['q'] == 'admin/config' && !user_access('scratchpad team')){
+    // Set the REQUIREMENT_ERROR variable so that no errors are displayed when
+    // viewing the admin/config page as a non-admin user.
+    define('REQUIREMENT_ERROR', 'Hide requirement error');
+  }
+  // Check to see if we're trying to view the admin/appearance/settings/scratchpads
+  // page, and if so we redirect to the general settings page.
+  if($_GET['q'] == 'admin/appearance/settings/scratchpads' || $_GET['q'] == 'admin/appearance/settings/scratchpads_em'){
+    if(!user_access('scratchpad team')){
+      drupal_goto('admin/appearance/settings');
+    }
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function media_multiselect_form_file_entity_add_upload_multiple_alter(&$form, &$form_state, $form_id){
@@ -181,6 +200,7 @@ function scratchpads_tweaks_cron(){
   }
   if(count($modules_to_enable)){
     module_enable($modules_to_enable);
+    menu_rebuild();
   }
   // Rebuild caches
   _scratchpads_tweaks_register_shutdown();
@@ -225,6 +245,16 @@ function scratchpads_tweaks_shutdown($reset = FALSE){
 function scratchpads_tweaks_node_type_insert($info){
   // Set the default for all comment forms to be on separate pages.
   variable_get('comment_form_location_' . $info->type, COMMENT_FORM_SEPARATE_PAGE);
+  $options = variable_get('node_options_' . $info->type, array());
+  foreach($options as $value){
+    if($value == 'revision'){return;}
+  }
+  $options[] = 'revision';
+  variable_set('node_options_' . $info->type, $options);
+  // Add this node type to the comment notify variable
+  $comment_notify_node_types = variable_get('comment_notify_node_types', array());
+  $comment_notify_node_types[$info->type] = $info->type;
+  variable_set('comment_notify_node_types', $comment_notify_node_types);
 }
 
 /**
@@ -235,13 +265,12 @@ function scratchpads_tweaks_preprocess_comment(&$variables){
 }
 
 /**
- * Implementation of hook_form_FORM_ID_alter.
- *
- * Hide the forums vocabulary from the taxonomy editor.
+ * Implements hook_preprocess_block
  */
-function scratchpads_tweaks_form_taxonomy_overview_vocabularies_alter(&$form, &$form_state, $form_id){
-  if($tid = variable_get('forum_nav_vocabulary', FALSE)){
-    unset($form[$tid]);
+function scratchpads_preprocess_block(&$variables){
+  $block = $variables['block'];
+  if(preg_match('/^views-front_page_blocks/', $block->bid) && $block->subject == 'Recent Biblios'){
+    $block->subject = 'Latest Literature';
   }
 }
 
@@ -255,6 +284,20 @@ function scratchpads_tweaks_form_alter(&$form, &$form_state, $form_id){
         $form['description']['#after_build'][] = 'scratchpads_tweaks_taxonomy_description_after_build';
       }
       break;
+    case 'system_theme_settings':
+      $form['logo']['resize_logo'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Resize logo.'),
+        '#default_value' => variable_get('resize_logo', 1),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="default_logo"]' => array(
+              'checked' => FALSE
+            )
+          )
+        )
+      );
+      $form['#submit'][] = 'scratchpads_tweaks_form_system_theme_settings_submit';
     default:
       // Only use the "comment_filtered_html" input type for comment bodies!
       if(substr($form_id, 0, 8) == 'comment_'){
@@ -265,8 +308,28 @@ function scratchpads_tweaks_form_alter(&$form, &$form_state, $form_id){
   }
 }
 
+function scratchpads_tweaks_form_system_theme_settings_submit($form, &$form_state){
+  variable_set('resize_logo', $form_state['values']['resize_logo']);
+}
+
+/**
+ * Implements hook_process_page
+ */
+function scratchpads_tweaks_process_page(&$variables){
+  if($_GET['q'] == 'media/browser'){
+    if(@isset($variables['title_suffix']['add_or_remove_shortcut'])){
+      unset($variables['title_suffix']['add_or_remove_shortcut']);
+    }
+  }
+}
+
 function scratchpads_tweaks_taxonomy_description_after_build($element, &$form_state){
   if(@isset($element['format']['format'])){
+    foreach($element['#pre_render'] as $key => $value){
+      if($value == 'ckeditor_pre_render_text_format'){
+        unset($element['#pre_render'][$key]);
+      }
+    }
     $element['format']['format']['#options'] = array(
       'plain_text' => t('Plain text')
     );
@@ -318,13 +381,6 @@ function scratchpads_tweaks_menu_alter(&$items){
     $items['node/%node/clone']['title'] = t('Clone');
     $items['node/%node/clone']['type'] = MENU_LOCAL_TASK;
   }
-}
-
-/**
- * Specifies the argument that should be used on forum/% links.
- */
-function forum_forum_to_arg($arg, $map, $index){
-  return FALSE;
 }
 
 /**
@@ -382,10 +438,9 @@ function scratchpads_tweaks_system_info_alter(&$info, $file, $type){
       $info['name'] = 'Pretty URLs';
       $info['description'] = 'Automatically generates pretty URLs based on the title of the content being edited/created. e.g. A page titled "About this site" will be given the URL content/about-this-site, instead of node/x.';
       break;
-    case 'forum':
-      $info['tool'] = TRUE;
-      $info['package'] = 'Forum';
-      break;
+    case 'rules':
+      $info['dependencies'][] = 'trigger';
+    case 'rules_admin':
     case 'blog':
     case 'simplenews':
     case 'googleanalytics':
