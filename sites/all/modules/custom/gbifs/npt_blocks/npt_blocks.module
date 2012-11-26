@@ -34,25 +34,27 @@ function npt_blocks_block_info() {
     'region' => 'credit_second',
     'weight' => 1,
     'theme' => NPTSTARTUP_THEME_NAME,
-    'status' => 1
+    'status' => TRUE,
+  );
+  $blocks['howto_publish'] = array(
+    'info' => t('How to publish data through the GBIF network'),
+    'region' => 'sidebar_second',
+    'weight' => 1,
+    'theme' => NPTSTARTUP_THEME_NAME,
+    'status' => TRUE,
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+    'pages' => 'taxonomy/term/*'
   );
   $blocks['credit_orgs'] = array(
     'info' => t('ViBRANT and GBIF credit'),
     'region' => 'credit_stretch',
     'weight' => 1,
     'theme' => NPTSTARTUP_THEME_NAME,
-    'status' => 1
+    'status' => TRUE,
   );
   $blocks['gbif_ogc_map'] = array(
     'info' => t('GBIF Species Distribution'),
     'region' => 'content',
-    'weight' => 0,
-    'theme' => NPTSTARTUP_THEME_NAME,
-    'status' => 0
-  );
-  $blocks['howto_publish'] = array(
-    'info' => t('How to publish data in the GBIF network'),
-    'region' => 'sidebar_second',
     'weight' => 0,
     'theme' => NPTSTARTUP_THEME_NAME,
     'status' => 0
@@ -70,6 +72,28 @@ function npt_blocks_block_view($delta = '') {
       $content = '<span class="nptcredit"><p><a href="http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/">' . t('The NPT Project') . '</a></p></span>';
       $block['content'] = array(
         '#markup' => $content
+      );
+      break;
+    case 'howto_publish':
+      $participant_shortname = variable_get('gbif_participant_shortname');
+      $participant_node = variable_get('gbif_participant_node');
+      $node_value = explode('-', $participant_node);
+      $iso_a2 = $node_value[0];
+      $country = $node_value[1];
+
+      $howto_publish_text = l(t('How to publish data through the GBIF network?'), variable_get('howto_publish_page'));
+      $country_page = t('@country on the !portal_link.', array(
+        '@country' => $country,
+        '!portal_link' => l(t('GBIF Data Portal'), 'http://data.gbif.org/countries/' . strtoupper($iso_a2))
+      ));
+      
+      $links_for_intro = array(
+        $howto_publish_text,
+        $country_page
+      );
+      $block['content'] = array(
+        '#theme' => 'item_list',
+        '#items' => $links_for_intro
       );
       break;
     case 'credit_orgs':
@@ -118,9 +142,17 @@ function npt_blocks_block_view($delta = '') {
          )
        )
       ));
-      
       break;
-      
   }
   return $block;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function npt_blocks_views_api() {
+  return array(
+    'api' => 3.0,
+    'path' => drupal_get_path('module', 'npt_blocks') . '/views'
+  );
 }

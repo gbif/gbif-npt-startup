@@ -2,7 +2,6 @@
 /* This also can include ANY global CSS that applies site-wide. Unless overwritten by a more specific style rule, CSS declarations in global.css will apply site-wide. */
 
 div.error {
-  display: normal;
 }
 
 html {
@@ -60,7 +59,11 @@ div#edit-facet input {
   margin-top: -4px;
 }
 div#edit-facet {
-  margin-left: -20px;
+  position: relative;
+  float: right;
+  margin-top: 5px;
+  width: 200px;
+  right: -30px;
 }
 
 .scratchpads-search-block-input .form-type-radios .form-type-radio {
@@ -404,6 +407,55 @@ ul#map-region-menu li a.active { border-radius: 3px; border: none; background-co
   text-decoration: underline;
 }
 
+/* Content */
+
+#block-views-news-block-news-front {
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  display: block;
+  width: 300px;
+  float: left;
+  margin: 0 20px 0 0;
+}
+
+#block-views-news-block-news-front h2 {
+  font-size: 13px;
+  font-family: DINOT-Regular, sans-serif;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+#block-views-news-block-news-front ul li a {
+  text-decoration: none;
+  font-size: 1em;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+#block-views-latest-species-block {
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  display: block;
+  width: 300px;
+  float: left;
+  margin: 0 0 0 0;
+}
+
+#block-views-latest-species-block h2 {
+  font-size: 13px;
+  font-family: DINOT-Regular, sans-serif;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+#block-views-latest-species-block ul li a {
+  text-decoration: none;
+  font-size: 1em;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+
 #region-content { padding-bottom: 40px; }
 
 #region-content h1 {
@@ -418,6 +470,16 @@ ul#map-region-menu li a.active { border-radius: 3px; border: none; background-co
 
 #participant-list h4 {
   margin-bottom: 10px;
+}
+
+div.view-news div.item-list ul li a {
+  text-decoration: none;
+  font-size: 1.3em;
+  font-family: DINOT-Regular, sens-serif;
+}
+div.view-news div.item-list ul li p {
+  margin-left: 20px;
+  margin-top: 10px;
 }
 
 
@@ -469,6 +531,29 @@ section #block-gbif-spdsht-available-templates {
 
 #region-sidebar-first { padding-bottom: 40px; }
 #region-sidebar-second { padding-bottom: 40px; }
+
+#block-npt-blocks-howto-publish {
+  background-color: rgba(30,50, 10, 0.078125);
+  padding:10px;
+  border-radius: 5px;
+  border: 1px solid #eee;
+  float: right;
+  margin-top: 60px;
+}
+
+.front-page-sidebar div#block-npt-blocks-howto-publish {
+  width: 245px;
+}
+
+#block-npt-blocks-howto-publish div.item-list ul { margin: 0; list-style: square; }
+#block-npt-blocks-howto-publish div.item-list ul li { margin: 0; }
+
+#block-views-eol-images-front-block div.views-row {
+  display: inline-block;
+  height: 85px;
+  float: right;
+  margin: 2px;
+}
 
 #section-footer {
   position: absolute;
