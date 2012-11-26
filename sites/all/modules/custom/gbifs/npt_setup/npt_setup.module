@@ -148,6 +148,28 @@ function npt_setup_front_form($form, &$form_state){
  */
 function npt_setup_front_form_submit($form, &$form_state){
   variable_set('front_page_welcome_message', $form_state['values']['front_page_welcome_message']['value']);
+
+  $bodytext = $form_state['values']['front_page_welcome_message']['value'];
+
+  $node = new stdClass();
+  $node->type = 'page';
+  node_object_prepare($node);
+  $node->title = t('Welcome to GBIF Benin!');
+  $node->language = LANGUAGE_NONE;
+  $node->body[$node->language][0]['value'] = $bodytext;
+  $node->body[$node->language][0]['summary'] = text_summary($bodytext);
+  $node->body[$node->language][0]['format'] = $form_state['values']['front_page_welcome_message']['format'];
+  $node->status = 1;
+  $node->comment = 1;
+  $node->promote = 0;
+  $node->revision = 0;
+  $node->changed = $_SERVER['REQUEST_TIME'];
+  $node->created = $_SERVER['REQUEST_TIME'];
+  node_submit($node);
+  node_save($node);
+  
+  // Use this node as the front page
+  variable_set('site_frontpage', 'node/' . $node->nid);
 }
 
 function npt_setup_about_form($form, &$form_state){
