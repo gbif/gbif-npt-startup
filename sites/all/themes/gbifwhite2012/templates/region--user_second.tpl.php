@@ -8,7 +8,7 @@
       }
       else {
         print t('Welcome, !username! ', array('!username' => theme('username', array('account' => $user))));
-        print l(t('Log out'), 'logout', array('attributes' => array('class' => array('logout'))));
+        print l(t('Log out'), 'user/logout', array('attributes' => array('class' => array('logout'))));
       }
       print $content;
     ?>
