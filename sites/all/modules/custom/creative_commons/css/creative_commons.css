@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-#block-creative-commons-creative-commons a{
+#block-creative-commons-creative-commons a img {
   float: left;
 }
 
