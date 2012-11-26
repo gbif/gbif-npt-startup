@@ -292,12 +292,12 @@ function npt_nodestats_global_view() {
           $output .= ', ';          
         }
         // year 
-        $output .= $adoc->year. '. ';
-        $output .= $adoc->title. '. ';
+        $output .= (isset($adoc->year)) ? $adoc->year. '. ' : '';
+        $output .= (isset($adoc->title)) ? $adoc->title. '. ' : '';
         $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
-        $output .= $adoc->volume;
-        $output .= '('.$adoc->issue.'), ';
-        $output .= 'p.'.$adoc->pages.'. ';
+        $output .= (isset($adoc->volume)) ? $adoc->volume : '';
+        $output .= (isset($adoc->issue)) ? '('.$adoc->issue.'), ' : '';
+        $output .= (isset($adoc->pages)) ? 'p.'.$adoc->pages.'. ' : '';
         $output .= 'Available at: ';
         $output .= l($adoc->url, $adoc->url).'.';
 
