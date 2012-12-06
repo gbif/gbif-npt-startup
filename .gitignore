@@ -8,6 +8,7 @@ sites/all/modules/contrib/examples/
 sites/10088.npt.bkolocal/
 sites/10088.spads.bkolocal/
 sites/10088.tools.bkolocal/
+sites/10088.postgis.bkolocal/
 sites/all/themes/gbif2012/
 dummy.php
 .DS_Store
