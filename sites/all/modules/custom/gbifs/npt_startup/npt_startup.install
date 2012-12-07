@@ -121,14 +121,17 @@ function npt_startup_install(){
   
   /**
    * Update field_quick_delete field to long blob
+   * There seems no such a table in a fresh Scratchpads installation.
+   * Commented out for now and awaiting more info from the London team.
    */
+  /*
   db_change_field('field_quick_delete', 'entity', 'entity', array(
     'type' => 'blob',
     'not null' => TRUE,
     'serialize' => TRUE,
     'size' => 'big'
   ));
-  
+  */
   
   // Insert default pages
   npt_startup_default_page();
@@ -888,7 +891,7 @@ function npt_startup_vocabularies() {
 
   // Insert default biological classification
   $vocabulary = taxonomy_vocabulary_machine_name_load('species_information');
-  itis_term_taxonomy_vocabulary_biological_classification($vocabulary, '1');
+  //itis_term_taxonomy_vocabulary_biological_classification($vocabulary, '1');
 }
 
 /**
