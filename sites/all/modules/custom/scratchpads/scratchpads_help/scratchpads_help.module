@@ -6,7 +6,8 @@
 function scratchpads_help_block_info(){
   $blocks['scratchpads_help'] = array(
     'info' => t('Scratchpads help'),
-    'region' => 'footer'
+    'region' => 'footer',
+    'status' => 0,
   );
   return $blocks;
 }

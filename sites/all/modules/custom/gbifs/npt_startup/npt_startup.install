@@ -7,7 +7,7 @@ function npt_startup_install(){
   npt_startup_ckeditor_settings();
   npt_startup_linkit_settings();
 
-  // Set the default theme to be "gbifwhite2012".
+  // Set the default theme to "gbifwhite2012".
   variable_set('theme_default', 'gbifwhite2012');
   // Disable default theme.
   theme_disable(array(
@@ -309,17 +309,6 @@ function npt_startup_standard_blocks() {
       'cache' => -1
     ),
     array(
-      'module' => 'menu_block',
-      'delta' => 'scratchpads_pages-1',
-      'theme' => 'scratchpads',
-      'status' => 1,
-      'weight' => -10,
-      'region' => 'sidebar_first',
-      'pages' => '',
-      'title' => '',
-      'cache' => -1
-    ),
-    array(
       'module' => 'creative_commons',
       'delta' => 'creative_commons',
       'theme' => 'gbifwhite2012',
@@ -331,17 +320,6 @@ function npt_startup_standard_blocks() {
       'cache' => -1
     ),
     // Admin theme blocks
-    array(
-      'module' => 'scratchpads_help',
-      'delta' => 'scratchpads_help',
-      'theme' => 'scratchpads_admin',
-      'status' => 1,
-      'weight' => 2,
-      'region' => 'help',
-      'pages' => '',
-      'title' => '',
-      'cache' => -1
-    ),
     // Dashboard blocks
     array(
       'module' => 'user',
@@ -426,6 +404,7 @@ function npt_startup_standard_blocks() {
       'module' => $block['module'],
       'delta' => $block['delta'],
       'theme' => $block['theme'],
+      'status' => $block['status'],
       'title' => $block['title']
     ))->fields($block)->execute();
   } 

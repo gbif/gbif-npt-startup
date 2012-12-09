@@ -5,7 +5,7 @@ package = "Scratchpads"
 dependencies[] = itis_term
 dependencies[] = tinytax
 dependencies[] = context
-dependencies[] = scratchpads_blocks
+;dependencies[] = scratchpads_blocks
 dependencies[] = convert_image_format
 
 files[] = views/scratchpads_species_views_handler_field_taxonomy.inc

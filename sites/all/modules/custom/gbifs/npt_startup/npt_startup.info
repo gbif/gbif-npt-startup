@@ -89,6 +89,6 @@ dependencies[] = scratchpads_user
 ; NPT Startup modules
 dependencies[] = npt_setup
 ;dependencies[] = npt_blocks
-dependencies[] = npt_role_and_permissions
+;dependencies[] = npt_role_and_permissions
 dependencies[] = npt_news
 dependencies[] = npt_solr

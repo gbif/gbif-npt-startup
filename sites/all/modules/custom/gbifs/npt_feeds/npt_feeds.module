@@ -11,11 +11,13 @@ function npt_feeds_block_info_alter(&$blocks, $theme, $code_blocks) {
       $delta = 'feed-'.$feed->fid;
       $gbif_feed[$feed->fid]['delta'] = $delta;
       $gbif_feed[$feed->fid]['region'] = 'postscript_first';
+      $gbif_feed[$feed->fid]['status'] = 1;
     }
     if ($feed->title == 'GBIF Latest Online Resources') {
       $delta = 'feed-'.$feed->fid;
       $gbif_feed[$feed->fid]['delta'] = $delta;
       $gbif_feed[$feed->fid]['region'] = 'postscript_second';
+      $gbif_feed[$feed->fid]['status'] = 1;
     }
   }
 

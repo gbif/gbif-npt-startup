@@ -27,6 +27,7 @@ regions[preface_third] = 'Preface Third'
 regions[content] = 'Content'
 regions[sidebar_first] = 'Sidebar First'
 regions[sidebar_second] = 'Sidebar Second'
+regions[help] = 'Help'
 
 ; FOOTER SECTION
 regions[postscript_first] = 'Postscript First'

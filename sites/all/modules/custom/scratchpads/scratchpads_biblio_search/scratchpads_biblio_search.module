@@ -453,6 +453,7 @@ function scratchpads_biblio_search_block_info() {
     'search_export' => array(
       'info' => t('Display links to export biblio content filtered with Solr facets'),
       'cache' => DRUPAL_NO_CACHE,
+      'status' => 1,
   ));
 }
 
