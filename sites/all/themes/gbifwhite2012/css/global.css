@@ -683,6 +683,27 @@ section #block-gbif-spdsht-available-templates {
 #zone-credit-wrapper a:hover {
   opacity: .4;
 }
+#zone-credit-stretch-wrapper {
+  color: #eee;
+  position: relative;
+  background: #222;
+}
+
+#zone-credit-stretch-wrapper a {
+  color: #eee;
+  text-decoration: none;
+}
+
+#zone-credit-stretch-wrapper p {
+  margin: 0px;
+  padding: 0px;
+  font-size: 0.85em;
+  line-height: 40px;
+}
+
+#zone-credit-stretch-wrapper a:hover {
+  opacity: .4;
+}
 
 .nptcredit {
   float: right;
