@@ -5,6 +5,9 @@ core = 7.x
 ; Features
 features[menu_links][] = "management:http://help.scratchpads.eu/"
 
+; Files
+files[] = scratchpads_tweaks.test
+
 ; Drupal core
 dependencies[] = block
 dependencies[] = color
@@ -28,10 +31,12 @@ dependencies[] = toolbar
 
 ; Contrib
 dependencies[] = advanced_help
+dependencies[] = biblio_refbank
 dependencies[] = boost
 dependencies[] = ckeditor
 dependencies[] = clone
 dependencies[] = comment_notify
+dependencies[] = dictionary_export
 dependencies[] = emptyparagraphkiller
 dependencies[] = entitycache
 dependencies[] = entityconnect
@@ -45,6 +50,7 @@ dependencies[] = media_multiselect
 dependencies[] = plupload
 dependencies[] = role_delegation
 dependencies[] = uuid
+dependencies[] = weight
 
 ; Scratchpads modules
 dependencies[] = scratchpads_apachesolr_instant
@@ -89,6 +95,7 @@ dependencies[] = hashcash
 dependencies[] = silver
 dependencies[] = spm
 dependencies[] = subpermissions
+dependencies[] = taxonomy_batch
 dependencies[] = taxonomy_breadcrumb_lite
 dependencies[] = tools
 dependencies[] = tree_widget
