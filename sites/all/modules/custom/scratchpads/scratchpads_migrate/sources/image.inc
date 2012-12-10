@@ -41,6 +41,8 @@ class DrupalImageMigration extends DrupalFileMigration{
     $fields['vid'] = 'vid';
     $fields['title'] = 'title';
     $fields['body'] = 'body';
+    $fields['sticky'] = 'sticky';
+    $fields['node_weight'] = 'node_weight';
     $this->source = new MigrateSourceSQL($this->sourceQuery(), $fields, $this->countQuery(), $this->sourceOptions);
     $destination_fields = $this->destination->fields();
     foreach($fields as $delta => $field){
@@ -93,7 +95,6 @@ class DrupalImageMigration extends DrupalFileMigration{
       }
     }
     $this->addUnmigratedDestinations(array(
-      'field_sticky',
       'field_creator',
       'field_creator:format',
       'field_creator:language',
@@ -113,12 +114,26 @@ class DrupalImageMigration extends DrupalFileMigration{
     // Images get filename from the image node title
     $this->removeFieldMapping('filename');
     $this->addFieldMapping('filename', 'title');
+    $this->addFieldMapping('field_weight', 'node_weight')->defaultValue(0);
+    $this->addFieldMapping('field_sticky', 'sticky')->defaultValue(0);
     // Add body field if it exists
     $this->addFieldMapping('field_description', 'body');
-    $this->addFieldMapping('field_description:format')->defaultValue('filtered_html');
-    $this->addUnmigratedDestinations(array(
-      'field_description:language'
-    ));
+    $field_mappings = $this->getFieldMappings();
+    foreach($destination_fields as $key => $field){
+      if(strpos($key, ':')){
+        if(!array_key_exists($key, $field_mappings)){
+          $subfield = end(explode(':', $key));
+          switch($subfield){
+            case 'format':
+              $this->addFieldMapping($key)->defaultValue('filtered_html');
+              break;
+            case 'language':
+              $this->addFieldMapping($key)->defaultValue('en');
+              break;
+          }
+        }
+      }
+    }
   }
 
   public function sourceFieldList(){
@@ -184,13 +199,14 @@ class DrupalImageMigration extends DrupalFileMigration{
     $query->fields('n', array(
       'nid',
       'vid',
-      'title'
+      'title',
+      'sticky'
     ));
     $query->innerJoin('node_revisions', 'nr', 'nr.nid = n.nid');
     $query->fields('nr', array(
       'body'
     ));
-    $query->innerJoin('content_field_imagefield', 'i', 'i.vid = n.vid');
+    $query->innerJoin('content_field_imagefield', 'i', 'i.nid = n.nid');
     $query->condition('i.field_imagefield_fid', $row->fid);
     $result = $query->execute();
     if($result->rowCount()){
@@ -199,11 +215,16 @@ class DrupalImageMigration extends DrupalFileMigration{
       $row->vid = $node->vid;
       $row->title = $node->title;
       $row->body = $node->body;
+      $row->sticky = $node->sticky;
     }else{
       $row->nid = 0;
       $row->vid = 0;
+      $row->sticky = 0;
     }
+    // ScratchpadsNodeImageMigration::prepareRow()
     $this->nodeMigration->prepareRow($row);
+    // Row weight
+    ScratchpadsNodeMigration::weightDecode($row);
   }
 
   public function prepare($file, $row){
