@@ -34,14 +34,14 @@ function npt_blocks_block_info() {
     'region' => 'credit_second',
     'weight' => 1,
     'theme' => NPTSTARTUP_THEME_NAME,
-    'status' => TRUE,
+    'status' => 1,
   );
   $blocks['howto_publish'] = array(
     'info' => t('How to publish data through the GBIF network'),
     'region' => 'sidebar_second',
     'weight' => 1,
     'theme' => NPTSTARTUP_THEME_NAME,
-    'status' => TRUE,
+    'status' => 1,
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     'pages' => 'taxonomy/term/*'
   );
@@ -50,7 +50,7 @@ function npt_blocks_block_info() {
     'region' => 'credit_stretch',
     'weight' => 1,
     'theme' => NPTSTARTUP_THEME_NAME,
-    'status' => TRUE,
+    'status' => 1,
   );
   $blocks['gbif_ogc_map'] = array(
     'info' => t('GBIF Species Distribution'),

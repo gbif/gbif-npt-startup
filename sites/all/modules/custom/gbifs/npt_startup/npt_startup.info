@@ -5,7 +5,7 @@ package = GBIF
 version = 7.x-0.1
 
 ; Features
-features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"
+;features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"
 
 ; Drupal core
 dependencies[] = aggregator
@@ -15,6 +15,7 @@ dependencies[] = comment
 dependencies[] = contextual
 dependencies[] = dashboard
 dependencies[] = dblog
+dependencies[] = entity
 dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = image
@@ -38,6 +39,7 @@ dependencies[] = ckeditor
 dependencies[] = clone
 dependencies[] = emptyparagraphkiller
 dependencies[] = entitycache
+dependencies[] = entityconnect
 dependencies[] = feeds_oai_pmh
 dependencies[] = globalredirect
 dependencies[] = imagemagick
@@ -71,32 +73,23 @@ dependencies[] = scratchpads_biblio
 dependencies[] = scratchpads_biblio_autocomplete_tweak
 dependencies[] = scratchpads_biblio_search
 dependencies[] = scratchpads_cleanup
-;dependencies[] = scratchpads_colour
 dependencies[] = scratchpads_contact
 dependencies[] = scratchpads_error
 dependencies[] = scratchpads_file_colorboxed
-;dependencies[] = scratchpads_front
-;dependencies[] = scratchpads_gbif_registry_client
 dependencies[] = scratchpads_hands_off
 dependencies[] = scratchpads_help
-;dependencies[] = scratchpads_issues_block
 dependencies[] = scratchpads_legal
-dependencies[] = scratchpads_lexicon
-;dependencies[] = scratchpads_logins
 dependencies[] = scratchpads_media_gallery
-dependencies[] = scratchpads_metadata_service
-;dependencies[] = scratchpads_mollom
 dependencies[] = scratchpads_pages
+dependencies[] = scratchpads_roles_and_permissions
 dependencies[] = scratchpads_search_block
-dependencies[] = scratchpads_solr
 dependencies[] = scratchpads_species
 dependencies[] = scratchpads_taxonomic_name_field
 dependencies[] = scratchpads_user
-;dependencies[] = scratchpads_width_and_height
 
 ; NPT Startup modules
 dependencies[] = npt_setup
 dependencies[] = npt_blocks
-dependencies[] = npt_role_and_permissions
+;dependencies[] = npt_role_and_permissions
 dependencies[] = npt_news
 dependencies[] = npt_solr
