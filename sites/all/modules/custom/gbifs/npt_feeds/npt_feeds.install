@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Subscribe default feeds of GBIF
+ *
+ */
 
 function npt_feeds_install() {
   npt_feeds_default_feeds();
@@ -23,7 +28,7 @@ function npt_feeds_default_feeds() {
       'block' => 8      
     ),
   );
-  foreach($values as $record) {
+  foreach ($values as $record) {
     aggregator_save_feed($record);
   }
   

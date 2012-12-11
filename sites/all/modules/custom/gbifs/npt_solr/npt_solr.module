@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * @file
  * The current setup of solr for NPT is just to provide a correct server address that works.
  * So the module is minimum. 
+ *
  */

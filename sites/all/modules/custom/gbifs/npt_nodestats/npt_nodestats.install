@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Installation of the npt_nodestates module
+ *
+ */
 
 /**
  * Implementation of hook_enable()

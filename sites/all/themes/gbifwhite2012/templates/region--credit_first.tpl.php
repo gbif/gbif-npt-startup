@@ -1,3 +1,9 @@
+<?php
+/**
+ * @file
+ * GBIF Credit
+ */
+?>
 <div<?php print $attributes; ?>>
   <div<?php print $content_attributes; ?>>
     <?php if (theme_get_setting('toggle_gbif_credit')): ?>

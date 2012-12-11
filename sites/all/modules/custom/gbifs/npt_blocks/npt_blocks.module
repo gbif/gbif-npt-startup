@@ -1,6 +1,11 @@
 <?php
-define('NPTSTARTUP_THEME_NAME', 'gbifwhite2012');
+/**
+ * @file
+ * Position default blocks in gbifwhite2012 theme.
+ *
+ */
 
+define('NPTSTARTUP_THEME_NAME', 'gbifwhite2012');
 
 /**
  * 
@@ -67,7 +72,7 @@ function npt_blocks_block_info() {
  */
 function npt_blocks_block_view($delta = '') {
   $block = array();
-  switch($delta) {
+  switch ($delta) {
     case 'credit_npt':
       $content = '<span class="nptcredit"><p><a href="http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/">' . t('The NPT Project') . '</a></p></span>';
       $block['content'] = array(
@@ -99,8 +104,8 @@ function npt_blocks_block_view($delta = '') {
     case 'credit_orgs':
       $path = drupal_get_path('module', 'npt_blocks');
       $options = array(
-        'html' => true,
-        'absolute' => true
+        'html' => TRUE,
+        'absolute' => TRUE
       );
       $links = array(
         l(theme('image', array(
@@ -123,7 +128,7 @@ function npt_blocks_block_view($delta = '') {
       $entity_id = arg(2);
       $result = db_query('SELECT guid FROM {feeds_item} WHERE entity_type = :entity_type AND entity_id = :entity_id', array(':entity_type' => 'taxonomy_term', ':entity_id' => $entity_id))->fetch();
       $guid = $result->guid;
-      $map_url = "http://ogc.gbif.org/wms?request=GetMap&bgcolor=0x666698&styles=,,&layers=gbif:country_fill,gbif:tabDensityLayer,gbif:country_borders&srs=EPSG:4326&filter=()(%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Eurl%3C/PropertyName%3E%3CLiteral%3E%3C!%5BCDATA%5Bhttp%3A%2F%2Fdata.gbif.org%2Fmaplayer%2Ftaxon%2F". $guid . "%5D%5D%3E%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E)()&width=700&height=320&Format=image/png&bbox=-180,-90,180,90";
+      $map_url = "http://ogc.gbif.org/wms?request=GetMap&bgcolor=0x666698&styles=,,&layers=gbif:country_fill,gbif:tabDensityLayer,gbif:country_borders&srs=EPSG:4326&filter=()(%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Eurl%3C/PropertyName%3E%3CLiteral%3E%3C!%5BCDATA%5Bhttp%3A%2F%2Fdata.gbif.org%2Fmaplayer%2Ftaxon%2F" . $guid . "%5D%5D%3E%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E)()&width=700&height=320&Format=image/png&bbox=-180,-90,180,90";
       
       $content = '<div class="gbif_map"><img src="' . $map_url . '" /></div>';
       
@@ -132,7 +137,7 @@ function npt_blocks_block_view($delta = '') {
         '#markup' => $content
       );
       */
-        $block['content'] = '<h2 class="block-title">GBIF Global Distribution</h2>' .theme('gm3_map', array(
+        $block['content'] = '<h2 class="block-title">GBIF Global Distribution</h2>' . theme('gm3_map', array(
        'map' => array(
          'libraries' => array(
            'eol_gbif_maps_overlay' => array(

@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Installation of the NPT Startup profile
+ *
+ */
 
 /**
  * Implements hook_install()

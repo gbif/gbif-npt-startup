@@ -1,9 +1,12 @@
 <?php
 /**
+ * @file
  * This module is based on scratchpads_setup, in order to provide NPT specific forms
  * during the setup process.
+ *
  */
- /*********************************************************************************************
+
+/*********************************************************************************************
   * 
   * HOOKS
   * 
@@ -11,7 +14,7 @@
 /**
  * Implementation of hook_default_flows().
  */
-function npt_setup_default_flows($name = null){
+function npt_setup_default_flows($name = NULL) {
   $default_flows = array(
     'site_setup' => array(
       'title' => t('Site setup'),
@@ -55,9 +58,10 @@ function npt_setup_default_flows($name = null){
       )
     )
   );
-  if($name){
+  if ($name) {
     return $default_flows[$name];
-  }else{
+  }
+  else {
     return $default_flows;
   }
 }
@@ -65,11 +69,11 @@ function npt_setup_default_flows($name = null){
 /**
  * Implements hook_admin_paths().
  */
-function npt_setup_admin_paths(){
+function npt_setup_admin_paths() {
   $paths = array(
-    'setup' => true,
-    'setup/*' => true,
-    'setup-complete' => true
+    'setup' => TRUE,
+    'setup/*' => TRUE,
+    'setup-complete' => TRUE
   );
   return $paths;
 }
@@ -77,7 +81,7 @@ function npt_setup_admin_paths(){
 /**
  * Implements hook_menu().
  */
-function npt_setup_menu(){
+function npt_setup_menu() {
   $items = array();
   $items['setup-complete'] = array(
     'title' => 'Setup complete',
@@ -94,8 +98,8 @@ function npt_setup_menu(){
 /**
  * Implements hook_module_implements_alter().
  */
-function npt_setup_module_implements_alter(&$implementations, $hook){
-  if($hook == 'form_alter'){
+function npt_setup_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'form_alter') {
     // Scratchpads setup form later should be called last
     $group = $implementations['npt_setup'];
     unset($implementations['npt_setup']);
@@ -108,10 +112,10 @@ function npt_setup_module_implements_alter(&$implementations, $hook){
  * SETUP FORMS
  * 
  ********************************************************************************************/
-function npt_setup_welcome_form($form, &$form_state){
+function npt_setup_welcome_form($form, &$form_state) {
   // Sanity check - ensure this hasn't already been completed
   // If it hasn't been filled in, npt_setup will be integer 0 - 6
-  if(variable_get('npt_setup', false) === false){
+  if (variable_get('npt_setup', FALSE) === FALSE) {
     drupal_goto();
   }
   $form['welcome'] = array(
@@ -126,7 +130,7 @@ function npt_setup_welcome_form($form, &$form_state){
   return $form;
 }
 
-function npt_setup_front_form($form, &$form_state){
+function npt_setup_front_form($form, &$form_state) {
   $form['front'] = array(
     '#title' => t('Front page'),
     '#type' => 'fieldset',
@@ -146,7 +150,7 @@ function npt_setup_front_form($form, &$form_state){
  * Form submit
  * Front page
  */
-function npt_setup_front_form_submit($form, &$form_state){
+function npt_setup_front_form_submit($form, &$form_state) {
   variable_set('front_page_welcome_message', $form_state['values']['front_page_welcome_message']['value']);
 
   $bodytext = $form_state['values']['front_page_welcome_message']['value'];
@@ -172,9 +176,9 @@ function npt_setup_front_form_submit($form, &$form_state){
   variable_set('site_frontpage', 'node/' . $node->nid);
 }
 
-function npt_setup_about_form($form, &$form_state){
+function npt_setup_about_form($form, &$form_state) {
   $node_shortname = variable_get('gbif_participant_shortname');
-  $title = isset($node_shortname) ? t('About ') . $node_shortname : t('About us');
+  $title = isset($node_shortname) ? t('About') . ' ' . $node_shortname : t('About us');
   $description = t('An <em>@title</em> page will be automatically created for your site. <br/>An administrative contact and a technical contact will be inserted below the description.', array('@title' => $title));
   $form['about'] = array(
     '#title' => t('About us page'),
@@ -234,7 +238,7 @@ function npt_setup_about_form_validate($form, &$form_state) {
   }
 }
 
-function npt_setup_about_form_submit($form, &$form_state){
+function npt_setup_about_form_submit($form, &$form_state) {
 
   // Prepare bodytext
   $bodytext = $form_state['values']['about_us']['value'];
@@ -289,7 +293,7 @@ function npt_setup_synopsis_form($form, &$form_state) {
   $node_country = $country[1];
   $node_country = ($node_country == 'Chinese Taipei') ? 'Taiwan' : $node_country;
   
-  $title = isset($node_country) ? t('Biodiversity in ') . $node_country : t('Synopsis of Biodiversity');
+  $title = isset($node_country) ? t('Biodiversity in') . ' ' . $node_country : t('Synopsis of Biodiversity');
   $description = t('An <em>@title</em> page will be automatically created for your site. <br/>Use this form to introduce biodiversity of your country.', array('@title' => $title));
 
   $form['synopsis'] = array(
@@ -357,7 +361,7 @@ function npt_setup_synopsis_form_submit($form, &$form_state) {
   
 }
 
-function npt_setup_news_form($form, &$form_state){
+function npt_setup_news_form($form, &$form_state) {
   $form['news'] = array(
     '#title' => t('News'),
     '#type' => 'fieldset',
@@ -378,7 +382,7 @@ function npt_setup_news_form($form, &$form_state){
   return $form;
 }
 
-function npt_setup_news_form_submit($form, &$form_state){
+function npt_setup_news_form_submit($form, &$form_state) {
 
   // Prepare bodytext
   $bodytext = $form_state['values']['news_article']['value'];
@@ -402,7 +406,7 @@ function npt_setup_news_form_submit($form, &$form_state){
   node_save($node);
 }
 
-function npt_setup_licence_form($form, &$form_state){
+function npt_setup_licence_form($form, &$form_state) {
   $form['licence_type'] = array(
     '#type' => 'select',
     '#title' => t('Licence type'),
@@ -412,26 +416,26 @@ function npt_setup_licence_form($form, &$form_state){
   return $form;
 }
 
-function npt_setup_licence_form_submit($form, &$form_state){
+function npt_setup_licence_form_submit($form, &$form_state) {
   variable_set('creative_commons_block_licence_type', $form_state['values']['licence_type']);
 }
 
-function npt_setup_form_alter(&$form, &$form_state, $form_id){
+function npt_setup_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   // Add npt_setup_form_submit() to all set up flow forms
-  if(npt_setup_get_step_delta('site_setup', $form_id) !== false){
+  if (npt_setup_get_step_delta('site_setup', $form_id) !== FALSE) {
     $form['#submit'][] = 'npt_setup_form_submit';
   }
-  switch($form_id){
+  switch ($form_id) {
     case 'user_profile_form':
-      if($user->uid == 2 && !variable_get('npt_setup_complete', false)){
+      if ($user->uid == 2 && !variable_get('npt_setup_complete', FALSE)) {
         $form['#submit'][] = 'npt_setup_user_profile_form_submit';
       }
       break;
   }
 }
 
-function npt_setup_user_profile_form_submit(&$form, &$form_state){
+function npt_setup_user_profile_form_submit(&$form, &$form_state) {
   $form_state['redirect'] = 'setup';
   drupal_get_messages();
 }
@@ -441,16 +445,18 @@ function npt_setup_user_profile_form_submit(&$form, &$form_state){
  * @param name of flow $flow_name
  * @param $form_id
  */
-function npt_setup_get_step_delta($flow_name, $form_id){
+function npt_setup_get_step_delta($flow_name, $form_id) {
   $setup_flow = npt_setup_default_flows($flow_name);
-  foreach($setup_flow['steps'] as $delta => $step){
-    if($step['form_id'] == $form_id){return $delta;}
+  foreach ($setup_flow['steps'] as $delta => $step) {
+    if ($step['form_id'] == $form_id) {
+      return $delta;
+    }
   }
-  return false;
+  return FALSE;
 }
 
-function npt_setup_form_submit(&$form, &$form_state){
-  if(isset($form_state['formflow']) && isset($form_state['form_info'])){
+function npt_setup_form_submit(&$form, &$form_state) {
+  if (isset($form_state['formflow']) && isset($form_state['form_info'])) {
     $delta = npt_setup_get_step_delta($form_state['form_info']['id'], $form_state['values']['form_id']);
     // Keep a record of what step we're up to
     $delta++;
@@ -463,7 +469,7 @@ function npt_setup_form_submit(&$form, &$form_state){
  * COMPLETE PAGE
  * 
  ********************************************************************************************/
-function npt_setup_complete_page(){
+function npt_setup_complete_page() {
   //  variable_set('npt_setup_complete', true);
   return array(
     '#show_messages' => TRUE,
@@ -485,10 +491,10 @@ function npt_setup_complete_page(){
       'help' => array(
         '#items' => array(
           l(t("Help"), 'http://help.scratchpads.eu', array(
-            'absolute' => true
+            'absolute' => TRUE
           )),
           l(t("Sandbox"), 'http://sandbox.scratchpads.eu', array(
-            'absolute' => true
+            'absolute' => TRUE
           ))
         ),
         '#title' => t("Need more help?"),
@@ -504,7 +510,7 @@ function npt_setup_complete_page(){
  * BLOCKS
  * 
  ********************************************************************************************/
-function npt_setup_block_info(){
+function npt_setup_block_info() {
   // This example comes from node.module.
   $blocks['npt_setup'] = array(
     'info' => t('NPT setup'),
@@ -516,24 +522,27 @@ function npt_setup_block_info(){
   return $blocks;
 }
 
-function npt_setup_block_view($delta = ''){
+function npt_setup_block_view($delta = '') {
   $block = array();
-  switch($delta){
+  switch ($delta) {
     case 'npt_setup':
       $path = drupal_get_path('module', 'npt_setup');
       $block['subject'] = t('Setup status');
       $setup_flow = npt_setup_default_flows('site_setup');
-      $current_step = variable_get('npt_setup', false);
-      if(is_numeric($current_step)){
+      $current_step = variable_get('npt_setup', FALSE);
+      if (is_numeric($current_step)) {
         $percentage_complete = ($current_step / count($setup_flow['steps'])) * 100;
-      }else{
+      }
+      else {
         $percentage_complete = 100;
       }
-      if($percentage_complete <= 0){
+      if ($percentage_complete <= 0) {
         $class = 'zero-complete';
-      }elseif($percentage_complete < 60){
+      }
+      elseif ($percentage_complete < 60) {
         $class = 'half-complete';
-      }else{
+      }
+      else {
         $class = 'complete';
       }
       $block['content'] = array(
@@ -556,7 +565,7 @@ function npt_setup_block_view($delta = ''){
           ))
         ),
       );
-      if($percentage_complete < 100){
+      if ($percentage_complete < 100) {
         $block['content']['link'] = array(
           '#type' => 'link',
           '#href' => 'setup/' . $current_step,

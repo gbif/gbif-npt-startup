@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * This file provides a toggle switch for displaying GBIF links in the footer area
+ */
 
 function gbifwhite2012_form_system_theme_settings_alter(&$form, &$form_state) {
   $form['theme_settings']['toggle_gbif_footer'] = array(

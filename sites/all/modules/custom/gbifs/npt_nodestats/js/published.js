@@ -1,3 +1,9 @@
+/**
+ * @file
+ * This script generates barcharts of GBIF by country and int'l organisation.
+ *
+ */
+
   var dest = Drupal.settings.gbif_stats.forChart;
 
 d3.json(dest, function(data) {

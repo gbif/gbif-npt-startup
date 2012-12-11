@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Default views with npt_blocks.
+ *
+ */
 
 /**
  * Implementation of hook_views_default_views()

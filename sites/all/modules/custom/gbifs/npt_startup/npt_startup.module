@@ -1,9 +1,14 @@
 <?php
+/**
+ * @file
+ * Get essential modules and configuration ready as part of the NPT Startup profile.
+ *
+ */
 
 /**
  * Implements hook_date_formats()
  */
-function npt_startup_date_formats(){
+function npt_startup_date_formats() {
   return array(
     array(
       'type' => 'short',
@@ -21,28 +26,29 @@ function npt_startup_date_formats(){
  *
  * This function ensures that all required modules are enabled.
  */
-function npt_startup_cron(){
+function npt_startup_cron() {
   // Note, we need to parse the npt_startup info file ourselves as it
   // has its dependencies removed to allow required modules to be removed.
   $tweaks_info = drupal_parse_info_file(drupal_get_path('module', 'npt_startup') . '/npt_startup.info');
   $system_data = system_rebuild_module_data();
   $modules_to_enable = array();
-  foreach($tweaks_info['dependencies'] as $module_name){
-    if(!module_exists($module_name)){
+  foreach ($tweaks_info['dependencies'] as $module_name) {
+    if (!module_exists($module_name)) {
       $row = db_select('system', 's')->condition('name', $module_name)->fields('s')->execute()->fetch();
-      if(!$row || $row->schema_version == -1){
+      if (!$row || $row->schema_version == -1) {
         // This module has never been installed, we install it.
         $modules_to_enable[] = $module_name;
-      }else{
+      }
+      else {
         // The module has been installed before, we need to check the module's
         // info file to check if it is a tool and could be disabled.
-        if(!isset($system_data[$module_name]->info['tool'])){
+        if (!isset($system_data[$module_name]->info['tool'])) {
           $modules_to_enable[] = $module_name;
         }
       }
     }
   }
-  if(count($modules_to_enable)){
+  if (count($modules_to_enable)) {
     module_enable($modules_to_enable);
   }
   // Rebuild caches
@@ -52,7 +58,7 @@ function npt_startup_cron(){
 /**
  * Implements hook_flush_caches
  */
-function npt_startup_flush_caches(){
+function npt_startup_flush_caches() {
   // Rebuild caches
   _npt_startup_register_shutdown();
 }
@@ -60,9 +66,9 @@ function npt_startup_flush_caches(){
 /**
  * Helper function to ensure we only register the shutdown function once.
  */
-function _npt_startup_register_shutdown(){
+function _npt_startup_register_shutdown() {
   $shutdown_registered = &drupal_static(__FUNCTION__);
-  if(!$shutdown_registered){
+  if (!$shutdown_registered) {
     $shutdown_registered = TRUE;
     drupal_register_shutdown_function('npt_startup_shutdown', TRUE);
   }
@@ -71,7 +77,7 @@ function _npt_startup_register_shutdown(){
 /**
  * Shutdown function used to improve performance.
  */
-function npt_startup_shutdown($reset = FALSE){
+function npt_startup_shutdown($reset = FALSE) {
   // Ensure that certain caches are built.  This should help speed up cold start
   // page loads.
   theme_get_registry();
@@ -85,7 +91,7 @@ function npt_startup_shutdown($reset = FALSE){
 /**
  * Implements hook_node_type_insert().
  */
-function npt_startup_node_type_insert($info){
+function npt_startup_node_type_insert($info) {
   // Set the default for all comment forms to be on separate pages.
   variable_get('comment_form_location_' . $info->type, COMMENT_FORM_SEPARATE_PAGE);
 }
@@ -95,8 +101,8 @@ function npt_startup_node_type_insert($info){
  *
  * Hide the forums vocabulary from the taxonomy editor.
  */
-function npt_startup_form_taxonomy_overview_vocabularies_alter(&$form, &$form_state, $form_id){
-  if($tid = variable_get('forum_nav_vocabulary', FALSE)){
+function npt_startup_form_taxonomy_overview_vocabularies_alter(&$form, &$form_state, $form_id) {
+  if ($tid = variable_get('forum_nav_vocabulary', FALSE)) {
     unset($form[$tid]);
   }
 }
@@ -104,25 +110,25 @@ function npt_startup_form_taxonomy_overview_vocabularies_alter(&$form, &$form_st
 /**
  * Implementation of hook_form_alter()
  */
-function npt_startup_form_alter(&$form, &$form_state, $form_id){
-  switch($form_id){
+function npt_startup_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
     case 'taxonomy_form_term':
-      if(isset($form['description'])){
+      if (isset($form['description'])) {
         $form['description']['#after_build'][] = 'npt_startup_taxonomy_description_after_build';
       }
       break;
     default:
       // Only use the "comment_filtered_html" input type for comment bodies!
-      if(substr($form_id, 0, 8) == 'comment_'){
-        if(@isset($form['comment_body'][LANGUAGE_NONE])){
+      if (substr($form_id, 0, 8) == 'comment_') {
+        if (@isset($form['comment_body'][LANGUAGE_NONE])) {
           $form['comment_body'][LANGUAGE_NONE]['#after_build'][] = 'npt_startup_comment_body_after_build';
         }
       }
   }
 }
 
-function npt_startup_taxonomy_description_after_build($element, &$form_state){
-  if(@isset($element['format']['format'])){
+function npt_startup_taxonomy_description_after_build($element, &$form_state) {
+  if (@isset($element['format']['format'])) {
     $element['format']['format']['#options'] = array(
       'plain_text' => t('Plain text')
     );
@@ -130,19 +136,21 @@ function npt_startup_taxonomy_description_after_build($element, &$form_state){
   return $element;
 }
 
-function npt_startup_comment_body_after_build($element, &$form_state){
+function npt_startup_comment_body_after_build($element, &$form_state) {
   npt_startup_remove_filtered_html($element);
   return $element;
 }
 
-function npt_startup_remove_filtered_html(&$item){
-  if(is_array($item)){
-    foreach($item as $key => $value){
-      if($key === 'filtered_html'){
+function npt_startup_remove_filtered_html(&$item) {
+  if (is_array($item)) {
+    foreach ($item as $key => $value) {
+      if ($key === 'filtered_html') {
         unset($item[$key]);
-      }else if(is_array($value)){
+      }
+      elseif (is_array($value)) {
         npt_startup_remove_filtered_html($item[$key]);
-      }else if($value === 'filtered_html'){
+      }
+      elseif ($value === 'filtered_html') {
         $item[$key] = 'comment_filtered_html';
       }
     }
@@ -153,7 +161,7 @@ function npt_startup_remove_filtered_html(&$item){
  * Translate a check plained string.
  * This should add back <em> tags.
  */
-function npt_startup_translate_after_check_plain($string){
+function npt_startup_translate_after_check_plain($string) {
   return strtr($string, array(
     '[i]' => '<em>',
     '[em]' => '<em>',
@@ -169,8 +177,8 @@ function npt_startup_translate_after_check_plain($string){
 /**
  * Implements hook_menu_alter().
  */
-function npt_startup_menu_alter(&$items){
-  if(isset($items['node/%node/clone'])){
+function npt_startup_menu_alter(&$items) {
+  if (isset($items['node/%node/clone'])) {
     $items['node/%node/clone']['title'] = t('Clone');
     $items['node/%node/clone']['type'] = MENU_LOCAL_TASK;
   }
@@ -179,15 +187,15 @@ function npt_startup_menu_alter(&$items){
 /**
  * Specifies the argument that should be used on forum/% links.
  */
-function forum_forum_to_arg($arg, $map, $index){
+function forum_forum_to_arg($arg, $map, $index) {
   return FALSE;
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function npt_startup_form_user_profile_form_alter(&$form, &$form_state, $form_id){
-  if(isset($form['account']) && isset($form['account']['roles'])){
+function npt_startup_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['account']) && isset($form['account']['roles'])) {
     $form['account']['roles']['#description'] = theme('item_list', array(
       'items' => array(
         'Authenticated user: Able to create and edit own forum posts',
@@ -202,21 +210,21 @@ function npt_startup_form_user_profile_form_alter(&$form, &$form_state, $form_id
 /**
  * Alter default views defined by other modules.
  */
-function npt_startup_views_default_views_alter(&$views){
-  if(isset($views['feeds_log'])){
+function npt_startup_views_default_views_alter(&$views) {
+  if (isset($views['feeds_log'])) {
     unset($views['feeds_log']);
   }
 }
 
-function npt_startup_form_user_register_form_alter(&$form, &$form_state, $form_id){
+function npt_startup_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   npt_startup_form_user_profile_form_alter($form, $form_state, $form_id);
 }
 
 /**
  * Implements hook_system_info_alter().
  */
-function npt_startup_system_info_alter(&$info, $file, $type){
-  switch($file->name){
+function npt_startup_system_info_alter(&$info, $file, $type) {
+  switch ($file->name) {
     case 'npt_startup':
       // Unset the dependencies of the scratchpads module so that other modules
       // can be disabled (e.g. EOL taxon page data).
@@ -261,11 +269,11 @@ function npt_startup_system_info_alter(&$info, $file, $type){
  *        
  * @return Body field instance.
  */
-function npt_startup_add_body_field($type, $label = 'Body', $weight = 0){
+function npt_startup_add_body_field($type, $label = 'Body', $weight = 0) {
   // Add or remove the body field, as needed.
   $field = field_info_field('body');
   $instance = field_info_instance('node', 'body', $type->type);
-  if(empty($field)){
+  if (empty($field)) {
     $field = array(
       'field_name' => 'body',
       'type' => 'text_with_summary',
@@ -275,7 +283,7 @@ function npt_startup_add_body_field($type, $label = 'Body', $weight = 0){
     );
     $field = field_create_field($field);
   }
-  if(empty($instance)){
+  if (empty($instance)) {
     $instance = array(
       'field_name' => 'body',
       'entity_type' => 'node',
@@ -308,6 +316,6 @@ function npt_startup_add_body_field($type, $label = 'Body', $weight = 0){
 /**
  * Implements hook_field_widget_info_alter()
  */
-function npt_startup_field_widget_info_alter(&$info){
+function npt_startup_field_widget_info_alter(&$info) {
   unset($info['image_image']);
 }

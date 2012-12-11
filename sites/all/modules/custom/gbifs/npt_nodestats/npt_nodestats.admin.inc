@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * @file
+ * Providing administrative functions to update the statistics.
+ *
+ */
+ 
 function npt_nodestats_admin_settingsform() {
 
   $participant_node = variable_get('gbif_participant_node');
@@ -12,7 +17,7 @@ function npt_nodestats_admin_settingsform() {
     '#title' => t('Update node statistics'),
   );
   $form['npt_nodestats_update_stats']['update_options'] = array(
-    '#title' => t('Available statistics sources: '),
+    '#title' => t('Available statistics sources:') . ' ',
     '#prefix' => t('Please choose statistics to update.'),
     '#type' => 'checkboxes',
     '#options' => drupal_map_assoc(array(
@@ -34,7 +39,7 @@ function npt_nodestats_admin_settingsform() {
     '#type' => 'submit',
     '#value' => t('Analyse now'),
     '#submit' => array('npt_nodestats_analyse_submit'),
-    '#prefix' => '<p>'. t('Analyse professional publications by authors from %country or biodiversity about %country, according to GBIF Public Library maintained on Mendeley.<br/>Please note this may take longer than expected.', array('%country' => $country)).'</p>',
+    '#prefix' => '<p>' . t('Analyse professional publications by authors from %country or biodiversity about %country, according to GBIF Public Library maintained on Mendeley.<br/>Please note this may take longer than expected.', array('%country' => $country)) . '</p>',
   );
   $form['npt_nodestats_update_interval'] = array(
     '#title' => t('Automatic update interval'),
@@ -83,7 +88,8 @@ function npt_nodestats_update_submit($form, &$form_state) {
     }
     
     //drupal_set_message(t('Statistics of @chosen updated.', array('@chosen' => $to_update_text)));  
-  } elseif ($length == 0) {
+  }
+  elseif ($length == 0) {
     drupal_set_message(t('No option was chosen.'), 'warning');
   }
 }

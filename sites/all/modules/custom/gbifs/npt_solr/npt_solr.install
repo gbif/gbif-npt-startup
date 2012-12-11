@@ -1,9 +1,14 @@
 <?php
+/**
+ * @file
+ * Installation for npt_solr module.
+ *
+ */
 
 /**
  * Implements hook_install().
  */
-function npt_solr_install(){
+function npt_solr_install() {
   db_update('apachesolr_environment')->fields(array(
     'name' => 'NPT solr server',
     'url' => 'http://b11g5.gbif.org:8088/solr'

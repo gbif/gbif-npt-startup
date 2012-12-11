@@ -1,3 +1,8 @@
+/**
+ * @file
+ * This javascript shows the maps and graphics with statistics from GBIF.
+ */
+
 var regionsURL = Drupal.settings.npt_nodestats;
 var dataTableTitle = '<div id="dataTableTitle"><p>Membership status, registry information, and data moblised per GBIF Participants:</p></div>';
 var dataTable = '<table cellpadding="0" cellspacing="0" border="0" class="display" id="dataGrid"><thead><tr><th>Node</th><th>Status</th><th>Node</th><th>Org Nr.</th><th>Res.</th><th>IPT</th><th>Chk dst</th><th>Chk usg</th><th>Publisher</th><th>Occu dst</th><th>Occu</th><th>Geo Occu</th></tr></thead><tbody><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tbody></table>';

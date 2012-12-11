@@ -1,10 +1,11 @@
 <?php
-/*
-
-  ToDo: 5) Think about what kind of chart makes best sense.
-        6) Count on top of chart.
-
-*/
+/**
+ * @file
+ * Retrieving some basic statistics of GBIF Nodes
+ *
+ * @todo Think about what kind of chart makes best sense.
+ * @todo Count on top of chart.
+ */
 
 define('GBIF_NPT_SERVICE_URL', 'http://npt.gbif.org/gbif/stats/services');
 define('NPT_MENDELEY_CONSUMER_KEY', '571f50a5930cf872cd4c6d129ea99b2b04ffe07de');
@@ -56,6 +57,7 @@ function npt_nodestats_library() {
     'version' => '2.9.1',
     'js' => array(
       /*
+      // D3 is not used yet.
       'http://d3js.org/d3.v2.js' => array(
         'type' => 'external',
         'weight' => -20,
@@ -123,7 +125,7 @@ function npt_nodestats_global_view() {
   $iso_a2 = $node_value[0];
   $country = $node_value[1];
 
-  $page_title = $country . t(' as a GBIF participant');
+  $page_title = $country . ' ' . t('as a GBIF participant');
   drupal_set_title($page_title);
 
   $page_content = '';
@@ -244,25 +246,25 @@ function npt_nodestats_global_view() {
       );
       $output .= '<ol class="mendeley-citation">';
 
-      $authored_docs = json_decode(file_get_contents(file_build_uri('npt_nodestats/'. $analysed_result['authored']['file'])));
+      $authored_docs = json_decode(file_get_contents(file_build_uri('npt_nodestats/' . $analysed_result['authored']['file'])));
 
       foreach ($authored_docs as $adoc) {
         $output .= '<li>';
 
         // author
         for ($i = 0; $i < count($adoc->authors); $i++) {
-          $output .= $adoc->authors[$i]->surname.', '. substr($adoc->authors[$i]->forename, 0, 1) . '.';
+          $output .= $adoc->authors[$i]->surname . ', ' . substr($adoc->authors[$i]->forename, 0, 1) . '.';
           $output .= ', ';          
         }
         // year 
-        $output .= $adoc->year. '. ';
-        $output .= $adoc->title. '. ';
+        $output .= $adoc->year . '. ';
+        $output .= $adoc->title . '. ';
         $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
         $output .= $adoc->volume;
-        $output .= '('.$adoc->issue.'), ';
-        $output .= 'p.'.$adoc->pages.'. ';
+        $output .= '(' . $adoc->issue . '), ';
+        $output .= 'p.' . $adoc->pages . '. ';
         $output .= 'Available at: ';
-        $output .= l($adoc->url, $adoc->url).'.';
+        $output .= l($adoc->url, $adoc->url) . '.';
 
         $output .= '</li>';
       }
@@ -281,25 +283,25 @@ function npt_nodestats_global_view() {
       );
       $output .= '<ol class="mendeley-citation">';
 
-      $authored_docs = json_decode(file_get_contents(file_build_uri('npt_nodestats/'. $analysed_result['about']['file'])));
+      $authored_docs = json_decode(file_get_contents(file_build_uri('npt_nodestats/' . $analysed_result['about']['file'])));
 
       foreach ($authored_docs as $adoc) {
         $output .= '<li>';
 
         // author
         for ($i = 0; $i < count($adoc->authors); $i++) {
-          $output .= $adoc->authors[$i]->surname.', '. substr($adoc->authors[$i]->forename, 0, 1) . '.';
+          $output .= $adoc->authors[$i]->surname . ', ' . substr($adoc->authors[$i]->forename, 0, 1) . '.';
           $output .= ', ';          
         }
         // year 
-        $output .= (isset($adoc->year)) ? $adoc->year. '. ' : '';
-        $output .= (isset($adoc->title)) ? $adoc->title. '. ' : '';
+        $output .= (isset($adoc->year)) ? $adoc->year . '. ' : '';
+        $output .= (isset($adoc->title)) ? $adoc->title . '. ' : '';
         $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
         $output .= (isset($adoc->volume)) ? $adoc->volume : '';
-        $output .= (isset($adoc->issue)) ? '('.$adoc->issue.'), ' : '';
-        $output .= (isset($adoc->pages)) ? 'p.'.$adoc->pages.'. ' : '';
+        $output .= (isset($adoc->issue)) ? '(' . $adoc->issue . '), ' : '';
+        $output .= (isset($adoc->pages)) ? 'p.' . $adoc->pages . '. ' : '';
         $output .= 'Available at: ';
-        $output .= l($adoc->url, $adoc->url).'.';
+        $output .= l($adoc->url, $adoc->url) . '.';
 
         $output .= '</li>';
       }
@@ -309,7 +311,7 @@ function npt_nodestats_global_view() {
       $page_content .= '</p>';
     }
 
-    $page_content .= '<p>('.t('Depending on how it is categorised, a publication may be listed twice.').')</p>';
+    $page_content .= '<p>(' . t('Depending on how it is categorised, a publication may be listed twice.') . ')</p>';
     
   }
   
@@ -337,10 +339,12 @@ function npt_nodestats_cron() {
     if ($stats != FALSE && $geo != FALSE && $publication != FALSE) {
       watchdog('npt_nodestats', 'NPT node statistics updated.');
       variable_set('npt_nodestats_last_update', time());      
-    } else {
+    }
+    else {
       watchdog('npt_nodestats', 'NPT node statistics is not completely updated. Please investigate', NULL, WATCHDOG_WARNING, $link = NULL);
     }
-  } else {
+  }
+  else {
     watchdog('npt_nodestats', 'NPT node statistics is not updated because the update interval is yet reached.');    
   }
   npt_nodestats_analyse();
@@ -351,13 +355,14 @@ function npt_nodestats_cron() {
  */
 function npt_nodestats_stats_retrieve() {
 
-  $membershipsGlobalJSON = file_get_contents(GBIF_NPT_SERVICE_URL . '/membership/world');
-  $membershipsGlobalJSON_file = file_save_data($membershipsGlobalJSON, file_build_uri('npt_nodestats/membership_world.json'), FILE_EXISTS_REPLACE);
+  $memberships_global_JSON = file_get_contents(GBIF_NPT_SERVICE_URL . '/membership/world');
+  $memberships_global_JSON_file = file_save_data($memberships_global_JSON, file_build_uri('npt_nodestats/membership_world.json'), FILE_EXISTS_REPLACE);
   
-  if ($membershipsGlobalJSON_file != FALSE) {
+  if ($memberships_global_JSON_file != FALSE) {
     drupal_set_message(t('Statistics of participants retrieved.'));
     return TRUE;
-  } else {
+  }
+  else {
     drupal_set_message(t('There was an error in retrieving statistics. Please investigate.'), 'warning');
     return FALSE;
   }
@@ -367,15 +372,16 @@ function npt_nodestats_stats_retrieve() {
  * Retrieve json map from GBIFS
  */
 function geojson_retrieve() {
-  $geoJSON = file_get_contents(GBIF_NPT_SERVICE_URL . '/geo');
-  $geoFile = 'npt_nodestats/geo_world.json';
-  $geoFileURI = file_build_uri($geoFile);
-  $json_file = file_save_data($geoJSON, $geoFileURI, FILE_EXISTS_REPLACE);
+  $geo_json = file_get_contents(GBIF_NPT_SERVICE_URL . '/geo');
+  $geo_file = 'npt_nodestats/geo_world.json';
+  $geo_file_uri = file_build_uri($geo_file);
+  $json_file = file_save_data($geo_json, $geo_file_uri, FILE_EXISTS_REPLACE);
 
-  if ($geoJSON != FALSE && $json_file != FALSE) {
+  if ($geo_json != FALSE && $json_file != FALSE) {
     drupal_set_message(t('Map layer successfully retrieved.'));
     return TRUE;
-  } else {
+  }
+  else {
     drupal_set_message(t('There was an error in retrieving map. Please investigate.'), 'warning');
     return FALSE;
   }
@@ -389,7 +395,7 @@ function publication_retrieve() {
   
   foreach ($files as $file) {
     $json_file = file_get_contents(GBIF_NPT_SERVICE_URL . $file);
-    $publication_file = 'npt_nodestats/'.$file.'.json';
+    $publication_file = 'npt_nodestats/' . $file . '.json';
     $publication_saved[] = file_save_data($json_file, file_build_uri($publication_file), FILE_EXISTS_REPLACE);    
   }
 
@@ -397,7 +403,8 @@ function publication_retrieve() {
   if (in_array(FALSE, $publication_saved) == FALSE) {
     drupal_set_message(t('Publication successfully retrieved.'));
     return TRUE;
-  } else {
+  }
+  else {
     drupal_set_message(t('There was an error in retrieving publication. Please investigate.'), 'warning');
     return FALSE;
   }
@@ -461,7 +468,8 @@ function npt_nodestats_analyse() {
     
       $analysed_result['authored']['file'] = 'authored_doc.json';
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('In GBIF Public Library, so far no document found authored by scientists from @country.', array('@country' => $country)));
   }
 
@@ -486,7 +494,8 @@ function npt_nodestats_analyse() {
     
       $analysed_result['about']['file'] = 'about_doc.json';      
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of @country.', array('@country' => $country)));    
   }
   
