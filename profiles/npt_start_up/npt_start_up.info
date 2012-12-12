@@ -1,8 +1,0 @@
-name = NPT Startup
-core = 7.x
-version = 0.0
-description = An initial site setup for GBIF participants to build a customisable biodiversity portal.
-
-files[] = npt_start_up.profile
-
-dependencies[] = npt_startup

@@ -1,6 +1,9 @@
 name = NPT Blocks
 description = "Provide default blocks for NPT."
-package = GBIF
+package = GBIFS
+project = Nodes Portal Toolkit
 core = 7.x
 files [] = npt_blocks.module
 #php = 5.3
+
+dependencies[] = npt_startup_tweak

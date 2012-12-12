@@ -5,31 +5,6 @@
  *
  */
 
-define('NPTSTARTUP_THEME_NAME', 'gbifwhite2012');
-
-/**
- * 
- * Implentation of hook_block_info_alter
- * Adjust the blocks for this theme
- * @param array $blocks
- * @param string $theme
- * @param array $code_blocks
- */
-/* 
-function gbif_nptblocks_block_info_alter(&$blocks, $theme, $code_blocks){
-  switch($theme){
-    case 'gbif2012':
-      // Move the search box to the search region
-      $blocks['search']['form']['region'] = 'search';
-      break;
-    case 'gbifwhite2012':
-      // Move the search box to the search region
-      $blocks['search']['form']['region'] = 'search';
-      break;
-  }
-}
-*/
-
 /**
  * Implements hook_block_info().
  */
@@ -38,14 +13,14 @@ function npt_blocks_block_info() {
     'info' => t('NPT Startup credit'),
     'region' => 'credit_second',
     'weight' => 1,
-    'theme' => NPTSTARTUP_THEME_NAME,
+    'theme' => NPTSTARTUP_THEME,
     'status' => 1,
   );
-  $blocks['howto_publish'] = array(
+  $blocks['how_to_publish'] = array(
     'info' => t('How to publish data through the GBIF network'),
     'region' => 'sidebar_second',
     'weight' => 1,
-    'theme' => NPTSTARTUP_THEME_NAME,
+    'theme' => NPTSTARTUP_THEME,
     'status' => 1,
     'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     'pages' => 'taxonomy/term/*'
@@ -54,14 +29,14 @@ function npt_blocks_block_info() {
     'info' => t('ViBRANT and GBIF credit'),
     'region' => 'credit_stretch',
     'weight' => 1,
-    'theme' => NPTSTARTUP_THEME_NAME,
+    'theme' => NPTSTARTUP_THEME,
     'status' => 1,
   );
   $blocks['gbif_ogc_map'] = array(
     'info' => t('GBIF Species Distribution'),
     'region' => 'content',
     'weight' => 0,
-    'theme' => NPTSTARTUP_THEME_NAME,
+    'theme' => NPTSTARTUP_THEME,
     'status' => 0
   );
   return $blocks;
@@ -79,7 +54,7 @@ function npt_blocks_block_view($delta = '') {
         '#markup' => $content
       );
       break;
-    case 'howto_publish':
+    case 'how_to_publish':
       $participant_shortname = variable_get('gbif_participant_shortname');
       $participant_node = variable_get('gbif_participant_node');
       $node_value = explode('-', $participant_node);

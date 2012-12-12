@@ -2,7 +2,7 @@
 
 function scratchpads_tweaks_install(){
   // Unset all 'status' and 'warning' messages.
-  $messages = drupal_get_messages();
+/*  $messages = drupal_get_messages();
   if(isset($messages['error']) && is_array($messages['error'])){
     foreach($messages['error'] as $message){
       drupal_set_message($message, 'error');
@@ -13,7 +13,7 @@ function scratchpads_tweaks_install(){
     foreach($more_messages as $message){
       watchdog('scratchpads_tweaks_install', $message);
     }
-  }
+  } */
   // In order for testing to work, we need to go no further at this point so that
   // the minimal_install() function does not barf.
   $backtrace = debug_backtrace();

@@ -1,0 +1,9 @@
+<?php
+/**
+ * @file
+ * Get essential modules and configuration ready as part of the NPT Startup profile.
+ *
+ */
+
+// NPT Startup constants
+define('NPTSTARTUP_THEME', 'gbifwhite2012');

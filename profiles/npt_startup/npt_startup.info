@@ -1,0 +1,8 @@
+name = NPT Startup
+core = 7.x
+version = 0.5
+description = A flavour of Scratchpads that sets up initial web presence for a GBIF Participant
+
+files[] = npt_startup.profile
+
+dependencies[] = npt_startup_tweak

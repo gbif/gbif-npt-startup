@@ -1,0 +1,14 @@
+name = NPT Startup Tweak
+description = Tweaks a ScratchPads/Drupal site into a NPT Startup instance
+core = 7.x
+package = GBIFS
+version = 7.x-0.5
+
+; Features
+;features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"
+
+; Drupal core
+dependencies[] = aggregator
+
+; Scratchpads modules
+dependencies[] = scratchpads_tweaks

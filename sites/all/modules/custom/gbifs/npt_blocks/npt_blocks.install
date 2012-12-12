@@ -1,0 +1,201 @@
+<?php
+/**
+ * @file
+ * Tweak and position relevant blocks of NPT Startup.
+ *
+ */
+function npt_blocks_install() {
+  // Tweak blocks.
+  $blocks = array(
+    // Blocks provided by core modules
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'search',
+      'delta' => 'form',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => -1,
+      'region' => 'search',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'main-menu',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'menu',
+      'pages' => '',
+      'title' => '<none>',
+      'cache' => -1
+    ),
+    // Blocks provided by contributed modules
+    array(
+      'module' => 'creative_commons',
+      'delta' => 'creative_commons',
+      'theme' => 'gbifwhite2012',
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'credit_first',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    // Admin theme blocks and dashboard blocks
+    array(
+      'module' => 'system',
+      'delta' => 'main',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'system',
+      'delta' => 'help',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'help',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'login',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 10,
+      'region' => 'content',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'new',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_inactive',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'user',
+      'delta' => 'online',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'forum',
+      'delta' => 'active',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_inactive',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'forum',
+      'delta' => 'new',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_inactive',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'node',
+      'delta' => 'recent',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_main',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'comment',
+      'delta' => 'recent',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 2,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    // Blocks provided by NPT modules
+    array(
+      'module' => 'npt_setup',
+      'delta' => 'npt_setup',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    // Position and set status of Scratchapds modules
+    array(
+      'module' => 'scratchpads_blocks',
+      'delta' => 'footer_menu',
+      'theme' => 'gbifwhite2012',
+      'status' => 0,
+      'weight' => 2,
+      'region' => -1,
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+    array(
+      'module' => 'scratchpads_blocks',
+      'delta' => 'footer_logos',
+      'theme' => 'gbifwhite2012',
+      'status' => 0,
+      'weight' => 2,
+      'region' => -1,
+      'pages' => '',
+      'title' => '',
+      'cache' => -1
+    ),
+  );
+  foreach ($blocks as $block) {
+    db_merge('block')->key(array(
+      'module' => $block['module'],
+      'delta' => $block['delta'],
+      'theme' => $block['theme'],
+      'status' => $block['status'],
+      'title' => $block['title']
+    ))->fields($block)->execute();
+  } 
+}

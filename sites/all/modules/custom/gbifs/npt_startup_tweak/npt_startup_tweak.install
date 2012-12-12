@@ -1,0 +1,215 @@
+<?php
+/**
+ * @file
+ * Installation of npt_startup.
+ *
+ */
+
+function npt_startup_tweak_install() {
+  // Set the default theme to "gbifwhite2012".
+  variable_set('theme_default', 'gbifwhite2012');
+
+  // Disable default theme and the Scratchpads theme.
+  theme_disable(array(
+    'bartik',
+    'scratchpads'
+  ));
+
+  // Enable NPT default theme.
+  theme_enable(array(
+    'gbifwhite2012'
+  ));
+
+  // Default site name and slogan. To be replaced by values from setup form
+  variable_set('site_name', 'NPT Startup');
+  variable_set('site_slogan', 'Participating in Development');
+  
+  // Disable unnecessary modules of Scratchpads
+  module_disable(array(
+    'scratchpads_setup'
+  ));
+  
+  // Enable relevant modules
+  module_enable(array(
+    'npt_blocks',
+    'npt_setup',
+  ), FALSE);
+  
+  variable_set('creative_commons_block_display_type', '80x15.png');
+
+  // Display warnings on development machines in the GBIFS
+  if(strpos($_SERVER['SERVER_ADDR'], '192.38.28') === 0){
+    variable_set('error_level', ERROR_REPORTING_DISPLAY_ALL);
+  }
+
+  // Set the comment form defaults.
+  foreach (node_type_get_names() as $type => $name) {
+    if ($type != 'forum') {
+      variable_set('comment_form_location_' . $type, COMMENT_FORM_SEPARATE_PAGE);
+    }
+  }
+  
+  npt_startup_vocabularies();
+
+  // Insert default pre-defined node types
+  $types = array(
+    array(
+      'type' => 'article',
+      'name' => st('Article'),
+      'base' => 'node_content',
+      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
+  );
+  foreach ($types as $type) {
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    scratchpads_tweaks_add_body_field($type);
+  }
+  
+  // Insert default pages
+  npt_startup_default_page();  
+
+  menu_rebuild();
+}
+
+function npt_startup_vocabularies() {
+  // Insert default pre-defined vocabularies
+  $vocabularies = array(
+    'article_type' => array(
+      'name' => 'Article Type',
+      'machine_name' => 'article_type',
+      'description' => 'Term to categorise articles',
+      'hierarchy' => '0',
+      'module' => 'taxonomy',
+      'weight' => '0',
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+    'species_information' => array(
+      'name' => 'Species',
+      'machine_name' => 'species_info',
+      'description' => 'A default site-wide biological classification',
+      'hierarchy' => '0',
+      'module' => 'taxonomy',
+      'weight' => '0',
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+  );
+  foreach ($vocabularies as $vocabulary) {
+    $vocabulary = (object)$vocabulary;
+    taxonomy_vocabulary_save($vocabulary);
+  }
+  // Insert default terms for article_type
+  $terms = array(
+    array(
+      'name' => 'news'
+    ),
+    array(
+      'name' => 'blog'
+    ),
+    array(
+      'name' => 'log'
+    )
+  );
+  $vocabulary = taxonomy_vocabulary_machine_name_load('article_type');
+  foreach ($terms as $term) {
+    $term = (object)$term;
+    $term->vid = $vocabulary->vid;
+    taxonomy_term_save($term);
+  }
+
+  // Insert default biological classification
+  $vocabulary = taxonomy_vocabulary_machine_name_load('species_info');
+  //itis_term_taxonomy_vocabulary_biological_classification($vocabulary, '1');
+}
+
+
+/**
+ * Default how to publish data to GBIF page
+ */
+function npt_startup_default_page() {
+  $bodytext = '';
+  $bodytext .= '<p>Data publishing in GBIF consists of three steps:</p>';
+  $bodytext .= '<p><strong>1. Become a registered GBIF data publisher;<br />';
+  $bodytext .= '2. Review the GBIF data publishing manuals and decide your choice of tools;<br />';
+  $bodytext .= '3. Prepare your data and register them with GBIF.</strong>';
+  $bodytext .= '</p>';
+  $bodytext .= '<p>These straightforward steps are required to ensure that the data published through GBIF are interoperable and discoverable; and that publishers are accredited through endorsement, to enable quality control and proper attribution. Here is a brief explanation of each step:</p>';
+  $bodytext .= '<p><strong>1 Become endorsed and registered as a GBIF data publisher:</strong></p>';
+  $bodytext .= '<p class="rteindent1">1.1 Check if your organization is already listed on <a href="http://gbrds.gbif.org/browse/agents?agentType=ORGANISATION" target="_blank">this page</a>.<br />';
+  $bodytext .= 'If it is, inform the listed contacts and proceed to step 2.</p>';
+  $bodytext .= '<p class="rteindent1">1.2 If your organization is not listed, you&rsquo;ll need to be endorsed by a GBIF node to be registered. Please contact the GBIF helpdesk (helpdesk[at]gbif[dot]org) in your region to begin. It is encouraged that a data publisher has good communication with a GBIF node before their data are published. The information needed for registration are:</p>';
+  $bodytext .= '<p class="rteindent2">1.2.1 Name or your organization;<br />';
+  $bodytext .= '1.2.2 Name and email address of an administrative contact;<br />';
+  $bodytext .= '1.2.3 Name and email address of a technical contact;<br />';
+  $bodytext .= '1.2.4 The name of the GBIF participant node by which the data publisher should be endorsed.</p>';
+  $bodytext .= '<p class="rteindent1">1.3 To ensure that data are credible and that someone has responsibility for data maintenance, currently only an organization is entitled to become a data publisher in GBIF. If you are an individual, you will need to affiliate with an organization registered with GBIF, or with an organization willing to register, following the procedures above.</p>';
+  $bodytext .= '<p><strong>2 Review GBIF data publishing manuals and decide your choice of tools:</strong></p>';
+  $bodytext .= '<p class="rteindent1">2.1 GBIF has a suite of manuals to guide users through preparing their data resources for publishing. We currently support metadata, occurrence records and taxonomic checklists as the data types, hence there are three document maps to follow. These manuals will help you to understand the standards and tools we use in GBIF, and determine the option that best suits your situation.<br />';
+  $bodytext .= '2.2 For metadata, see <a href="http://www.gbif.org/orc/?doc_id=3246" target="_blank">Document Map for Metadata Publishing</a>;<br />';
+  $bodytext .= '2.3 For occurrence data, see <a href="http://www.gbif.org/orc/?doc_id=3251" target="_blank">Document Map for Occurrence Data Publishing</a>;<br />';
+  $bodytext .= '2.4 For taxonomic checklists, see&nbsp; <a href="http://www.gbif.org/orc/?doc_id=3248" target="_blank">Document Map for Checklist Publishing</a>.</p>';
+  $bodytext .= '<p><strong>3 Prepare your data and register them with GBIF</strong></p>';
+  $bodytext .= '<p class="rteindent1">3.1 After deciding the best method, you can start to prepare the data in the standard format.<br />';
+  $bodytext .= '3.2 Once your data are in place, install the tools you need, such as the Integrated Publishing Toolkit (IPT) or use other tools we provide online, such as the GBIF Spreadsheet Processor.<br />';
+  $bodytext .= '3.3 The last step is to register your data resource. With IPT, the registration is automated, while with Darwin Core Archive, TAPIR, BioCASe or other formats/protocols, you will need to provide the URL and send an email to the helpdesk to complete the process.</p>';
+  $bodytext .= '<p>If you have any questions during the publishing process, please feel free to contact the GBIF Helpdesk at the Secretariat:<br />';
+  $bodytext .= 'helpdesk[at]gbif[dot]org</p>';
+  
+  $text_summary = '';
+  $text_summary .= '<p>Data publishing in GBIF consists of three steps:</p>';
+  $text_summary .= '<p>1. Become a registered GBIF data publisher;<br />';
+  $text_summary .= '2. Review the GBIF data publishing manuals and decide your choice of tools;<br />';
+  $text_summary .= '3. Prepare your data and register them with GBIF.';
+  $text_summary .= '</p>';
+  
+  $node = new stdClass();
+  $node->type = 'page';
+  node_object_prepare($node);
+  $node->title = t('How to publish data through the GBIF network');
+  $node->language = LANGUAGE_NONE;
+  $node->body[$node->language][0]['value'] = $bodytext;
+  $node->body[$node->language][0]['summary'] = text_summary($text_summary);
+  $node->body[$node->language][0]['format'] = 'filtered_html';
+  $node->status = 1;
+  $node->comment = 1;
+  $node->promote = 0;
+  $node->revision = 0;
+  $node->changed = $_SERVER['REQUEST_TIME'];
+  $node->created = $_SERVER['REQUEST_TIME'];
+  node_submit($node);
+  node_save($node);
+  
+  // Use this node as the front page
+  variable_set('howto_publish_page', 'node/' . $node->nid);
+}
