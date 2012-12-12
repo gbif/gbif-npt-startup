@@ -7,3 +7,15 @@
 
 // NPT Startup constants
 define('NPTSTARTUP_THEME', 'gbifwhite2012');
+
+/**
+ * Implements hook_menu_link_alter()
+ */
+function npt_startup_tweak_menu_link_alter(&$item) {
+  // Hide some Scratchpads menu links.
+  $items_to_hide = array('article', 'biblio', 'biblio/import', 'gallery');
+  if (in_array($item['link_path'], $items_to_hide)) {
+    $item['hidden'] = 1;
+  }
+  
+}

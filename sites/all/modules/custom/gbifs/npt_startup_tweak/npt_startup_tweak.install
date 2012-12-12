@@ -32,6 +32,7 @@ function npt_startup_tweak_install() {
   // Enable relevant modules
   module_enable(array(
     'npt_blocks',
+    'npt_news',
     'npt_setup',
   ), FALSE);
   
