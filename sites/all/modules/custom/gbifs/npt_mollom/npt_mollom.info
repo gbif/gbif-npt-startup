@@ -1,6 +1,7 @@
 name = NPT mollom keys
 description = Based on ScratchPads mollom settings, provide another set of keys that works.
-package = GBIF
+package = GBIFS
+project = Nodes Portal Toolkit
 core = "7.x"
 dependencies[] = "mollom"
 dependencies[] = "scratchpads_mollom"

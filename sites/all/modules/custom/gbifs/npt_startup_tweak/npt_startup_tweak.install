@@ -29,6 +29,7 @@ function npt_startup_tweak_install() {
     'npt_blocks',
     'npt_news',
     'npt_setup',
+    'npt_mollom',
   ), TRUE);
   
   variable_set('creative_commons_block_display_type', '80x15.png');
@@ -97,7 +98,7 @@ function npt_startup_vocabularies() {
         ),
       ),
     ),
-    'species_information' => array(
+    'species_info' => array(
       'name' => 'Species',
       'machine_name' => 'species_info',
       'description' => 'A default site-wide biological classification',
@@ -145,8 +146,9 @@ function npt_startup_vocabularies() {
   }
 
   // Insert default biological classification
-  $vocabulary = taxonomy_vocabulary_machine_name_load('species_info');
-  //itis_term_taxonomy_vocabulary_biological_classification($vocabulary, '1');
+  $default_biological_vocabulary = taxonomy_vocabulary_machine_name_load('species_info');
+  $default_biological_vocabulary->biological_classification = 1;
+  itis_term_taxonomy_vocabulary_biological_classification($default_biological_vocabulary, '1');
 }
 
 
