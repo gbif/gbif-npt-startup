@@ -11,4 +11,32 @@
 function npt_setup_install() {
   // Set the npt_setup to first step - this will increment through each of the steps
   variable_set('npt_setup', 0);
+  
+  // Make sure the setup block in dashboard is in position
+  $values = array(
+    array(
+      'module' => 'npt_setup',
+      'delta' => 'npt_setup',
+      'theme' => 'scratchpads_admin',
+      'status' => 1,
+      'weight' => 0,
+      'region' => 'dashboard_sidebar',
+      'pages' => '',
+      'title' => '',
+      'cache' => -1      
+    )
+  );
+  foreach ($values as $record) {
+    db_merge('block')->key(array(
+      'module' => $record['module'],
+      'delta' => $record['delta'],
+      'theme' => $record['theme'],
+      'status' => $record['status'],
+      'weight' => $record['weight'],
+      'region' => $record['region'],
+      'pages' => $record['pages'],
+      'title' => $record['title'],
+      'cache' => $record['cache'],
+    ))->fields($record)->execute();
+  } 
 }

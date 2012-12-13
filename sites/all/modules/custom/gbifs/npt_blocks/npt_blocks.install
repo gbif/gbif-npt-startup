@@ -153,18 +153,6 @@ function npt_blocks_install() {
       'title' => '',
       'cache' => -1
     ),
-    // Blocks provided by NPT modules
-    array(
-      'module' => 'npt_setup',
-      'delta' => 'npt_setup',
-      'theme' => 'scratchpads_admin',
-      'status' => 1,
-      'weight' => 0,
-      'region' => 'dashboard_sidebar',
-      'pages' => '',
-      'title' => '',
-      'cache' => -1
-    ),
     // Position and set status of Scratchapds modules
     array(
       'module' => 'scratchpads_blocks',

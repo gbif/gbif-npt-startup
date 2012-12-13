@@ -6,11 +6,6 @@
  *
  */
 
-/*********************************************************************************************
-  * 
-  * HOOKS
-  * 
-  ********************************************************************************************/
 /**
  * Implementation of hook_default_flows().
  */
@@ -107,11 +102,9 @@ function npt_setup_module_implements_alter(&$implementations, $hook) {
   }
 }
 
-/*********************************************************************************************
- * 
+/** 
  * SETUP FORMS
- * 
- ********************************************************************************************/
+ */
 function npt_setup_welcome_form($form, &$form_state) {
   // Sanity check - ensure this hasn't already been completed
   // If it hasn't been filled in, npt_setup will be integer 0 - 6
@@ -505,11 +498,9 @@ function npt_setup_complete_page() {
   );
 }
 
-/*********************************************************************************************
- * 
- * BLOCKS
- * 
- ********************************************************************************************/
+/** 
+ * Implements hook_block_info()
+ */
 function npt_setup_block_info() {
   // This example comes from node.module.
   $blocks['npt_setup'] = array(

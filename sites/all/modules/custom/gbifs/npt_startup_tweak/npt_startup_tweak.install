@@ -24,17 +24,12 @@ function npt_startup_tweak_install() {
   variable_set('site_name', 'NPT Startup');
   variable_set('site_slogan', 'Participating in Development');
   
-  // Disable unnecessary modules of Scratchpads
-  module_disable(array(
-    'scratchpads_setup'
-  ));
-  
   // Enable relevant modules
   module_enable(array(
     'npt_blocks',
     'npt_news',
     'npt_setup',
-  ), FALSE);
+  ), TRUE);
   
   variable_set('creative_commons_block_display_type', '80x15.png');
 
