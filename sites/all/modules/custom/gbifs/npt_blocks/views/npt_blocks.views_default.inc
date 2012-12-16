@@ -82,5 +82,38 @@ function npt_blocks_views_default_views() {
  * Implementation of hook_views_default_views_alter(&$views)
  */
 function npt_blocks_views_default_views_alter(&$views) {
+  // Alter species_overview_map by scratchpads_species  
   unset($views['species_overview_map']->display['default']->handler->display->display_options['arguments']);
+  unset($views['species_overview_map']->display['default']->handler->display->display_options['filters']['status']);
+  unset($views['species_overview_map']->display['default']->handler->display->display_options['filters']['type']);
+  
+  // Add no results behaviour for species biblio
+  $species_biblio_display_default = $views['species_biblio']->display['default'];
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['id'] = 'area';
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['table'] = 'views';
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['field'] = 'area';
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['empty'] = FALSE;
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['content'] = 'Currently no local literature data hosted for this taxon.';
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['format'] = 'filtered_html';
+  $species_biblio_display_default->handler->display->display_options['empty']['area']['tokenize'] = 0;
+  
+  // Add no results behaviour for species map
+  $species_map_display_default = $views['species_map']->display['default'];
+  $species_map_display_default->handler->display->display_options['empty']['area']['id'] = 'area';
+  $species_map_display_default->handler->display->display_options['empty']['area']['table'] = 'views';
+  $species_map_display_default->handler->display->display_options['empty']['area']['field'] = 'area';
+  $species_map_display_default->handler->display->display_options['empty']['area']['empty'] = FALSE;
+  $species_map_display_default->handler->display->display_options['empty']['area']['content'] = 'Currently no local map data hosted for this taxon.';
+  $species_map_display_default->handler->display->display_options['empty']['area']['format'] = 'filtered_html';
+  $species_map_display_default->handler->display->display_options['empty']['area']['tokenize'] = 0;
+  
+  // Add no results behavious for species specimen observation
+  $species_speciemen_observation_display_default = $views['species_specimen_observation']->display['default'];
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['id'] = 'area';
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['table'] = 'views';
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['field'] = 'area';
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['empty'] = FALSE;
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['content'] = 'Currently no local specimen data hosted for this taxon.';
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['format'] = 'filtered_html';
+  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['tokenize'] = 0;
 }
