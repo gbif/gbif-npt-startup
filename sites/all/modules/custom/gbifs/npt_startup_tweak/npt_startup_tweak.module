@@ -16,6 +16,5 @@ function npt_startup_tweak_menu_link_alter(&$item) {
   $items_to_hide = array('article', 'biblio', 'biblio/import', 'gallery');
   if (in_array($item['link_path'], $items_to_hide)) {
     $item['hidden'] = 1;
-  }
-  
+  } 
 }

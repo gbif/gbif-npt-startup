@@ -532,7 +532,7 @@ section #block-gbif-spdsht-available-templates {
 #region-sidebar-first { padding-bottom: 40px; }
 #region-sidebar-second { padding-bottom: 40px; }
 
-#block-npt-blocks-howto-publish {
+#block-npt-blocks-how-to-publish {
   background-color: rgba(30,50, 10, 0.078125);
   padding:10px;
   border-radius: 5px;
@@ -541,12 +541,12 @@ section #block-gbif-spdsht-available-templates {
   margin-left: 30px;
 }
 
-.front-page-sidebar div#block-npt-blocks-howto-publish {
+.front-page-sidebar div#block-npt-blocks-how-to-publish {
   width: 245px;
 }
 
-#block-npt-blocks-howto-publish div.item-list ul { margin: 0; list-style: square; }
-#block-npt-blocks-howto-publish div.item-list ul li { margin: 0; }
+#block-npt-blocks-how-to-publish div.item-list ul { margin: 0; list-style: square; }
+#block-npt-blocks-how-to-publish div.item-list ul li { margin: 0; }
 
 #block-views-eol-images-front-block {
   

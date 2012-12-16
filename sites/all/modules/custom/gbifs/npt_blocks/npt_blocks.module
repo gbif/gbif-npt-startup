@@ -105,3 +105,15 @@ function npt_blocks_views_api() {
     'path' => drupal_get_path('module', 'npt_blocks') . '/views'
   );
 }
+
+/**
+ * Implements hook_ctools_plugin_api()
+ */
+function npt_blocks_ctools_plugin_api($module, $api) {
+  if ($module == 'context' && $api == 'context') {
+    return array('version' => '3');
+  }
+  if ($module == 'delta' && $api == 'delta') {
+    return array('version' => '3');
+  }
+}

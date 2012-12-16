@@ -121,13 +121,15 @@ function npt_blocks_views_default_views() {
   $handler->display->display_options['filters']['machine_name']['table'] = 'taxonomy_vocabulary';
   $handler->display->display_options['filters']['machine_name']['field'] = 'machine_name';
   $handler->display->display_options['filters']['machine_name']['value'] = array(
-    'species' => 'species',
+    'species_info' => 'species_info',
   );
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block');
   $handler->display->display_options['block_description'] = 'Latest taxa for front page';
-  
+
+  $views[$view->name] = $view;
+    
   return $views;
 }
 
