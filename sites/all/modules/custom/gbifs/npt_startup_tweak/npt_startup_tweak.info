@@ -2,6 +2,7 @@ name = NPT Startup Tweak
 description = Tweaks a ScratchPads/Drupal site into a NPT Startup instance
 core = 7.x
 package = GBIFS
+project = Nodes Portal Toolkit
 version = 7.x-0.5
 
 ; Features
@@ -12,3 +13,6 @@ dependencies[] = aggregator
 
 ; Scratchpads modules
 dependencies[] = scratchpads_tweaks
+
+; Customised modules
+dependencies[] = eolapi
