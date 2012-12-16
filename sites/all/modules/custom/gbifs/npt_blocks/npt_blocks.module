@@ -33,9 +33,9 @@ function npt_blocks_block_info() {
     'status' => 1,
   );
   $blocks['gbif_ogc_map'] = array(
-    'info' => t('GBIF Species Distribution'),
+    'info' => t('GBIF Global Distribution'),
     'region' => 'content',
-    'weight' => 0,
+    'weight' => 10,
     'theme' => NPTSTARTUP_THEME,
     'status' => 0
   );
@@ -112,15 +112,15 @@ function npt_blocks_block_view($delta = '') {
         '#markup' => $content
       );
       */
-        $block['content'] = '<h2 class="block-title">GBIF Global Distribution</h2>' . theme('gm3_map', array(
-       'map' => array(
-         'libraries' => array(
-           'eol_gbif_maps_overlay' => array(
-             'module' => 'eol_gbif_maps',
-             'taxon_id' => $guid
-           )
-         )
-       )
+      $block['content'] = '<h2 class="block-title">GBIF Global Distribution</h2>' . theme('gm3_map', array(
+        'map' => array(
+          'libraries' => array(
+            'eol_gbif_maps_overlay' => array(
+              'module' => 'eol_gbif_maps',
+              'taxon_id' => $guid
+            )
+          )
+        )
       ));
       break;
   }
