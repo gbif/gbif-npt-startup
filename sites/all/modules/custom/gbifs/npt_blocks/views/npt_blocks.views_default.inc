@@ -77,3 +77,10 @@ function npt_blocks_views_default_views() {
   $views[$view->name] = $view;
   return $views;
 }
+
+/**
+ * Implementation of hook_views_default_views_alter(&$views)
+ */
+function npt_blocks_views_default_views_alter(&$views) {
+  unset($views['species_overview_map']->display['default']->handler->display->display_options['arguments']);
+}
