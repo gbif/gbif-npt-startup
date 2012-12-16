@@ -64,14 +64,6 @@ function scratchpads_species_context_default_contexts(){
         )
       )
     );
-    if ($name == 'overview') {
-      $context->reactions['block']['blocks']['npt_blocks-gbif_ogc_map'] = array(
-          'module' => 'npt_blocks',
-          'delta' => 'gbif_ogc_map',
-          'region' => 'content',
-          'weight' => '0',
-      );
-    }
     if(count($views = scratchpads_species_get_context_views($context->name))){
       $weight = 0;
       foreach($views as $view){
@@ -85,7 +77,6 @@ function scratchpads_species_context_default_contexts(){
         $weight++;
       }
     }
-    
     $context->condition_mode = 0;
     $contexts[$context->name] = $context;
   }
