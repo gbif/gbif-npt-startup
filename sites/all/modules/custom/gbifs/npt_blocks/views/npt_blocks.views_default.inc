@@ -108,12 +108,12 @@ function npt_blocks_views_default_views_alter(&$views) {
   $species_map_display_default->handler->display->display_options['empty']['area']['tokenize'] = 0;
   
   // Add no results behavious for species specimen observation
-  $species_speciemen_observation_display_default = $views['species_specimen_observation']->display['default'];
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['id'] = 'area';
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['table'] = 'views';
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['field'] = 'area';
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['empty'] = FALSE;
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['content'] = 'Currently no local specimen data hosted for this taxon.';
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['format'] = 'filtered_html';
-  $species_speciemen_observation_display_default->handler->display->display_options['empty']['area']['tokenize'] = 0;
+  $species_speciemen_display_default = $views['species_specimen']->display['default'];
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['id'] = 'area';
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['table'] = 'views';
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['field'] = 'area';
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['empty'] = FALSE;
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['content'] = 'Currently no local specimen data hosted for this taxon.';
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['format'] = 'filtered_html';
+  $species_speciemen_display_default->handler->display->display_options['empty']['area']['tokenize'] = 0;
 }

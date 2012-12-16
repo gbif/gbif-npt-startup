@@ -1698,7 +1698,7 @@ function scratchpads_species_views_default_views(){
    * 
    ********************************************************************************************/
   $view = new view();
-  $view->name = 'species_specimen_observation';
+  $view->name = 'species_specimen';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
@@ -1708,7 +1708,7 @@ function scratchpads_species_views_default_views(){
   $view->context = 'species_specimens';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   /* Display: Master */
-        $handler = $view->new_display('default', 'Master', 'default');
+  $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Specimens';
   $handler->display->display_options['css_class'] = 'alpha omega';
   $handler->display->display_options['access']['type'] = 'perm';
