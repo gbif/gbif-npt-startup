@@ -14,6 +14,10 @@ dependencies[] = aggregator
 ; Scratchpads modules
 dependencies[] = scratchpads_tweaks
 
+; Contributed modules
+dependencies[] = delta
+dependencies[] = delta_ui
+
 ; Customised modules
 dependencies[] = eolapi
 dependencies[] = darwincore
