@@ -131,7 +131,7 @@ function npt_news_views_default_views() {
   $handler->display->display_options['menu']['context'] = 0;
 
   /* Display: Block */
-  $handler = $view->new_display('block', 'Block', 'block_1');
+  $handler = $view->new_display('block', 'Block', 'block_news_front');
   $handler->display->display_options['defaults']['pager'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['pager']['options']['items_per_page'] = '3';
