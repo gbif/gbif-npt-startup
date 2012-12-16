@@ -16,3 +16,4 @@ dependencies[] = scratchpads_tweaks
 
 ; Customised modules
 dependencies[] = eolapi
+dependencies[] = darwincore
