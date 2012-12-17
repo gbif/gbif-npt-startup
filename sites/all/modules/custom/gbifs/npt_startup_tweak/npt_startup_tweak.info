@@ -1,9 +1,9 @@
 name = NPT Startup Tweak
 description = Tweaks a ScratchPads/Drupal site into a NPT Startup instance
-core = 7.x
+version = 7.x-0.9
 package = GBIFS
 project = Nodes Portal Toolkit
-version = 7.x-0.5
+core = 7.x
 
 ; Features
 ;features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"

@@ -1,9 +1,9 @@
-name = "npt_news"
-description = "Necessary settings to create news page base on article content type."
-core = "7.x"
-package = "GBIFS"
-version = "7.x-0.0"
-project = "npt_news"
+name = NPT News
+description = Necessary settings to create news page base on article content type.
+version = 7.x-0.9
+package = GBIFS
+project = Nodes Portal Toolkit
+core = 7.x
 
 dependencies[] = "ctools"
 dependencies[] = "features"
