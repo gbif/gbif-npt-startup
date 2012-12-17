@@ -5,4 +5,4 @@ package = GBIFS
 project = Nodes Portal Toolkit
 core = 7.x
 
-dependencies[] = "scratchpads_solr"
+dependencies[] = scratchpads_solr

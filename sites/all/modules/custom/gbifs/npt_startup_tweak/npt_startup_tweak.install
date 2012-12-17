@@ -30,6 +30,7 @@ function npt_startup_tweak_install() {
     'npt_news',
     'npt_setup',
     'npt_mollom',
+    'npt_solr',
   ), TRUE);
   
   variable_set('creative_commons_block_display_type', '80x15.png');
