@@ -23,7 +23,7 @@ function npt_nodestats_menu() {
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
     'menu_name' => 'main-menu',
-    'weight' => 1
+    'weight' => 19
   );
   $items['admin/config/nodestats'] = array(
     'title' => 'NPT Node Statistics',
