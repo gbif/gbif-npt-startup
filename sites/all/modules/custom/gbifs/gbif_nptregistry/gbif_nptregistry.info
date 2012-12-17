@@ -1,8 +1,0 @@
-name = GBIF NPT Registry
-description = "Accessing GBIF Registry API and register this NPT instance to a GBIF Node."
-package = GBIF
-core = 7.x
-files [] = gbif_nptregistry.module
-files [] = gbif_nptregistry.install
-files [] = gbif_nptregistry.admin.inc
-#php = 5.3

@@ -1,7 +1,0 @@
-name = "GBIF Checklist Bank taxonomy import provider"
-description = "Interacts with the GBIF Checklist Bank API and retrieve names."
-package = GBIF
-core = 7.x
-dependencies[] = tcsdc
-files [] = gbif_checklist.module
-files [] = gbif_checklist.info
