@@ -334,7 +334,7 @@ function scratchpads_tweaks_install_help_install_filters(){
         'weight' => 1,
         'status' => 1,
         'settings' => array(
-          'allowed_html' => '<div> <iframe> <hr> <i> <a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <table> <thead> <tbody> <tr> <th> <td> <caption> <img> <pre> <p> <sub> <sup> <br> <h1> <h2> <h3> <h4> <h5> <h6> <u>',
+          'allowed_html' => '<span> <div> <iframe> <hr> <i> <a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <table> <thead> <tbody> <tr> <th> <td> <caption> <img> <pre> <p> <sub> <sup> <br> <h1> <h2> <h3> <h4> <h5> <h6> <u>',
           'filter_html_help' => 0,
           'filter_html_nofollow' => 0
         )
@@ -346,6 +346,10 @@ function scratchpads_tweaks_install_help_install_filters(){
       ),
       // HTML corrector filter.
       'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1
+      ),
+      'biblio_filter_reference' => array(
         'weight' => 10,
         'status' => 1
       ),
@@ -943,4 +947,35 @@ function scratchpads_tweaks_update_7033(){
     $options[] = 'status';
     variable_set('node_options_' . $bundle, $options);
   }
+}
+
+/**
+ * Add <span> tags
+ */
+function scratchpads_tweaks_update_7034(){
+  scratchpads_tweaks_install_help_install_filters();
+}
+
+/**
+ * Add HTMLPurifier module.
+ * 
+ * Removed code as could result in an error if run on a site once the 
+ * htmlpurifier module has been removed.
+ */
+function scratchpads_tweaks_update_7036(){}
+
+/**
+ * Restore old filters.
+ */
+function scratchpads_tweaks_update_7038(){
+  module_enable(array(
+    'emptyparagraphkiller'
+  ));
+  scratchpads_tweaks_install_help_install_filters();
+  module_disable(array(
+    'htmlpurifier'
+  ));
+  drupal_uninstall_modules(array(
+    'htmlpurifier'
+  ));
 }
