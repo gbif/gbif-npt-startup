@@ -1,0 +1,43 @@
+body {
+    color: #bdb7b1;
+    background: #2d2d2d;
+}
+a:link {
+    color: #fff;
+}
+a:hover {
+    color: #fff;
+}
+a:visited {
+    color: #fff;
+}
+.maintain {
+    width: 550px;
+    margin: 0 auto;
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+.maintain p.sorry {
+    font-size: 30px;
+    font-weight: bold;
+}
+.maintain p.something {
+    font-size: 14px;
+    font-style: italic;
+    line-height: 26px;
+}
+.icon {
+    /* background: transparent url(maintainicon.png) no-repeat top left; */
+    width: 128px;
+    height: 128px;
+    margin: 0 auto;
+    border: 1px solid #777;
+    -webkit-box-shadow: 1px 0px 5px 5px rgba(0, 0, 0, 0.4);
+    box-shadow: 1px 0px 5px 5px rgba(0, 0, 0, 0.4);
+}
+.copy {
+    width: 300px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 40px;
+}
