@@ -60,13 +60,7 @@ class eolapi_plugin_style_eolapi extends views_plugin_style{
           )
         ),
         'content' => array(
-          '#markup' => '<script type="text/javascript">
-	document.write(\'<div class="eolapi-empty" data-view-name="' . $this->view->name . '" data-tid="' . $this->view->args[0] . '"><img src="' . base_path() . drupal_get_path('module', 'eolapi') . '/images/load.gif"/></div>\');
-</script>
-<noscript>
-	<p class="error">' . t('Please enable Javascript, or reload the page.') . '</p>
-</noscript>
-	'
+          '#markup' => '<script type="text/javascript">document.write(\'<div class="eolapi-empty" data-view-name="' . $this->view->name . '" data-tid="' . $this->view->args[0] . '"><img src="' . base_path() . drupal_get_path('module', 'eolapi') . '/images/load.gif"/></div>\');</script><noscript><p class="error">' . t('Please enable Javascript, or reload the page.') . '</p></noscript>'
         )
       );
     }
