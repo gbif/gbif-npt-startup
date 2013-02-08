@@ -36,7 +36,7 @@ function node_definition_form() {
   // Need to get a list of country node here
   $form['node_info']['node_country'] = array(
     '#type' => 'select',
-    '#title' => st('GBIF participant:'),
+    '#title' => st('GBIF Participant:'),
     '#required' => TRUE,
     '#options' => $nodelist,
     '#description' => st('Only GBIF country participants are available at the moment.'),
