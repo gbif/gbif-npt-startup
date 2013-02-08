@@ -17,3 +17,5 @@ sites/all/libraries/filemakerapi/
 scratchpad_1_database.php
 cache/
 index2.php
+sites/all/libraries/dwca
+sites/all/modules/custom/inbio
