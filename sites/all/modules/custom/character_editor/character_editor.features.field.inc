@@ -1126,6 +1126,7 @@ other|Other',
             'element_class' => '',
             'element_option' => '- None -',
             'links_option' => 1,
+            'append_vocabulary' => 1,
             'separator_option' => ', ',
             'wrapper_class' => '',
             'wrapper_option' => '- None -',
@@ -1146,7 +1147,7 @@ other|Other',
         'module' => 'tree_widget',
         'settings' => array(),
         'type' => 'tree_widget',
-        'weight' => '2'
+        'weight' => '-3'
       )
     )
   );

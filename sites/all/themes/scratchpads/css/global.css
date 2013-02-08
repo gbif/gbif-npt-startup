@@ -180,9 +180,27 @@ table th a img{
   margin-left: 2px;
 }
 
+sup, sub {
+  height: 0;
+  vertical-align: baseline;
+  position: relative;
+  font-size:90%;
+}
+sup {
+  bottom: 1ex;
+}
+sub {
+  top: .5ex;
+}
+
 /************************ Layout *********************/ 
 
-
+/* Sitemap */
+.site-map-box>.content{
+  column-count: 3;
+  -moz-column-count: 3;
+  -webkit-column-count: 3;
+}
 
 /* Slide top & bottom */
 
@@ -199,6 +217,17 @@ table th a img{
 
 #zone-slide-top-wrapper form#user-login-form{
   padding: 20px 0 30px 0;
+}
+
+#zone-slide-top-wrapper .form-item-remember-me{
+  clear:both;
+  float:right !important;
+}
+#zone-slide-top-wrapper .form-item-remember-me input{
+  margin-bottom:2px;
+}
+#zone-slide-top-wrapper .form-item-remember-me label{
+  margin-left:5px !important;
 }
 
 #zone-slide-top-wrapper form#user-login-form .item-list{
@@ -229,9 +258,9 @@ display: inline;
   margin-left: 20px;
 }
 
-#zone-slide-top-wrapper form#user-login-form div.clearfix .form-actions,
-#zone-slide-top-wrapper form#user-login-form div.clearfix .form-item{
-  float: right;
+#zone-slide-top-wrapper .form-actions,
+#zone-slide-top-wrapper .form-item{
+  float: left;
 }
 
 #zone-slide-top-wrapper form#user-login-form .form-item-openid-identifier div.description{
@@ -546,6 +575,9 @@ h2.site-name {
   position: relative;
   top: -30px;
 }
+.block-species-biblio-block, .block-species-spm-block{
+  float:none !important;
+}
 
 
 /************************ BLOCKS *********************/ 
@@ -566,7 +598,8 @@ h2.site-name {
 }
 
 .view-species-media .view-content ul li.views-row,
-.page-gallery .file{	
+.page-gallery .file,
+.lexicon-list .file{	
   float: left;
   margin: 0 10px 10px 0;
   border: 1px solid #999;
@@ -599,23 +632,23 @@ h2.site-name {
 
 /* STRIPY DIV GROUPS */
 
-.node .stripy-div-group{
+.stripy-div-group{
   margin: 20px 0;
   border-top: 1px solid #D9DADD;
 }
 
-.node .stripy-div-group .field{
+.stripy-div-group .field{
   border-width: 1px;
   border-color: #D9DADD;
   border-style: none solid solid solid;
   clear: left;
 }
 
-.node .stripy-div-group .odd{
+.stripy-div-group .odd{
   background: #F1F4FB;
 }
 
-.node .stripy-div-group .field-label{
+.stripy-div-group .field-label{
   float: left;
   width: 200px;
   text-align: right;
@@ -623,16 +656,16 @@ h2.site-name {
   font-weight: bold;
 }
 
-.node .stripy-div-group .field-label,
-.node .stripy-div-group .field-items{
+.stripy-div-group .field-label,
+.stripy-div-group .field-items{
   padding: 6px 0;
 }
 
-.node .stripy-div-group .field-items{
+.stripy-div-group .field-items{
   margin-left: 205px;
 }
 
-.node .stripy-div-group .field-items{ 
+.stripy-div-group .field-items{ 
   border-left: 1px solid #D9DADD;
   padding-left: 5px;
 }
@@ -736,6 +769,14 @@ table.biblio td{
   float: left;
 }
 
+/* Embeded floated images ; for imported sites */
+#region-content div.field-name-body img.embeded_image_float_right {
+  float: right;
+}
+#region-content div.field-name-body img.embeded_image_float_left {
+  float: left;
+}
+
 /****************** BLOG ****************/
 .view-blog-page .views-row-odd,
 .view-blog-page .views-row-even{
@@ -809,10 +850,6 @@ article.node-event div.field-name-field-event-date {
   display: block;
 }
 
-#cboxContent .file .content .field{
-  margin: 8px 0 0 0;
-}
-
 #cboxContent .file .content .field div.field-label{
   float: left;
   width: 160px;
@@ -822,20 +859,12 @@ article.node-event div.field-name-field-event-date {
   margin-left: 180px;
 }
 
-#cboxContent .file .content .field-name-field-cc-licence{
-  position: absolute;
-  bottom: 5px;
-  right: 40px;
-  text-align: right;
-  margin: 0;
-}
-
 .file .field-name-field-description div.field-items{
   max-width: 500px!important;
 }
 
-#cboxContent .file .content .field-name-field-cc-licence div.field-items{
-  margin-left: 0;
+.field.field-name-field-creator .field-items .field-item:before{
+  content:'\a9  ';
 }
 
 /****************** SLICKGRID *****************/
@@ -936,6 +965,9 @@ width: 300px;
 }
 
 /****************** Comments *****************/
+li.comment-add{
+  font-weight:700;
+}
 #comments h2{
   background: transparent!important;
   color: #3E3E3E;

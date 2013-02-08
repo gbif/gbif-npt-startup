@@ -25,6 +25,7 @@ function spm_field_default_fields(){
             'element_class' => '',
             'element_option' => '- None -',
             'links_option' => 1,
+            'append_vocabulary' => 1,
             'separator_option' => ', ',
             'wrapper_class' => '',
             'wrapper_option' => '- None -'
@@ -60,7 +61,7 @@ function spm_field_default_fields(){
           'size' => 60
         ),
         'type' => 'taxonomy_autocomplete',
-        'weight' => '-1000'
+        'weight' => '-3'
       )
     )
   );
@@ -236,7 +237,7 @@ function spm_field_default_fields(){
           'progress_indicator' => 'throbber'
         ),
         'type' => 'media_multiselect',
-        'weight' => '100'
+        'weight' => '2'
       )
     )
   );
@@ -449,7 +450,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '4'
+        'weight' => '1'
       )
     )
   );
@@ -1159,7 +1160,7 @@ function spm_field_default_fields(){
           'rows' => '5'
         ),
         'type' => 'text_textarea',
-        'weight' => '2'
+        'weight' => '0'
       )
     )
   );

@@ -195,8 +195,15 @@ function scratchpads_tweaks_preprocess_comment(&$variables){
  */
 function scratchpads_preprocess_block(&$variables){
   $block = $variables['block'];
-  if(preg_match('/^views-front_page_blocks/', $block->bid) && $block->subject == 'Recent Biblios'){
-    $block->subject = 'Recent Literature';
+  if(preg_match('/^views-front_page_blocks/', $block->bid)){
+    switch($block->subject){
+      case 'Recent Biblios':
+        $block->subject = t('Recently Added Literature');
+        break;
+      case 'Recent Taxon Descriptions':
+        $block->subject = t('Recently Added Taxon Descriptions');
+        break;
+    }
   }
 }
 
@@ -407,7 +414,8 @@ function scratchpads_tweaks_add_body_field($type, $label = 'Body', $weight = 0){
       'bundle' => $type->type,
       'label' => $label,
       'widget' => array(
-        'type' => 'text_textarea_with_summary'
+        'type' => 'text_textarea_with_summary',
+        'weight' => 1
       ),
       'settings' => array(
         'display_summary' => TRUE

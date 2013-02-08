@@ -19,14 +19,14 @@ class PublicationUIController extends EntityDefaultUIController{
         'publication_admin_overview_form'
       ),
       'access arguments' => array(
-        'administer publication'
+        'administer publications'
       ),
       'file' => 'publication.admin.inc',
       'file path' => drupal_get_path('module', $this->entityInfo['module']),
       'type' => MENU_LOCAL_TASK
     );
     // Change the add page menu to multiple types of entities
-    $items[$this->path . '/add'] = array(
+    $items['publication/add'] = array(
       'title' => 'Add a publication',
       'description' => 'Add a new publication',
       'page callback' => 'publication_add_page',
@@ -41,7 +41,7 @@ class PublicationUIController extends EntityDefaultUIController{
     );
     // Add menu items to add each different type of entity.
     foreach(publication_get_types() as $type){
-      $items[$this->path . '/add/' . $type->type] = array(
+      $items['publication/add/' . $type->type] = array(
         'title' => 'Add ' . $type->label,
         'page callback' => 'publication_form_wrapper',
         'page arguments' => array(
@@ -53,7 +53,7 @@ class PublicationUIController extends EntityDefaultUIController{
         'access callback' => 'publication_access',
         'access arguments' => array(
           'edit',
-          'edit ' . $type->type
+          $type->type
         ),
         'file' => 'publication.admin.inc',
         'file path' => drupal_get_path('module', $this->entityInfo['module'])
@@ -88,7 +88,7 @@ class PublicationUIController extends EntityDefaultUIController{
       ),
       'access callback' => 'publication_access',
       'access arguments' => array(
-        'update',
+        'edit',
         1
       ),
       'weight' => 0,
@@ -106,7 +106,7 @@ class PublicationUIController extends EntityDefaultUIController{
       ),
       'access callback' => 'publication_access',
       'access arguments' => array(
-        'update',
+        'edit',
         1
       ),
       'type' => MENU_LOCAL_TASK,
@@ -260,7 +260,7 @@ function publication_form_wrapper($form_id, $publication = null){
  * with only a publication type defined.
  */
 function publication_edit_form($form, &$form_state, $publication){
-	// Jump to a particular step
+  // Jump to a particular step
   if(isset($_GET['step']) & !$form_state['submitted']){
     $form_state['current_group'] = $_GET['step'];
   }
@@ -350,7 +350,8 @@ function publication_edit_form_submit(&$form, &$form_state){
   $publication = entity_ui_controller('publication')->entityFormSubmitBuildEntity($form, $form_state);
   // Save the publication and go back to the list of publications
   // Add in created and changed times.
-  if($publication->is_new = isset($publication->is_new) ? $publication->is_new : 0){
+  $publication->is_new = isset($publication->is_new);
+  if($publication->is_new){
     $publication->created = time();
     $publication->uid = $user->uid;
   }

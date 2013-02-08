@@ -185,14 +185,14 @@ function itis_term_fields_per_vocabulary(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The scientific name of the valid or accepted taxon identified as the currently accepted name used for a given invalid or not accepted name. Each name that is in synonymy (junior synonyms, obsolete combinations, etc.) must be connected to one accepted or valid name.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'taxonomy',
             'settings' => array(),
-            'type' => 'taxonomy_term_reference_link',
-            'weight' => 10
+            'type' => 'hidden',
+            'weight' => -10
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -252,14 +252,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The author(s) associated with the name of a taxon. This can include the year of publication and brackets, e.g. "(Quoy and Gaimard, 1832)".'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 12
+            'weight' => -11
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -310,14 +310,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The page number the taxon was described on in the protologue.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 13
+            'weight' => -6
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -361,14 +361,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The label associated with the specific level of a taxonomic hierarchy, e.g. "Family", "Genus" or "Species".'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 0
+            'weight' => -20
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -423,11 +423,11 @@ function itis_term_fields(){
         'description' => '',
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'node_reference',
             'settings' => array(),
             'type' => 'node_reference_default',
-            'weight' => 14
+            'weight' => -7
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -474,14 +474,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('An explanation regarding why a given scientific name is judged to be invalid or not accepted.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 11
+            'weight' => -8
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -524,14 +524,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('Indicator of an occurrence of a plant hybrid at the generic level.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 5
+            'weight' => -15
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -574,14 +574,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('A category indicator positioned between the first and second parts of a binomial/polynomial taxonomic name.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 6
+            'weight' => -14
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -624,14 +624,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('A category indicator located within a polynomial taxonomic name. Allowed values are: "ssp." (plants and fungi), "subsp." (animals and monerans), "var.", "subvar.", "f.", "subf.", and "X".'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 7
+            'weight' => -13
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -674,14 +674,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('A category indicator located within a polynomial taxonomic name.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 8
+            'weight' => -12
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -731,14 +731,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The singular or first part of a scientifically accepted label for an occurrence of Taxonomic Units. For uninomials (1-part names like family or genus names) this will be the only name field entered. For binomials/polynomials, this field will be used for the first part of the name (the genus name). The names in this position require the initial letter to be capitalized.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 1
+            'weight' => -19
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -789,14 +789,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The second part of a scientifically accepted label for a binomial/polynomial occurrence of Taxonomic Units (the species epithet).'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 2
+            'weight' => -18
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -847,14 +847,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The third portion of a scientifically accepted label for a polynomial occurrence of Taxonomic Units (e.g. subspecies name).'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 3
+            'weight' => -17
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -905,14 +905,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('The fourth part of a scientifically accepted label for a polynomial occurrence of Taxonomic Units.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 4
+            'weight' => -16
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -956,14 +956,14 @@ function itis_term_fields(){
         'bundle' => 'tags',
         'default_value' => NULL,
         'deleted' => '0',
-        'description' => '',
+        'description' => t('Current standing of an occurrence of Taxonomic Units.'),
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'list',
             'settings' => array(),
             'type' => 'list_default',
-            'weight' => 9
+            'weight' => -9
           )
         ),
         'entity_type' => 'taxonomy_term',
@@ -1016,11 +1016,11 @@ function itis_term_fields(){
         'description' => '',
         'display' => array(
           'default' => array(
-            'label' => 'above',
+            'label' => 'inline',
             'module' => 'text',
             'settings' => array(),
             'type' => 'text_default',
-            'weight' => 15
+            'weight' => -5
           )
         ),
         'entity_type' => 'taxonomy_term',

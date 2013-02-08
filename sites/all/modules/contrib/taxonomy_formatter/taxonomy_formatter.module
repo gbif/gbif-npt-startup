@@ -14,6 +14,7 @@ function taxonomy_formatter_field_formatter_info() {
       'field types' => array('taxonomy_term_reference'),
       'settings'  => array(
         'links_option' => FALSE,
+        'append_vocabulary' => FALSE,
         'separator_option' => ', ',
         'element_option' => '- None -',
         'wrapper_option' => '- None -',
@@ -36,6 +37,12 @@ function taxonomy_formatter_field_formatter_settings_form($field, $instance, $vi
     '#description'    => t('When checked terms will be displayed as links'),
     '#default_value'  => $settings['links_option'],
   );
+  $element['append_vocabulary'] = array(
+    '#type'           => 'checkbox',
+    '#title'          => t('Append Vocabulary'),
+    '#description'    => t('When checked the name of the vocabulary that a term is from will be appended to the term name.'),
+    '#default_value'  => $settings['append_vocabulary'],
+  );
   $element['separator_option'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Separator'),
@@ -57,6 +64,7 @@ function taxonomy_formatter_field_formatter_settings_form($field, $instance, $vi
       'h5'        => 'h5',
       'strong'    => 'h6',
       'em'        => 'h7',
+      'li'        => 'li',
     ),
   );
   $element['element_class'] = array(
@@ -80,6 +88,8 @@ function taxonomy_formatter_field_formatter_settings_form($field, $instance, $vi
       'h4'        => 'h4',
       'h5'        => 'h5',
       'p'         => 'p',
+      'ul'        => 'ul',
+      'ol'        => 'ol',
       'strong'    => 'strong',
       'em'        => 'em',
       ),
@@ -101,6 +111,9 @@ function taxonomy_formatter_field_formatter_settings_summary($field, $instance, 
   $summary = t('The Terms will be displayed separated by "@separator"', array('@separator' => $settings['separator_option']));
   if ($settings['links_option']) {
     $summary .= t('<br>The terms will link to the term pages');
+  }
+  if ($settings['append_vocabulary']) {
+    $summary .= t('<br>The vocabulary will be displayed');
   }
   if ($settings['element_option']!="- None -") {
     $summary .= t('<br>Elements will be wrapped in a "@element" tag',  array('@element' => $settings['element_option']));
@@ -144,13 +157,21 @@ function taxonomy_formatter_field_formatter_view($entity_type, $entity, $field, 
     $termid = $item['tid'];
     $term[] = $termid;
     $actterm = entity_load('taxonomy_term', $term);
-    if (isset($actterm[$termid])) {
+    if(isset($actterm[$termid])) {
       $uri = entity_uri('taxonomy_term', $actterm[$termid]);
+      $link_text = $actterm[$termid]->name;
+      if ($settings['append_vocabulary']){
+        $vocabularies = drupal_static(__FUNCTION__, array());
+        if(!isset($vocabularies[$actterm[$termid]->vid])){
+          $vocabularies[$actterm[$termid]->vid] = taxonomy_vocabulary_load($actterm[$termid]->vid);
+        }
+        $link_text .= ' ('.$vocabularies[$actterm[$termid]->vid]->name.')';
+      }
       if ($settings['links_option']) {
-        $formatted .= $elementwrap[0] . l($actterm[$termid]->name, $uri['path'], $uri['options']) . $elementwrap[1] . $separator;
+        $formatted .= $elementwrap[0] . l($link_text, $uri['path'], $uri['options']) . $elementwrap[1] . $separator;
       }
       else {
-        $formatted .= $elementwrap[0] . check_plain($actterm[$termid]->name) . $elementwrap[1] . $separator;
+        $formatted .= $elementwrap[0] . check_plain($link_text) . $elementwrap[1] . $separator;
       }
     }
   }

@@ -1,6 +1,6 @@
 <?php
 // DEFINE the file extensions that we allow.
-DEFINE('FIELD_MEDIA_FILE_EXTENSIONS', 'png gif jpg mp3 avi mp4');
+DEFINE('FIELD_MEDIA_FILE_EXTENSIONS', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv wmv ico');
 include_once ('scratchpads_media_gallery.features.inc');
 
 /**
@@ -211,7 +211,7 @@ function scratchpads_media_gallery_theme(){
  * Implementation of hook_node_view_alter().
  */
 function scratchpads_media_gallery_node_view($node, $view_mode, $langcode){
-  if($node->type == 'media_gallery' && arg(0) == 'node' && is_numeric(arg(1)) && !arg(2)){
+  if($node->type == 'media_gallery' && arg(0) == 'node' && $view_mode != 'search_index' && is_numeric(arg(1)) && !arg(2)){
     drupal_goto('gallery', array(
       'query' => array(
         'f' => array(

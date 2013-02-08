@@ -59,7 +59,7 @@ function scratchpads_media_gallery_field_default_fields(){
           'summary_rows' => 5
         ),
         'type' => 'text_textarea_with_summary',
-        'weight' => '-4'
+        'weight' => '1'
       )
     )
   );
@@ -131,7 +131,7 @@ function scratchpads_media_gallery_field_default_fields(){
           'progress_indicator' => 'throbber'
         ),
         'type' => 'media_multiselect',
-        'weight' => '-3'
+        'weight' => '2'
       )
     )
   );
@@ -453,6 +453,7 @@ function scratchpads_media_gallery_field_default_fields(){
             'element_class' => '',
             'element_option' => '- None -',
             'links_option' => 1,
+            'append_vocabulary' => 1,
             'separator_option' => ', ',
             'wrapper_class' => '',
             'wrapper_option' => '- None -'
@@ -462,10 +463,18 @@ function scratchpads_media_gallery_field_default_fields(){
         ),
         'file_styles_colorbox' => array(
           'label' => 'above',
-          'module' => 'taxonomy',
-          'settings' => array(),
-          'type' => 'taxonomy_term_reference_plain',
-          'weight' => 0
+          'module' => 'taxonomy_formatter',
+          'settings' => array(
+            'element_class' => '',
+            'element_option' => '- None -',
+            'links_option' => 1,
+            'append_vocabulary' => 1,
+            'separator_option' => ', ',
+            'wrapper_class' => '',
+            'wrapper_option' => '- None -'
+          ),
+          'type' => 'taxonomy_term_reference_csv',
+          'weight' => '1'
         ),
         'linked_node' => array(
           'label' => 'above',
@@ -495,7 +504,7 @@ function scratchpads_media_gallery_field_default_fields(){
           'size' => 60
         ),
         'type' => 'taxonomy_autocomplete',
-        'weight' => '10'
+        'weight' => '-3'
       )
     )
   );
@@ -515,6 +524,7 @@ function scratchpads_media_gallery_field_default_fields(){
             'element_class' => '',
             'element_option' => '- None -',
             'links_option' => 1,
+            'append_vocabulary' => 1,
             'separator_option' => ', ',
             'wrapper_class' => '',
             'wrapper_option' => '- None -'
@@ -570,6 +580,7 @@ function scratchpads_media_gallery_field_default_fields(){
             'element_class' => '',
             'element_option' => '- None -',
             'links_option' => 1,
+            'append_vocabulary' => 1,
             'separator_option' => ', ',
             'wrapper_class' => '',
             'wrapper_option' => '- None -'
@@ -645,28 +656,28 @@ function scratchpads_media_gallery_field_default_fields(){
       'bundle' => 'image',
       'default_value' => array(
         0 => array(
-          'licence' => '5'
+          'licence' => variable_get('creative_commons_block_licence_type', CC_BY)
         )
       ),
       'deleted' => '0',
       'description' => '',
       'display' => array(
         'default' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'module' => 'creative_commons',
           'settings' => array(),
           'type' => 'creative_commons_small_image',
           'weight' => 2
         ),
         'file_styles_colorbox' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'module' => 'creative_commons',
           'settings' => array(),
           'type' => 'creative_commons_small_image',
           'weight' => '4'
         ),
         'file_styles_square_thumbnail' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'settings' => array(),
           'type' => 'hidden',
           'weight' => 0
@@ -724,21 +735,21 @@ function scratchpads_media_gallery_field_default_fields(){
       'bundle' => 'audio',
       'default_value' => array(
         0 => array(
-          'licence' => '5'
+          'licence' => variable_get('creative_commons_block_licence_type', CC_BY)
         )
       ),
       'deleted' => '0',
       'description' => '',
       'display' => array(
         'default' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'module' => 'creative_commons',
           'settings' => array(),
           'type' => 'creative_commons_small_image',
           'weight' => 2
         ),
         'file_styles_colorbox' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'module' => 'creative_commons',
           'settings' => array(),
           'type' => 'creative_commons_small_image',
@@ -803,21 +814,21 @@ function scratchpads_media_gallery_field_default_fields(){
       'bundle' => 'video',
       'default_value' => array(
         0 => array(
-          'licence' => '5'
+          'licence' => variable_get('creative_commons_block_licence_type', CC_BY)
         )
       ),
       'deleted' => '0',
       'description' => '',
       'display' => array(
         'default' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'module' => 'creative_commons',
           'settings' => array(),
           'type' => 'creative_commons_small_image',
           'weight' => 2
         ),
         'file_styles_colorbox' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'module' => 'creative_commons',
           'settings' => array(),
           'type' => 'creative_commons_small_image',
@@ -995,17 +1006,33 @@ function scratchpads_media_gallery_field_default_fields(){
       'display' => array(
         'default' => array(
           'label' => 'above',
-          'module' => 'taxonomy',
-          'settings' => array(),
-          'type' => 'taxonomy_term_reference_plain',
-          'weight' => 5
+          'module' => 'taxonomy_formatter',
+          'settings' => array(
+            'element_class' => '',
+            'element_option' => '- None -',
+            'links_option' => 1,
+            'append_vocabulary' => 1,
+            'separator_option' => ', ',
+            'wrapper_class' => '',
+            'wrapper_option' => '- None -',
+          ),
+          'type' => 'taxonomy_term_reference_csv',
+          'weight' => '5'
         ),
         'file_styles_colorbox' => array(
           'label' => 'above',
-          'module' => 'taxonomy',
-          'settings' => array(),
-          'type' => 'taxonomy_term_reference_plain',
-          'weight' => 5
+          'module' => 'taxonomy_formatter',
+          'settings' => array(
+            'element_class' => '',
+            'element_option' => '- None -',
+            'links_option' => 1,
+            'append_vocabulary' => 1,
+            'separator_option' => ', ',
+            'wrapper_class' => '',
+            'wrapper_option' => '- None -',
+          ),
+          'type' => 'taxonomy_term_reference_csv',
+          'weight' => '5'
         ),
         'file_styles_square_thumbnail' => array(
           'label' => 'above',
@@ -1819,9 +1846,10 @@ function scratchpads_media_gallery_field_default_fields(){
         ),
         'file_styles_colorbox' => array(
           'label' => 'above',
+          'module' => 'text',
           'settings' => array(),
-          'type' => 'hidden',
-          'weight' => 0
+          'type' => 'text_default',
+          'weight' => 7
         ),
         'file_styles_large' => array(
           'label' => 'above',

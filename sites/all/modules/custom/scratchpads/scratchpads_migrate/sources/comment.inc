@@ -4,7 +4,13 @@ class ScratchpadsCommentMigration extends DrupalComment6Migration{
   // Turn of comment notifcation
   protected function preImport(){
     parent::preImport();
-    variable_set('comment_notify_node_types', array());
+    // Chnage the desaitnation to my own class
+    $this->destination = new ScratchpadsMigrateDestinationComment('comment_node_' . $this->destinationType);
+    $array_node_types = array();
+    foreach(node_type_get_names() as $type => $name){
+      $array_node_types[$type] = 0;
+    }
+    variable_set('comment_notify_node_types', $array_node_types);
     variable_set('comment_notify_node_notify_default_mailalert', 0);
   }
 
@@ -22,7 +28,8 @@ class ScratchpadsCommentMigration extends DrupalComment6Migration{
       'path'
     ));
     $this->addUnmigratedSources(array(
-      'format'
+      'format',
+      'vid'
     ));
   }
 
@@ -40,5 +47,28 @@ class ScratchpadsCommentMigration extends DrupalComment6Migration{
     }
     variable_set('comment_notify_node_types', $array_node_types);
     variable_set('comment_notify_node_notify_default_mailalert', 1);
+  }
+
+  protected function commentQuery($sourceType){
+    $query = Database::getConnection('default', $this->sourceConnection)->select('comments', 'c')->fields('c', array(
+      'cid',
+      'pid',
+      'nid',
+      'uid',
+      'subject',
+      'comment',
+      'hostname',
+      'timestamp',
+      'status',
+      'thread',
+      'name',
+      'mail',
+      'homepage',
+      'format'
+    ));
+    $query->join('node', 'n', 'c.nid = n.nid');
+    $query->addField('n', 'vid');
+    $query->condition('n.type', $sourceType);
+    return $query;
   }
 }

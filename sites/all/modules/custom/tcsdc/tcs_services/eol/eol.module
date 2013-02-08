@@ -124,6 +124,13 @@ function eol_classifications_js($form, $form_state){
     $form_to_return[$key]['#name'] = 'eol-import-id';
   }
   $output = drupal_render($form_to_return);
+  if(count($options) == 1){
+    // Odd bug with #states that seems to stop what I've written above from
+    // working.
+    // It may well be the case that what I've written shouldn't work, but this
+    // is a work around.
+    $output .= '<input id="edit-eol-import-id-randomgibberish" class="form-radio" type="radio" value="randomgibberish" name="eol-import-id" style="display:none;">';
+  }
   drupal_get_messages();
   return $output;
 }
@@ -179,5 +186,9 @@ function eol_submit($form, $form_state){
     // 'Remaining x of y operations' message will be confusing here.
     'error_message' => t('The import has encountered an error.')
   );
+  // Update the vocabulary to state that we've downloaded from EOL.
+  $vocabulary = taxonomy_vocabulary_load($form_state['values']['taxonomy_vid']);
+  $vocabulary->description = trim($vocabulary->description . ' ' . t('(Imported from EOL)'));
+  taxonomy_vocabulary_save($vocabulary);
   batch_set($batch);
 }

@@ -304,3 +304,53 @@ function scratchpads_media_gallery_update_7007(){
   features_include();
   field_features_rebuild('scratchpads_media_gallery');
 }
+
+/**
+ * Set the site's default licence on media fields.
+ */
+function scratchpads_media_gallery_update_7008(){
+  // Update all instances of field_cc_licence.
+  $info = field_info_field('field_cc_licence');
+  foreach($info['bundles'] as $entity => $bundles){
+    foreach($bundles as $bundle){
+      $instance = field_info_instance($entity, 'field_cc_licence', $bundle);
+      $instance['default_value'][0]['licence'] = variable_get('creative_commons_block_licence_type', CC_BY);
+      field_update_instance($instance);
+    }
+  }
+}
+
+/**
+ * Update the extensions allowed.
+ */
+function scratchpads_media_gallery_update_7009(){
+  $media = field_info_field('field_media');
+  foreach($media['bundles'] as $entity_type => $bundles){
+    foreach($bundles as $bundle_name){
+      $instance = field_info_instance($entity_type, 'field_media', $bundle_name);
+      $instance['settings']['file_extensions'] = FIELD_MEDIA_FILE_EXTENSIONS;
+      field_update_instance($instance);
+    }
+  }
+}
+
+/**
+ * Display the label for the Licence field.
+ */
+function scratchpads_media_gallery_update_7010(){
+  module_load_include('features.field.inc', 'scratchpads_media_gallery');
+  $fields = scratchpads_media_gallery_field_default_fields();
+  field_update_instance($fields['file-image-field_keywords']['field_instance']);
+  field_update_instance($fields['file-image-field_cc_licence']['field_instance']);
+  field_update_instance($fields['file-video-field_cc_licence']['field_instance']);
+  field_update_instance($fields['file-audio-field_cc_licence']['field_instance']);
+}
+
+/**
+ * Display the creator field in the colorbox.
+ */
+function scratchpads_media_gallery_update_7011(){
+  module_load_include('features.field.inc', 'scratchpads_media_gallery');
+  $fields = scratchpads_media_gallery_field_default_fields();
+  field_update_instance($fields['file-image-field_creator']['field_instance']);
+}
