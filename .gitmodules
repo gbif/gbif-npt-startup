@@ -1,6 +1,0 @@
-[submodule "sites/all/libraries/dwca"]
-	path = sites/all/libraries/dwca
-	url = https://github.com/Sufrostico/DwC-A-PHP-Library.git
-[submodule "sites/all/modules/custom/inbio"]
-	path = sites/all/modules/custom/inbio
-	url = https://github.com/Sufrostico/DwC-A-Drupal-Importer.git
