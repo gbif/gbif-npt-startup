@@ -1,9 +1,14 @@
 <?php
+/**
+ * @file
+ * Installation of the npt_mollom module
+ *
+ */
 
 /**
  * Implements hook_install().
  */
-function npt_mollom_install(){
+function npt_mollom_install() {
   variable_set('mollom_private_key', '953d18dc259f271319ba597e3214028e');
   variable_set('mollom_public_key', '088e7d836431f75bd385e8cbbb61ccb2');
 }
@@ -11,7 +16,7 @@ function npt_mollom_install(){
 /**
  * Implements hook_update_N
  */
-function npt_mollom_update_7001(){
+function npt_mollom_update_7001() {
   module_enable(array(
     'mollom'
   ));
