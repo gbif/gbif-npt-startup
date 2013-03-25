@@ -1,0 +1,43 @@
+<p>Data publishing in GBIF consists of three steps:</p>
+<ol type="I">
+	<li><strong>Become a registered GBIF data publisher;</strong></li>
+	<li><strong>Review the GBIF data publishing manuals and decide your choice of tools;</strong></li>
+	<li><strong>Prepare your data and register them with GBIF.</strong></li>
+</ol>
+<p>These straightforward steps are required to ensure that the data published through GBIF are interoperable and discoverable; and that publishers are accredited through endorsement, to enable quality control and proper attribution. Here is a brief explanation of each step:</p>
+<strong>I. Become endorsed and registered as a GBIF data publisher</strong>:
+  <ol type="1">
+  	<li>Check if your organization is already listed on <a href="http://gbrds.gbif.org/browse/agents?agentType=14010">this page</a>.<br />
+  		If it is, inform the listed contacts and proceed to step II.</li>
+  	<li>If your organization is not listed, you&rsquo;ll need to be endorsed by a GBIF node to be registered. It is encouraged that a data publisher has good communication with a GBIF node before its data are published. A list of GBIF nodes and their contacts can be found at <a href="http://www.gbif.org/communications/directory-of-contacts/nodes-committee/">this page</a>, or you can contact the <a href="mailto:helpdesk@gbif.org">GBIF helpdesk</a> if you cannot identify a suitable node. The GBIF Secretariat will then seek formal endorsement of your organization. The information needed for registration is:
+  		<ol type="a">
+  			<li>Name of your organization;</li>
+  			<li>Name and email address of an administrative contact;</li>
+  			<li>Name and email address of a technical contact;</li>
+  			<li>The name of the GBIF participant node by which the data publisher should be endorsed.</li>
+  		</ol>
+  	</li>
+  	<li>To ensure that data are credible and that someone has responsibility for data maintenance, currently only <em>an organization</em> is entitled to become a data publisher in GBIF. If you are an individual, you will need to affiliate with an organization registered with GBIF, or with an organization willing to register, following the procedures above.</li>
+  </ol>
+<strong>II. Review GBIF data publishing manuals and decide your choice of tools</strong>:
+  <ol>
+  	<li>
+  		GBIF has a suite of manuals to guide users through preparing their data resources for publishing. We currently support metadata, occurrence records and taxonomic checklists as the data types, hence there are three document maps to follow. These manuals will help you to understand the standards and tools we use in GBIF, and determine the option that best suits your situation.</li>
+  	<li>
+  		For metadata, see <a href="http://www.gbif.org/informatics/discoverymetadata/publishing/">Document Map for Metadata Publishing</a>;</li>
+  	<li>
+  		For occurrence data, see <a href="http://www.gbif.org/informatics/primary-data/publishing/">Document Map for Occurrence Data Publishing</a>;</li>
+  	<li>
+  		For taxonomic checklists, see &nbsp;<a href="http://www.gbif.org/informatics/name-services/sharing-taxonomic-data/">Document Map for Checklist Publishing</a>.</li>
+  </ol>
+<strong>III. Prepare your data and register them with GBIF</strong>
+	<ol>
+		<li>
+			After deciding the best method, you can start to prepare the data in the standard format.</li>
+		<li>
+			Once your data are in place, install the tools you need, such as the <a href="http://code.google.com/p/gbif-providertoolkit/">Integrated Publishing Toolkit (IPT)</a>, or use other tools we provide online, such as the <a href="http://tools.gbif.org/spreadsheet-processor/">GBIF Spreadsheet Processor</a>.</li>
+		<li>
+			The last step is to register your data resource. With IPT, the registration is automated, while with Darwin Core Archive, TAPIR, BioCASe or other formats/protocols, you will need to provide the URL and send an email to the helpdesk to complete the process.</li>
+	</ol>
+<p>If you have any questions during the publishing process, please feel free to contact the GBIF Helpdesk at the Secretariat:</p>
+<p>helpdesk[at]gbif[dot]org</p>

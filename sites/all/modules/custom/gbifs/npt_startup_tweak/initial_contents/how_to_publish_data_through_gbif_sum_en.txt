@@ -1,0 +1,6 @@
+<p>Data publishing in GBIF consists of three steps:</p>
+<ol type="I">
+	<li><strong>Become a registered GBIF data publisher;</strong></li>
+	<li><strong>Review the GBIF data publishing manuals and decide your choice of tools;</strong></li>
+	<li><strong>Prepare your data and register them with GBIF.</strong></li>
+</ol>
