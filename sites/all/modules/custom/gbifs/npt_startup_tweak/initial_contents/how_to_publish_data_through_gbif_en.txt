@@ -21,23 +21,16 @@
   </ol>
 <strong>II. Review GBIF data publishing manuals and decide your choice of tools</strong>:
   <ol>
-  	<li>
-  		GBIF has a suite of manuals to guide users through preparing their data resources for publishing. We currently support metadata, occurrence records and taxonomic checklists as the data types, hence there are three document maps to follow. These manuals will help you to understand the standards and tools we use in GBIF, and determine the option that best suits your situation.</li>
-  	<li>
-  		For metadata, see <a href="http://www.gbif.org/informatics/discoverymetadata/publishing/">Document Map for Metadata Publishing</a>;</li>
-  	<li>
-  		For occurrence data, see <a href="http://www.gbif.org/informatics/primary-data/publishing/">Document Map for Occurrence Data Publishing</a>;</li>
-  	<li>
-  		For taxonomic checklists, see &nbsp;<a href="http://www.gbif.org/informatics/name-services/sharing-taxonomic-data/">Document Map for Checklist Publishing</a>.</li>
+  	<li>GBIF has a suite of manuals to guide users through preparing their data resources for publishing. We currently support metadata, occurrence records and taxonomic checklists as the data types, hence there are three document maps to follow. These manuals will help you to understand the standards and tools we use in GBIF, and determine the option that best suits your situation.</li>
+  	<li>For metadata, see <a href="http://www.gbif.org/informatics/discoverymetadata/publishing/">Document Map for Metadata Publishing</a>;</li>
+  	<li>For occurrence data, see <a href="http://www.gbif.org/informatics/primary-data/publishing/">Document Map for Occurrence Data Publishing</a>;</li>
+  	<li>For taxonomic checklists, see &nbsp;<a href="http://www.gbif.org/informatics/name-services/sharing-taxonomic-data/">Document Map for Checklist Publishing</a>.</li>
   </ol>
 <strong>III. Prepare your data and register them with GBIF</strong>
 	<ol>
-		<li>
-			After deciding the best method, you can start to prepare the data in the standard format.</li>
-		<li>
-			Once your data are in place, install the tools you need, such as the <a href="http://code.google.com/p/gbif-providertoolkit/">Integrated Publishing Toolkit (IPT)</a>, or use other tools we provide online, such as the <a href="http://tools.gbif.org/spreadsheet-processor/">GBIF Spreadsheet Processor</a>.</li>
-		<li>
-			The last step is to register your data resource. With IPT, the registration is automated, while with Darwin Core Archive, TAPIR, BioCASe or other formats/protocols, you will need to provide the URL and send an email to the helpdesk to complete the process.</li>
+		<li>After deciding the best method, you can start to prepare the data in the standard format.</li>
+		<li>Once your data are in place, install the tools you need, such as the <a href="http://code.google.com/p/gbif-providertoolkit/">Integrated Publishing Toolkit (IPT)</a>, or use other tools we provide online, such as the <a href="http://tools.gbif.org/spreadsheet-processor/">GBIF Spreadsheet Processor</a>.</li>
+		<li>The last step is to register your data resource. With IPT, the registration is automated, while with Darwin Core Archive, TAPIR, BioCASe or other formats/protocols, you will need to provide the URL and send an email to the helpdesk to complete the process.</li>
 	</ol>
 <p>If you have any questions during the publishing process, please feel free to contact the GBIF Helpdesk at the Secretariat:</p>
 <p>helpdesk[at]gbif[dot]org</p>

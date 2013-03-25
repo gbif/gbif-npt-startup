@@ -62,12 +62,12 @@ function npt_startup_tweak_install() {
     scratchpads_tweaks_add_body_field($type);
   }
   
+  npt_startup_default_multilingual();
+
   // Insert default pages
   npt_startup_default_page();  
-
   menu_rebuild();
   
-  npt_startup_default_multilingual()
 }
 
 function npt_startup_vocabularies() {
@@ -192,7 +192,7 @@ function npt_startup_default_page() {
   $node->type = 'page';
   node_object_prepare($node);
   $node->title = t('How to publish data through the GBIF network');
-  $node->language = 'en';
+  $node->language = LANGUAGE_NONE;
   $node->body[$node->language][0]['value'] = $bodytext;
   $node->body[$node->language][0]['summary'] = text_summary($text_summary);
   $node->body[$node->language][0]['format'] = 'filtered_html';
