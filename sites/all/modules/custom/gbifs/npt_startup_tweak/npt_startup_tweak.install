@@ -66,6 +66,8 @@ function npt_startup_tweak_install() {
   npt_startup_default_page();  
 
   menu_rebuild();
+  
+  npt_startup_default_multilingual()
 }
 
 function npt_startup_vocabularies() {
@@ -205,4 +207,53 @@ function npt_startup_default_page() {
   
   // Use this node as the front page
   variable_set('howto_publish_page', 'node/' . $node->nid);
+}
+
+/**
+ * Default multilingual settings
+ * This function essentially mimic the form submission at
+ * admin/config/regional/language/configure
+ * Please refer to function locale_languages_configure_form_submit (at line 675)
+ * in modules/locale/locale.admin.inc
+ */
+function npt_startup_default_multilingual() {
+  $negotiation = array(
+    'locale-url' => array(
+      'types' => array(
+        '0' => 'language_content',
+        '1' => 'language',
+        '2' => 'language_url',
+      ),
+      'callbacks' => array(
+        'language' => 'locale_language_from_url',
+        'switcher' => 'locale_language_switcher_url',
+        'url_rewrite' => 'locale_langauge_url_rewrite_url',
+      ),
+      'file' => 'includes/locale.inc',
+      'weight' => '-8',
+      'name' => 'URL',
+      'description' => 'Determine the language from the URL (Path prefix or domain).',
+      'config' => 'admin/config/regional/language/configure/url',
+    ),
+    'language-default' => array(
+      'callbacks' => array(
+        'language' => 'language_from_default',
+      ),
+      'weight' => '10',
+      'name' => 'Default',
+      'description' => 'Use the default site language (English).',
+    ),
+  );
+  
+  $providers_weight = array(
+    'locale-url' => '-8',
+    'locale-session' => '-6',
+    'locale-user' => '-4',
+    'locale-browser' => '-2',
+    'language-default' => '10',
+  );
+  
+  language_negotiation_set('language', $negotiation);
+  variable_set("locale_language_providers_weight_$type", $providers_weight);
+  language_types_set();
 }
