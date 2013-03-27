@@ -17,6 +17,13 @@ function scratchpads_tweaks_init(){
       drupal_goto('admin/appearance/settings');
     }
   }
+  // Set the expire/domain/params on the has_js cookie to the same as the session
+  // cookie to prevent any issues, especially with the "Issues..." block.
+  if(!empty($_COOKIE['has_js'])){
+    $params = session_get_cookie_params();
+    $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
+    setcookie('has_js', 1, $expire, $params['path'], $params['domain'], FALSE, $params['httponly']);
+  }
 }
 
 /**
@@ -313,6 +320,18 @@ function scratchpads_tweaks_menu_alter(&$items){
   if(isset($items['node/%node/clone'])){
     $items['node/%node/clone']['title'] = t('Clone');
     $items['node/%node/clone']['type'] = MENU_LOCAL_TASK;
+  }
+}
+
+/**
+ * Implements hook_mail_alter().
+ */
+function scratchpads_tweaks_mail_alter(&$message){
+  if($message['id'] == 'install_welcome-admin'){
+    $message['from'] = 'Scratchpads Team <no-reply@scratchpads.eu>';
+    $message['headers']['From'] = $message['from'];
+    $message['headers']['Sender'] = $message['from'];
+    $message['headers']['Return-Path'] = $message['from'];
   }
 }
 

@@ -388,6 +388,8 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
           watchdog('scratchpads_migrate', 'Could not find group id for group node %group_nid', array(
             '%group_nid' => $row->group_nid
           ), WATCHDOG_ERROR);
+          unset($row->og_public);
+          unset($row->group_nid); // Avoid this getting associated to the wrong group
         }
       }else{ // This is part of a publication group so unset it
         unset($row->og_public);
@@ -438,6 +440,7 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
       if(isset($row->{$longTextField})){
         $row->{$longTextField} = ScratchpadsNodeMigration::parseImages($row->{$longTextField}, $row);
         $row->{$longTextField} = ScratchpadsNodeMigration::parseStyles($row->{$longTextField});
+        $row->{$longTextField} = ScratchpadsNodeMigration::lowercaseHtml($row->{$longTextField});
         $row->{$longTextField} = preg_replace('/\[(\/?)no-glossary\]/', '[$1no-lexicon]', $row->{$longTextField});
       }
     }
@@ -614,6 +617,20 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
   }
 
   /**
+   * Ensures HTML tags are lowercase
+   */
+  public static function lowercaseHtml($html){
+    return preg_replace_callback('/<(\/?)([a-zA-Z]+)(.*?)>/s', array(
+      'ScratchpadsNodeMigration',
+      '_lowercaseHtmlCallback'
+    ), $html);
+  }
+
+  public static function _lowercaseHtmlCallback($matches){
+    return '<' . $matches[1] . strtolower($matches[2]) . $matches[3] . '>';
+  }
+
+  /**
    * Build a basic stub node
    */
   protected function buildStubNode($migration, $nid){
@@ -629,7 +646,10 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
       $node->nid = $nid;
       $node->vid = $vid;
       $node->is_new = true;
-      // Crap OG requires the original uid
+      // OG requires the original uid
+      if (!isset($node->original)) {
+        $node->original = new StdClass;
+      }
       $node->original->uid = $node->uid;
       return $node;
     }
@@ -721,7 +741,7 @@ class ScratchpadsNodeMigration extends DrupalNode6Migration{
   }
 
   /**
-   * Decode the fucking weight to get stickiness
+   * Decode the weight to get stickiness
    */
   public static function weightDecode(&$row){
     if($row->sticky == 0 || $row->sticky == 1){

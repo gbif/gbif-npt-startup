@@ -63,8 +63,10 @@ class ScratchpadsNodeDarwincorelocationMigration extends ScratchpadsNodeMigratio
 
   protected function nodeQuery(){
     $query = parent::nodeQuery();
-    $query->innerJoin('darwincorelocation', 'dl', 'dl.vid = n.vid');
-    $query->fields('dl', array(
+    $table_exists = Database::getConnection('default', $this->sourceConnection)->schema()->tableExists('darwincorelocation');
+    if ($table_exists) {
+      $query->innerJoin('darwincorelocation', 'dl', 'dl.vid = n.vid');
+      $query->fields('dl', array(
       'continentocean',
       'islandgroup',
       'island',
@@ -80,12 +82,20 @@ class ScratchpadsNodeDarwincorelocationMigration extends ScratchpadsNodeMigratio
       'maxelevation',
       'mindepth',
       'maxdepth'
-    ));
+      ));
+    } else {
+      $query->condition('n.nid', 0); // FALSE
+    }
     return $query;
   }
   protected function countQuery(){
     $query = parent::countQuery();
-    $query->innerJoin('darwincorelocation', 'dl', 'dl.vid = n.vid');
+    $table_exists = Database::getConnection('default', $this->sourceConnection)->schema()->tableExists('darwincorelocation');
+    if ($table_exists) {
+      $query->innerJoin('darwincorelocation', 'dl', 'dl.vid = n.vid');
+    } else {
+      $query->condition('n.nid', 0); // FALSE
+    }
     return $query;
   }
 
@@ -126,7 +136,7 @@ class ScratchpadsNodeDarwincorelocationMigration extends ScratchpadsNodeMigratio
       }
     }
     // If lat/long is 0 remove the field so we don't get an empty map
-    if($row->location_latlong == '0.000000,0.000000'){
+    if(isset($row->location_latlong) && $row->location_latlong == '0.000000,0.000000'){
       unset($row->location_latlong);
     }
   }

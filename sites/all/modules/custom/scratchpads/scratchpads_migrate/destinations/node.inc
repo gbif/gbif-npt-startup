@@ -96,7 +96,8 @@ class ScratchpadsMigrateDestinationNode extends MigrateDestinationNode{
     }
     // We cannot call parent::import() at this point, cos it checks nid against migrate_map_destid1
     // But we use VID, so change the checking to VID
-    // Updating previously-migrated content?
+    //
+    // Updating previously-migrated content? Or creating actual content for stub nodes.
     $migration = Migration::currentMigration();
     if(isset($row->migrate_map_destid1)){
       // Make sure is_new is off
@@ -110,10 +111,13 @@ class ScratchpadsMigrateDestinationNode extends MigrateDestinationNode{
         $node->vid = $row->migrate_map_destid1;
       }
       // Get the existing nid, tnid so updates don't generate notices
-      $values = db_select('node', 'n')->fields('n', array(
+      $nrquery = db_select('node_revision', 'nr');
+      $nrquery->addJoin('INNER', 'node', 'n', 'n.nid = nr.nid');
+      $nrquery->fields('n', array(
         'nid',
         'tnid'
-      ))->condition('vid', $node->vid)->execute()->fetchAssoc();
+      ))->condition('nr.vid', $node->vid);
+      $values = $nrquery->execute()->fetchAssoc();
       if(empty($values)){throw new MigrateException(t("Incoming node VID !vid no longer exists", array(
           '!vid' => $node->vid
         )));}
@@ -241,6 +245,22 @@ class ScratchpadsMigrateDestinationNode extends MigrateDestinationNode{
           $node->timestamp = $changed;
         }
       }
+      // Save Organic groups memberships associated with this node
+      if(!empty($row->og_memberships)){
+        $associated_groups = og_get_group_ids('node', array(
+          $node->nid
+        ));
+        if(isset($associated_groups[$node->nid])){
+          $og_group_id = $associated_groups[$node->nid];
+          foreach($row->og_memberships as $og_membership_info){
+            $og_membership = og_membership_create($og_group_id, $og_membership_info['type'], $og_membership_info['id']);
+            if($og_membership){
+              $og_membership->save();
+            }
+          }
+        }
+      }
+      // Prepare return value
       $return = array(
         $node->vid
       );
