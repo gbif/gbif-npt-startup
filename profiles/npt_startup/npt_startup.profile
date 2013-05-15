@@ -31,7 +31,7 @@ function node_definition_form() {
   $form['node_info'] = array(
     '#type' => 'fieldset',
     '#title' => st('Node information'),
-    '#description' => st('Please provide necessary information to setup this site as a GBIF node portal.'),
+    '#description' => st('Please provide necessary information to setup this site as a GBIF Node portal.'),
   );
   // Need to get a list of country node here
   $form['node_info']['node_country'] = array(
@@ -39,7 +39,7 @@ function node_definition_form() {
     '#title' => st('GBIF Participant:'),
     '#required' => TRUE,
     '#options' => $nodelist,
-    '#description' => st('Only GBIF country participants are available at the moment.'),
+    '#description' => st('Only country participants are available at the moment.'),
   );
   $form['node_info']['node_shortname'] = array(
     '#type' => 'textfield',
