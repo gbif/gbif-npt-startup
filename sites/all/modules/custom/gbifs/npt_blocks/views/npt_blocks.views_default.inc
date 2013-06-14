@@ -141,6 +141,7 @@ function npt_blocks_views_default_views_alter(&$views) {
   unset($views['species_overview_map']->display['default']->handler->display->display_options['arguments']);
   unset($views['species_overview_map']->display['default']->handler->display->display_options['filters']['status']);
   unset($views['species_overview_map']->display['default']->handler->display->display_options['filters']['type']);
+  unset($views['species_overview_map']->display['default']->handler->display->display_options['filters']['field_spm_map_gm3_type']);
   
   // Add no results behaviour for species biblio
   $species_biblio_display_default = $views['species_biblio']->display['default'];
