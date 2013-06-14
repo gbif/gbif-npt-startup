@@ -106,7 +106,11 @@ class DrupalFieldMigration extends DrupalMigration{
     }
     // We want all image fields to use the media field
     if($row->type == 'image' || $row->type == 'filefield'){
-      $row->field_name = 'field_media';
+      if ($row->field_name != 'field_mediafiles') {
+        $row->field_name = 'field_media';
+      }
+    } else {
+      $row->field_name = DrupalFieldMigration::getCustomMapping($row->field_name, $row->type);
     }
     // Special cases for node references
     if($row->type == 'nodereference'){
@@ -208,5 +212,24 @@ class DrupalFieldMigration extends DrupalMigration{
       }
     }
     return $node_types;
+  }
+
+  /**
+   * Provide additional custom field name mapping
+   */
+  static public function getCustomMapping($field_name, $field_type = NULL) {
+    // Ensure that text-based country fields do not get mapped to the field_country field.
+    if ($field_name == 'field_country' && $field_type == 'text') {
+      return 'field_country_text';
+    }
+    // Custom field field_keywords that is not a taxonmy term reference need to be renamed
+    if ($field_name == 'field_keywords' && $field_type == 'text') {
+      return 'field_keywords_t';
+    }
+    // Field name field_name is reserved.
+    if ($field_name == 'field_name') {
+      return 'field_name_r';
+    }
+    return $field_name;
   }
 }

@@ -24,6 +24,16 @@ function scratchpads_tweaks_init(){
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie('has_js', 1, $expire, $params['path'], $params['domain'], FALSE, $params['httponly']);
   }
+  // Alter the exception handler so that we can ignore certain exceptions.
+  //set_exception_handler('scratchpads_tweaks_exception_handler');
+}
+
+/**
+ * Alternative exception handler so that we can ignore "duplicate" errors.
+ */
+function scratchpads_tweaks_exception_handler($exception){
+  if(is_object($exception) && get_class($exception) == 'PDOException' && substr($exception->getCode(), 0, 2) == '23'){return;}
+  _drupal_exception_handler($exception);
 }
 
 /**
@@ -82,7 +92,7 @@ function _scratchpads_tweaks_get_media_browser_query(){
       'public' => 'public'
     ),
     'file_directory' => '',
-    'file_extensions' => variable_get('upload_extensions_default', 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp'),
+    'file_extensions' => variable_get('upload_extensions_default', FIELD_MEDIA_FILE_EXTENSIONS),
     'max_filesize' => file_upload_max_size(),
     'uri_scheme' => 'public',
     'multiselect' => 'true',
@@ -248,6 +258,20 @@ function scratchpads_tweaks_form_alter(&$form, &$form_state, $form_id){
   }
 }
 
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function scratchpads_tweaks_theme_registry_alter(&$reg){
+  $reg['filter_guidelines']['function'] = 'theme_scratchpads_tweaks_filter_guidelines';
+}
+
+/**
+ * Hide the filter guidelines
+ */
+function theme_scratchpads_tweaks_filter_guidelines($vars){
+  return '';
+}
+
 function scratchpads_tweaks_form_system_theme_settings_submit($form, &$form_state){
   variable_set('resize_logo', $form_state['values']['resize_logo']);
 }
@@ -317,10 +341,47 @@ function scratchpads_tweaks_translate_after_check_plain($string){
  * Implements hook_menu_alter().
  */
 function scratchpads_tweaks_menu_alter(&$items){
+  $items['admin/appearance']['page callback'] = 'scratchpads_tweaks_redirect';
   if(isset($items['node/%node/clone'])){
     $items['node/%node/clone']['title'] = t('Clone');
     $items['node/%node/clone']['type'] = MENU_LOCAL_TASK;
   }
+}
+
+/**
+ * Simple callback to redirect non-Scratchpads Team users from
+ * admin/appearance to admin/appearance/settings.
+ */
+function scratchpads_tweaks_redirect(){
+  global $user;
+  if($user->uid > 1){
+    drupal_goto('admin/appearance/settings');
+  }else{
+    return system_themes_page();
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function scratchpads_tweaks_module_implements_alter(&$implementations, $hook){
+  if($hook == 'library_alter' && isset($implementations['jquery_update'])){
+    // Move jquery update to the end. This will make sure our hook_library_alter
+    // is always called before the jquery_update.
+    $jquery_update = $implementations['jquery_update'];
+    unset($implementations['jquery_update']);
+    $implementations['jquery_update'] = $jquery_update;
+  }
+}
+
+/**
+ * Implements hook_schema_alter().
+ */
+function scratchpads_tweaks_schema_alter(&$schema){
+  // We remove the primary key from the dile_display table due to an problem
+  // somewhere that is resulting in an attempt to insert duplicate entries in
+  // the file_display table.
+  unset($schema['file_display']['primary key']);
 }
 
 /**
@@ -383,12 +444,6 @@ function scratchpads_tweaks_system_info_alter(&$info, $file, $type){
       $info['tool'] = TRUE;
       $info['name'] = 'Views';
       $info['description'] = 'Allows you to create custom reports or views of the data held on your Scratchpad';
-      break;
-    case 'pathauto':
-      $info['dependencies'][] = 'redirect';
-      $info['tool'] = TRUE;
-      $info['name'] = 'Pretty URLs';
-      $info['description'] = 'Automatically generates pretty URLs based on the title of the content being edited/created. e.g. A page titled "About this site" will be given the URL content/about-this-site, instead of node/x.';
       break;
     case 'rules':
       $info['dependencies'][] = 'trigger';

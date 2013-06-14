@@ -16,7 +16,7 @@
  * will not result in multiple database reads.
  *
  * @param $obj
- *   A 32 character or less string to define what kind of object is being
+ *   A 128 character or less string to define what kind of object is being
  *   stored; primarily this is used to prevent collisions.
  * @param $name
  *   The name of the object being stored.
@@ -55,7 +55,7 @@ function ctools_object_cache_get($obj, $name, $skip_cache = FALSE, $sid = NULL) 
  * Store an object in the non-volatile ctools cache.
  *
  * @param $obj
- *   A 32 character or less string to define what kind of object is being
+ *   A 128 character or less string to define what kind of object is being
  *   stored; primarily this is used to prevent collisions.
  * @param $name
  *   The name of the object being stored.
@@ -94,7 +94,7 @@ function ctools_object_cache_set($obj, $name, $cache, $sid = NULL) {
  * Remove an object from the non-volatile ctools cache
  *
  * @param $obj
- *   A 32 character or less string to define what kind of object is being
+ *   A 128 character or less string to define what kind of object is being
  *   stored; primarily this is used to prevent collisions.
  * @param $name
  *   The name of the object being removed.
@@ -125,7 +125,7 @@ function ctools_object_cache_clear($obj, $name, $sid = NULL) {
  * modify them.
  *
  * @param $obj
- *   A 32 character or less string to define what kind of object is being
+ *   A 128 character or less string to define what kind of object is being
  *   stored; primarily this is used to prevent collisions.
  * @param $name
  *   The name of the object being removed.
@@ -153,7 +153,7 @@ function ctools_object_cache_test($obj, $name, $sid = NULL) {
  * an an administration UI.
  *
  * @param $obj
- *   A 32 character or less string to define what kind of object is being
+ *   A 128 character or less string to define what kind of object is being
  *   stored; primarily this is used to prevent collisions.
  * @param $names
  *   An array of names of objects
@@ -172,7 +172,7 @@ function ctools_object_cache_test_objects($obj, $names) {
  * This is useful for clearing a lock.
  *
  * @param $obj
- *   A 32 character or less string to define what kind of object is being
+ *   A 128 character or less string to define what kind of object is being
  *   stored; primarily this is used to prevent collisions.
  * @param $name
  *   The name of the object being removed.

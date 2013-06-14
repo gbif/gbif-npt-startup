@@ -1,6 +1,8 @@
 <?php
 
 function scratchpads_tweaks_install(){
+  // Drop the primary key from the file_display table.
+  scratchpads_tweaks_update_7046();
   // Unset all 'status' and 'warning' messages.
 /*  $messages = drupal_get_messages();
   if(isset($messages['error']) && is_array($messages['error'])){
@@ -308,6 +310,10 @@ function scratchpads_tweaks_install(){
       variable_set('comment_form_location_' . $type, COMMENT_FORM_SEPARATE_PAGE);
     }
   }
+  // Set the jQuery settings
+  scratchpads_tweaks_update_7049();
+  // Prevent optimize from running on Solr.
+  variable_set('apachesolr_last_optimize', 10000000000);
 }
 
 /**
@@ -620,13 +626,6 @@ function scratchpads_tweaks_update_7014(){
     'theme_config_js' => 'f',
     'js_conf' => '',
     'loadPlugins' => array(
-      'autogrow' => array(
-        'name' => 'autogrow',
-        'desc' => 'Auto Grow plugin',
-        'path' => '%editor_path%plugins/autogrow/',
-        'buttons' => false,
-        'default' => 'f'
-      ),
       'counter' => array(
         'name' => 'counter',
         'desc' => 'Plugin to count symbols, symbols without blanks and words',
@@ -735,13 +734,6 @@ function scratchpads_tweaks_update_7014(){
     'theme_config_js' => 'f',
     'js_conf' => '',
     'loadPlugins' => array(
-      'autogrow' => array(
-        'name' => 'autogrow',
-        'desc' => 'Auto Grow plugin',
-        'path' => '%editor_path%plugins/autogrow/',
-        'buttons' => false,
-        'default' => 'f'
-      ),
       'linkit' => array(
         'name' => 'linkit',
         'desc' => 'Support for Linkit module',
@@ -1039,4 +1031,60 @@ function scratchpads_tweaks_update_7041(){
  */
 function scratchpads_tweaks_update_7042(){
   variable_set('apachesolr_cron_limit', 50);
+}
+
+/**
+ * Disable autogrow for the WYSIWYG editor.
+ */
+function scratchpads_tweaks_update_7043(){
+  scratchpads_tweaks_update_7014();
+}
+
+/**
+ * Allow insecure derivatives
+ */
+function scratchpads_tweaks_update_7045(){
+  variable_set('image_allow_insecure_derivatives', TRUE);
+}
+
+/**
+ * Drop the primary key from the file_display table.
+ * 
+ * Renamed from from scratchpads_tweaks_update_7044.
+ */
+function scratchpads_tweaks_update_7046(){
+  db_drop_primary_key('file_display');
+}
+
+/**
+ * Enable the scratchpads_pretty_urls module if the pathauto module is enabled.
+ */
+function scratchpads_tweaks_update_7047(){
+  if(module_exists('pathauto')){
+    module_enable(array(
+      'scratchpads_pretty_urls'
+    ));
+  }
+}
+
+/**
+ * Prevent optimize from running on Solr.
+ */
+function scratchpads_tweaks_update_7048(){
+  variable_set('apachesolr_last_optimize', 10000000000);
+}
+
+/**
+ * Set the jQuery update settings.
+ */
+function scratchpads_tweaks_update_7049(){
+  variable_set('jquery_update_jquery_version', '1.8');
+  variable_set('jquery_update_jquery_cdn', 'microsoft');
+}
+
+/**
+ * Set the jQuery update settings.
+ */
+function scratchpads_tweaks_update_7050(){
+  variable_del('scratchpad_last_reported');
 }

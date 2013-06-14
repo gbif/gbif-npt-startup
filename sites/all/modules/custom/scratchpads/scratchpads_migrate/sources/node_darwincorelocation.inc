@@ -61,10 +61,13 @@ class ScratchpadsNodeDarwincorelocationMigration extends ScratchpadsNodeMigratio
     return $fields;
   }
 
+  static function tableExists($cnx) {
+    return Database::getConnection('default', $cnx)->schema()->tableExists('darwincorelocation');
+  }
+
   protected function nodeQuery(){
     $query = parent::nodeQuery();
-    $table_exists = Database::getConnection('default', $this->sourceConnection)->schema()->tableExists('darwincorelocation');
-    if ($table_exists) {
+    if (ScratchpadsNodeDarwincorelocationMigration::tableExists($this->sourceConnection)) {
       $query->innerJoin('darwincorelocation', 'dl', 'dl.vid = n.vid');
       $query->fields('dl', array(
       'continentocean',
@@ -90,8 +93,7 @@ class ScratchpadsNodeDarwincorelocationMigration extends ScratchpadsNodeMigratio
   }
   protected function countQuery(){
     $query = parent::countQuery();
-    $table_exists = Database::getConnection('default', $this->sourceConnection)->schema()->tableExists('darwincorelocation');
-    if ($table_exists) {
+    if (ScratchpadsNodeDarwincorelocationMigration::tableExists($this->sourceConnection)) {
       $query->innerJoin('darwincorelocation', 'dl', 'dl.vid = n.vid');
     } else {
       $query->condition('n.nid', 0); // FALSE
@@ -101,6 +103,10 @@ class ScratchpadsNodeDarwincorelocationMigration extends ScratchpadsNodeMigratio
 
   public function prepareRow($row){
     parent::prepareRow($row);
+    // Allow for broken data
+    if ($row->coordinateuncertainty == 'NULL') {
+      $row->coordinateuncertainty = NULL;
+    }
     foreach($this->termMappings as $delta => $term_mapping){
       if(isset($row->{$delta})){
         if($row->{$delta} == 0){

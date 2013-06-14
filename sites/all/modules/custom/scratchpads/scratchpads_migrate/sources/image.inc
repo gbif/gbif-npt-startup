@@ -2,6 +2,12 @@
 
 class ScratchpadsNodeImageMigration extends DrupalNode6Migration{
 
+  public function __construct(array $arguments){
+    parent::__construct($arguments);
+    $this->fieldSuffixes['content_taxonomy'] = 'value';
+    $this->fieldSuffixes['userreference'] = 'uid';
+  }
+
   public function getSourceFieldTypes(){
     return $this->sourceFieldTypes;
   }
@@ -59,7 +65,7 @@ class DrupalImageMigration extends DrupalFileMigration{
               $field_name = 'field_keywords';
               $vocabulary->name = 'keywords';
             }else{
-              $field_name = DrupalFieldTaxonomyMigration::getFieldName($vocabulary->name);
+              $field_name = DrupalFieldTaxonomyMigration::getFieldName($vocabulary->name, $this->sourceConnection);
             }
           }else{
             $field_name = 'taxonomy_forums';

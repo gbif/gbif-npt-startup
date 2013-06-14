@@ -8,5 +8,7 @@ sites/all/modules/contrib/examples/
 .DS_Store
 sites/all/modules/custom/feeds_xls/PHPExcel/
 scratchpad_1_database.php
-cache/
 index2.php
+cache
+sites/default/files
+sites/default/settings.php

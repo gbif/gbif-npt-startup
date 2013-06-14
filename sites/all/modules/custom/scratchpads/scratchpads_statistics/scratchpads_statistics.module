@@ -1,6 +1,258 @@
 <?php
 
 /**
+ * Implements hook_block_info()
+ */
+function scratchpads_statistics_block_info(){
+  return array(
+    'user' => array(
+      'info' => t('Scratchpads statistics facet - User'),
+      'cache' => DRUPAL_CACHE_PER_PAGE
+    ),
+    'site' => array(
+      'info' => t('Scratchpads statistics facet - Site'),
+      'cache' => DRUPAL_CACHE_PER_PAGE
+    ),
+    'category' => array(
+      'info' => t('Scratchpads statistics facet - Site Category'),
+      'cache' => DRUPAL_CACHE_PER_PAGE
+    ),
+    'term' => array(
+      'info' => t('Scratchpads statistics facet - Term'),
+      'cache' => DRUPAL_CACHE_PER_PAGE
+    ),
+    /*
+    'ss_facet_users' => array(
+      'info' => t('Scratchpads statistics facet - Users'),
+      'cache' => DRUPAL_CACHE_PER_PAGE
+    )
+    */
+  );
+}
+
+/**
+ * Implements hook_hashcash_form_ids_alter().
+ */
+function scratchpads_statistics_hashcash_form_ids_alter(&$form_ids){
+  $form_ids[] = 'scratchpads_statistics_facet_form_user';
+  $form_ids[] = 'scratchpads_statistics_facet_form_site';
+  $form_ids[] = 'scratchpads_statistics_facet_form_category';
+  $form_ids[] = 'scratchpads_statistics_facet_form_term';
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function scratchpads_statistics_ctools_plugin_api(){
+  list($module, $api) = func_get_args();
+  if($module == "context" && $api == "context"){return array(
+      "version" => "3"
+    );}
+}
+
+/**
+ * Implements hook_block_view()
+ */
+function scratchpads_statistics_block_view($delta = ''){
+  if($delta == 'category'){
+    $tagged_sites = db_select('scratchpads_statistics_site_site_type', 's')->fields('s')->countQuery()->execute()->fetchCol();
+    $tagged_sites = array_pop($tagged_sites);
+    if(!$tagged_sites){return array();}
+  }
+  return array(
+    'subject' => t('Filter by ' . ucfirst($delta)),
+    'content' => array(
+      'scratchpads_statistics_facet_form' => drupal_get_form('scratchpads_statistics_facet_form_' . $delta, $delta),
+      '#attached' => array(
+        'css' => array(
+          drupal_get_path('module', 'scratchpads_statistics') . '/css/scratchpads_statistics.css'
+        )
+      )
+    )
+  );
+}
+
+/**
+ * Implements hook_forms
+ */
+function scratchpads_statistics_forms($form_id, $args){
+  $forms = array();
+  foreach(array(
+    'user',
+    'site',
+    'category',
+    'term'
+  ) as $type){
+    $forms['scratchpads_statistics_facet_form_' . $type] = array(
+      'callback' => 'scratchpads_statistics_facet_form'
+    );
+  }
+  return $forms;
+}
+
+/**
+ * Allow other modules (namely the scratchpads_setup module) to set the
+ * category for this and other sites.
+ */
+function scratchpads_statistics_set_site_categories($categories, $site = 1){
+  $query = db_insert('scratchpads_statistics_site_site_type')->fields(array(
+    'site',
+    'site_type'
+  ));
+  $do_insert = FALSE;
+  foreach($categories as $category){
+    $site_type_id = scratchpads_statistics_insert_item(array(
+      'type' => $category
+    ), 'scratchpads_statistics_site_type', 'type');
+    if($site_type_id){
+      $do_insert = TRUE;
+      $query->values(array(
+        'site' => $site,
+        'site_type' => $site_type_id
+      ));
+    }
+  }
+  if($do_insert){
+    db_delete('scratchpads_statistics_site_site_type')->condition('site', $site)->execute();
+    $query->execute();
+  }
+}
+
+/**
+ * Create/Retrieve a user
+ */
+function scratchpads_statistics_insert_item($item, $table, $key){
+  // Keep a static cache of the users.
+  $items = drupal_static(__FUNCTION__, array());
+  if(is_array($key)){
+    $itemkey = '';
+    foreach($key as $k){
+      $itemkey .= '---' . $item[$k];
+    }
+  }else{
+    $itemkey = $item[$key];
+    $key = array(
+      $key
+    );
+  }
+  if(@isset($items[$table][$itemkey])){return $items[$table][$itemkey];}
+  $query = db_merge($table);
+  foreach($key as $k){
+    $query->key(array(
+      $k => $item[$k]
+    ));
+  }
+  $output = $query->fields($item)->execute();
+  $query = db_select($table, 's')->fields('s', array(
+    'id'
+  ));
+  foreach($key as $key_item){
+    $query->condition($key_item, $item[$key_item]);
+  }
+  $col = $query->execute()->fetchCol();
+  $id = array_pop($col);
+  if(!isset($items[$table])){
+    $items[$table] = array();
+  }
+  $items[$table][$itemkey] = $id;
+  return $id;
+}
+
+/**
+ * Allow other modules (namely the scratchpads_setup module) to set the
+ * category for this and other sites.
+ */
+function scratchpads_statistics_get_site_categories($site = 1){
+  $query = db_select('scratchpads_statistics_site_type', 'st');
+  $query->innerJoin('scratchpads_statistics_site_site_type', 'sst', 'sst.site_type = st.id');
+  return $query->condition('site', $site)->fields('st', array(
+    'type'
+  ))->execute()->fetchAll(PDO::FETCH_COLUMN);
+}
+
+/**
+ * Scratchpads statistics facet form.
+ */
+function scratchpads_statistics_facet_form($form, $form_state, $type){
+  switch($type){
+    case 'category':
+      //db_select('')
+      return array(
+        'scratchpads_stats_facet_type' => array(
+          '#type' => 'hidden',
+          '#value' => $type
+        ),
+        'scratchpads_stats_facet_entry' => array(
+          '#type' => 'select'
+        ),
+        'submit' => array(
+          '#type' => 'submit',
+          '#value' => t('Filter by category')
+        ),
+        '#submit' => array(
+          'scratchpads_statistics_facet_form_submit'
+        )
+      );
+    default:
+      return array(
+        'scratchpads_stats_facet_type' => array(
+          '#type' => 'hidden',
+          '#value' => $type
+        ),
+        'scratchpads_stats_facet_entry' => array(
+          '#type' => 'textfield',
+          '#autocomplete_path' => 'scratchpads-statistics-autocomplete/' . $type,
+          '#attributes' => array(
+            'placeholder' => t(ucfirst($type))
+          ),
+          '#default_value' => ''
+        ),
+        'submit' => array(
+          '#prefix' => '<div style="display:none">',
+          '#suffix' => '</div>',
+          '#value' => t('Filter'),
+          '#type' => 'submit'
+        ),
+        '#submit' => array(
+          'scratchpads_statistics_facet_form_submit'
+        )
+      );
+  }
+}
+
+/**
+ * Scratchpads statistics facet form submit.
+ */
+function scratchpads_statistics_facet_form_submit($form, &$form_state){
+  $query = $_GET;
+  unset($query['q']);
+  switch($form_state['values']['scratchpads_stats_facet_type']){
+    case 't':
+      $results = db_select('scratchpads_statistics_term', 's')->condition('term', $form_state['values']['scratchpads_stats_facet_entry'], 'LIKE')->fields('s', array(
+        'id'
+      ))->execute();
+      break;
+    case 'user':
+      $results = db_select('scratchpads_statistics_user', 's')->condition('name', $form_state['values']['scratchpads_stats_facet_entry'], 'LIKE')->fields('s', array(
+        'id'
+      ))->execute();
+      break;
+    case 'site':
+      $results = db_query('SELECT id FROM {scratchpads_statistics_site} WHERE CONCAT(title, \' (\', url, \')\') LIKE :query_string', array(
+        ':query_string' => $form_state['values']['scratchpads_stats_facet_entry']
+      ));
+      break;
+  }
+  $query[$form_state['values']['scratchpads_stats_facet_type']] = array();
+  foreach($results as $row){
+    $query[$form_state['values']['scratchpads_stats_facet_type']][] = $row->id;
+  }
+  drupal_goto('stats', array(
+    'query' => $query
+  ));
+}
+
+/**
  * Implements hook_cron().
  */
 function scratchpads_statistics_cron(){
@@ -53,6 +305,15 @@ function scratchpads_statistics_menu(){
       ),
       'file' => 'scratchpads_statistics.pages.inc',
       'type' => MENU_NORMAL_ITEM
+    ),
+    'scratchpads-statistics-autocomplete' => array(
+      'title' => '',
+      'page callback' => 'scratchpads_statistics_autocomplete',
+      'access arguments' => array(
+        'access content'
+      ),
+      'file' => 'scratchpads_statistics.pages.inc',
+      'type' => MENU_CALLBACK
     )
   );
 }
