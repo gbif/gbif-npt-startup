@@ -36,22 +36,4 @@ function npt_feeds_block_info_alter(&$blocks, $theme, $code_blocks) {
       }
       break;
   }
-  $blocks['twitter_pull'][0]['status'] = 1;
-  $blocks['twitter_pull'][0]['region'] = 'postscript_third';
-}
-
-/*
- * Implements of hook_twitter_pull_blocks()
- */
-function npt_feeds_twitter_pull_blocks() {
-  return array(
-    0 => (object) array(
-      'delta' => '0',
-      'tweetkey' => '@gbif',
-      'title' => 'GBIF on Twitter',
-      'name' => 'GBIF on Twitter',
-      'number_of_items' => 3,
-      'theme_key' => 'twitter_pull_listing',
-    )
-  );
 }

@@ -6,4 +6,3 @@ project = Nodes Portal Toolkit
 core = 7.x
 
 dependencies[] = aggregator
-dependencies[] = twitter_pull

@@ -106,4 +106,4 @@ dependencies[] = taxonomy_breadcrumb_lite
 dependencies[] = tools
 dependencies[] = tree_widget
 dependencies[] = tui
-dependencies[] = twitterscript
+;dependencies[] = twitterscript
