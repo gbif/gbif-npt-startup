@@ -158,7 +158,7 @@ function node_definition_form_submit($form, &$form_state) {
   );
   variable_set('centre_crd', $centre_crd);  
   
-  module_enable(array('npt_nodestats', 'npt_feeds'), TRUE);
+  module_enable(array('npt_feeds'), TRUE);
 }
 
 /**
