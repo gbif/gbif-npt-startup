@@ -1,5 +1,5 @@
 name = NPT Setup
-description = Provides several steps to establish intitial contents so the site is started as a node web presence.
+description = Provides several steps to establish initial contents so the site is started as a node web presence.
 version = 7.x-0.9
 package = GBIFS
 project = Nodes Portal Toolkit

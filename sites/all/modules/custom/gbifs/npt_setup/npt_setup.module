@@ -87,6 +87,25 @@ function npt_setup_menu() {
       'access content'
     )
   );
+  $items['admin/config/npt'] = array(
+    'title' => t('NPT Configuration'),
+    'description' => t("Configure settings that determine how this Drupal site presents itself as a Nodes' portal."),
+    'position' => 'right',
+    'weight' => -10,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/npt/settings'] = array(
+    'title' => t('GBIF Participant Node'),
+    'description' => t('Settings for the GBIF Participant Node with which this Drupal site is associated.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('npt_setup_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'npt_setup.admin.inc',
+  );
   return $items;
 }
 
