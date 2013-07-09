@@ -138,7 +138,12 @@ function node_definition_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   
   // Assigning this site to a GBIF Participant
-  variable_set('gbif_participant_node_uuid', $values['node_uuid']);
+  if ($values['node_uuid'] == 'country-voting' || $values['node_uuid'] == 'country-associate' || $values['node_uuid'] == 'other-associate' ) {
+    // If no node is selected, then use 'none' to indicate.
+    variable_set('gbif_participant_node_uuid', 'none');
+  } else {
+    variable_set('gbif_participant_node_uuid', $values['node_uuid']);
+  }
 
   // Registering short name
   variable_set('gbif_participant_shortname', $values['node_shortname']);
