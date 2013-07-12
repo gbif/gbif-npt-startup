@@ -1,0 +1,36 @@
+<?php
+/**
+ * @file
+ * Installation of the npt_mendeley module
+ */
+
+/**
+ * Implementation of hook_enable()
+ */
+function npt_mendeley_enable() {
+  // Create a directory for storing generated data files
+  $uri = 'public://npt_mendeley';
+  $dir_exists = file_prepare_directory($uri);
+  if (!$dir_exists) {
+    drupal_mkdir($uri);
+  }
+  $mendeley_tags = array('GBIF_used', 'GBIF_discussed', 'GBIF_mentioned');
+  variable_set('mendeley_tags', $mendeley_tags);
+}
+
+/**
+ * Implementation of hook_uninstall()
+ */
+function npt_mendeley_uninstall() {
+  // Detele the directory and generated data from this module
+  $uri = 'public://npt_mendeley';
+  $dir_exists = file_prepare_directory($uri);
+  if ($dir_exists) {
+    $deleted = file_unmanaged_delete_recursive($uri);
+  }
+  if ($deleted == TRUE) {
+    drupal_set_message('The cached citations from GBIF public library on mendeley are successfully deleted.');
+  }
+  variable_del('npt_mendeley_update_interval');
+  variable_del('npt_mendeley_last_update');
+}

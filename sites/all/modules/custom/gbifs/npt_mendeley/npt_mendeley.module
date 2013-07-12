@@ -1,0 +1,362 @@
+<?php
+/**
+ * @file
+ * This module retrieves relevant literature entries about a node from Mendeley API.
+ */
+
+define('NPT_MENDELEY_CONSUMER_KEY', '571f50a5930cf872cd4c6d129ea99b2b04ffe07de');
+define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
+define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
+
+/**
+ * Implements hook_menu().
+ */
+function npt_mendeley_menu() {
+  $items = array();
+  $items['admin/config/npt/mendeley_settings'] = array(
+    'title' => t('Mendeley API'),
+    'description' => t('Settings for accessing GBIF public library on Mendeley and updating statistics.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('npt_mendeley_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'npt_mendeley.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function npt_mendeley_block_info() {
+  $blocks['npt_mendeley'] = array(
+    'info' => t("Peer-reviewed publications using/discussing GBIF-mediated data"),
+    'region' => 'content',
+    'weight' => 1,
+    'theme' => NPTSTARTUP_THEME,
+    'status' => 0,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function npt_mendeley_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'npt_mendeley':
+      // Get entries from local documents.json
+      // Prepare the block content
+      $block_content = '<article>';
+      
+      $analysed_result = variable_get('npt_memdeley_publication');
+      $analysed_result_count = $analysed_result['authored']['count'] + $analysed_result['about']['count'];
+
+      if ($analysed_result_count > 0) {
+        $block_content .= '<h4>' . t('Professional publication') . '</h4>';
+        $block_content .= '<h5>' . t('Peer-reviewed publications using or discussing GBIF-mediated data') . '</h5>';
+
+        if ($analysed_result['authored']['count'] > 0) {
+          $block_content .= '<p>';
+          $output = format_plural($analysed_result['authored']['count'],
+            'There is 1 publication authored by scientists from @country:',
+            'There are @count publications authored by scientists from @country:',
+            array('@country' => $country)
+          );
+          $output .= '<ol class="mendeley-citation">';
+
+          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_memdeley/' . $analysed_result['authored']['file'])));
+
+          foreach ($authored_docs as $adoc) {
+            $output .= '<li>';
+
+            // author
+            for ($i = 0; $i < count($adoc->authors); $i++) {
+              $output .= $adoc->authors[$i]->surname . ', ' . substr($adoc->authors[$i]->forename, 0, 1) . '.';
+              $output .= ', ';          
+            }
+            // year 
+            $output .= $adoc->year . '. ';
+            $output .= $adoc->title . '. ';
+            $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
+            $output .= $adoc->volume;
+            $output .= '(' . $adoc->issue . '), ';
+            $output .= 'p.' . $adoc->pages . '. ';
+            $output .= 'Available at: ';
+            $output .= l($adoc->url, $adoc->url) . '.';
+
+            $output .= '</li>';
+          }
+          $output .= '</ol>';
+          $block_content .= $output;
+          $output = '';
+          $block_content .= '</p>';
+        }
+
+        if ($analysed_result['about']['count'] > 0) {
+          $block_content .= '<p>';
+          $output = format_plural($analysed_result['about']['count'],
+            'There is 1 publication about biodiversity in @country:',
+            'There are @count publications about biodiversity in @country:',
+            array('@country' => $country)
+          );
+          $output .= '<ol class="mendeley-citation">';
+
+          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_memdeley/' . $analysed_result['about']['file'])));
+
+          foreach ($authored_docs as $adoc) {
+            $output .= '<li>';
+
+            // author
+            for ($i = 0; $i < count($adoc->authors); $i++) {
+              $output .= $adoc->authors[$i]->surname . ', ' . substr($adoc->authors[$i]->forename, 0, 1) . '.';
+              $output .= ', ';          
+            }
+            // year 
+            $output .= (isset($adoc->year)) ? $adoc->year . '. ' : '';
+            $output .= (isset($adoc->title)) ? $adoc->title . '. ' : '';
+            $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
+            $output .= (isset($adoc->volume)) ? $adoc->volume : '';
+            $output .= (isset($adoc->issue)) ? '(' . $adoc->issue . '), ' : '';
+            $output .= (isset($adoc->pages)) ? 'p.' . $adoc->pages . '. ' : '';
+            $output .= 'Available at: ';
+            $output .= l($adoc->url, $adoc->url) . '.';
+
+            $output .= '</li>';
+          }
+          $output .= '</ol>';
+          $block_content .= $output;
+          $output = '';
+          $block_content .= '</p>';
+        }
+
+        $block_content .= '<p>(' . t('Depending on how it is categorised, an article may be listed twice.') . ')</p>';
+        $block_content .= '</article>';
+      }
+      $block['content'] = array(
+        '#markup' => $block_content,
+      );
+      break;
+  }
+}
+
+/**
+ * Ensure a local digest of citations from the GBIF Public Library on Mendeley.
+ */
+function npt_mendeley_retrieve() {
+
+  // Begin accessing Mendeley API.
+  $mendeley_consumer_key = '571f50a5930cf872cd4c6d129ea99b2b04ffe07de';
+  $mendeley_gbif_url = 'http://api.mendeley.com/oapi/documents/groups/1068301/docs/?details=true&items=40&consumer_key='. $mendeley_consumer_key;
+  $mendeley_curl = curl_init();
+  curl_setopt($mendeley_curl, CURLOPT_URL, $mendeley_gbif_url);
+  curl_setopt($mendeley_curl, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($mendeley_curl, CURLOPT_HEADER, true);
+  $mendeley_curl_result = curl_exec($mendeley_curl);
+  curl_close($mendeley_curl);
+  $mendeley_curl_result_byline = explode("\r\n", $mendeley_curl_result);
+
+  // Get the remining available requests from Mendeley. For future use.
+  $mendeley_remain_rate = '';
+  foreach ($mendeley_curl_result_byline as $line) {
+    $header_available = strpos($line, "x-ratelimit-remaining");
+    if ($header_available === 0) {
+      $header = explode(":", $line);
+      $mendeley_remain_rate = trim($header[1]);
+    }
+  }
+  watchdog('npt_mendeley', 'Mendeley API rate remaining: @rate', array('@rate' => $mendeley_remain_rate));
+
+  $mendeley_json = end($mendeley_curl_result_byline);
+  $mendeley_result = json_decode($mendeley_json);
+  unset($mendeley_json);
+
+  $total_results = $mendeley_result->total_results;
+  $total_pages = $mendeley_result->total_pages;
+  
+  $documents_file = 'npt_mendeley/documents.json';
+  $_SESSION['npt_mendeley_documents_file_loc'] = file_build_uri($documents_file);
+  $documents_file_path = drupal_realpath($_SESSION['npt_mendeley_documents_file_loc']);
+  $documents_exist = file_exists($_SESSION['npt_mendeley_documents_file_loc']);
+  $documents_time = filemtime($documents_file_path);
+  $time = time();
+  $documents_age = $time - $documents_time;
+
+  // If documents are already retrieved and the local copy is only 6 hrs old,
+  // then use the local copy. Otherwise retrieve and update again.
+  if ($documents_exist == TRUE && $documents_age < 21600) {
+    $gbif_documents_content = file_get_contents($_SESSION['npt_mendeley_documents_file_loc']);
+    $gbif_documents = json_decode($gbif_documents_content);
+
+    drupal_set_message(t('The local copy of retrieved documents is used.'));
+    return TRUE;
+
+  } elseif ($documents_exist == FALSE || $documents_age >= 21600) {
+
+    drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
+    
+    $operations = array(); // For batch operations.
+    // If there is no document retrieved or the local copy is older than 6 hrs,
+    // then retrieve all documents into one array
+    for ($i = 0; $i < $total_pages; $i++) {
+      
+      $operations[] = array('_npt_mendeley_retrieve_page', array($mendeley_gbif_url, $i));
+      
+    }
+    
+    $batch = array(
+      'operations' => $operations,
+      'finished' => '_npt_mendeley_batch_finished',
+    );
+    
+    return $batch;
+    
+  } else {
+
+    drupal_set_message(t('An exception occurred during the retrival.'));
+    return FALSE;
+
+  }
+}
+
+function _npt_mendeley_retrieve_page($mendeley_gbif_url, $page_number, &$context) {
+
+  $url_retrieval = $mendeley_gbif_url . '&page=' . $page_number;
+  $mendeley_result = json_decode(file_get_contents($url_retrieval));
+  foreach ($mendeley_result->documents as $document) {
+    array_push($_SESSION['mendeley_gbif_documents'], $document);        
+  }
+}
+
+function _npt_mendeley_batch_finished($success, $results, $operations) {
+  // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.
+  $json_file = json_encode($_SESSION['mendeley_gbif_documents']);
+  file_save_data($json_file, $_SESSION['npt_mendeley_documents_file_loc'], FILE_EXISTS_REPLACE);
+  
+}
+
+function npt_mendeley_analyse() {
+  $gbif_participant_node_uuid = variable_get('gbif_participant_node_uuid');
+  
+  // Determine the country of the Node.
+  $json_url = GBIF_REGISTRY_API_NODE . '/' . $gbif_participant_node_uuid;
+  $gbif_registry_node_api_response = json_decode(file_get_contents($json_url));
+
+  if (isset($gbif_registry_node_api_response->country) == TRUE) {
+    $country = $gbif_registry_node_api_response->country;
+    _npt_mendeley_analyse_country($country);
+  } elseif (isset($gbif_registry_node_api_response->country) == FALSE) {
+    drupal_set_message(t('The current associated GBIF Participant Node is not a country. No further activities with Mendeley API for now.'), 'warning');
+    exit;
+  }
+}
+
+function _npt_mendeley_analyse_country($country) {
+
+  $tag_authored = $country;
+  $tag_about = $country . '_biodiversity';
+
+  $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
+  $analysed_docs_authored = array();
+  $analysed_docs_about = array();
+  $analysed_result = array();
+
+  // First iteration: get only documents tagged with country name
+  foreach ($documents as $k => $doc) {
+  // Only retrieve documents with Mendeley UUID
+    if (isset($doc->uuid)) {
+      if (in_array($tag_authored, $doc->tags)) {
+        $analysed_docs_authored[] = $doc;
+      }
+      if (in_array($tag_about, $doc->tags)) {
+        $analysed_docs_about[] = $doc;
+      }
+    }
+    unset($documents[$k]);
+  }
+  if (count($documents) == 0) drupal_set_message(t('Finished analysing documents for @country.', array('@country' => $country)));
+
+  // Produce the count of documents
+  $authored_doc_count = count(_npt_mendeley_deduplicate($analysed_docs_authored));
+  $analysed_result['authored']['count'] = $authored_doc_count;
+
+  $about_doc_count = count(_npt_mendeley_deduplicate($analysed_docs_about));
+  $analysed_result['about']['count'] = $about_doc_count;
+
+  // Publications authored by scientists from a country
+  if ($authored_doc_count > 0) {
+
+    // Insert publication_outlet from Mendeley detail call
+    foreach ($analysed_docs_authored as $adoc) {
+      $url = MENDELEY_DOC_DETAIL_URL . $adoc->uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $detail = json_decode(file_get_contents($url));
+      $adoc->publication_outlet = $detail->publication_outlet;
+    }
+    
+    $authored_json = json_encode($analysed_docs_authored);
+    $authored_doc = file_save_data($authored_json, file_build_uri('npt_mendeley/authored_doc.json'), FILE_EXISTS_REPLACE);
+    
+    if ($authored_doc == TRUE) {
+      drupal_set_message(format_plural($authored_doc_count,
+        'There is a publication authored by scientists from @country, results saved.',
+        'There are @count publications authored by scientists from @country, results saved.',
+        array('@country' => $country)
+      ));
+    
+      $analysed_result['authored']['file'] = 'authored_doc.json';
+    }
+  }
+  else {
+    drupal_set_message(t('In GBIF Public Library, so far no document found authored by scientists from @country.', array('@country' => $country)));
+  }
+
+  // Publications about biodiversity in a country
+  if ($about_doc_count > 0) {
+    // Insert publication_outlet from Mendeley detail call
+    foreach ($analysed_docs_about as $adoc) {
+      $url = MENDELEY_DOC_DETAIL_URL . $adoc->uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $detail = json_decode(file_get_contents($url));
+      $adoc->publication_outlet = $detail->publication_outlet;
+    }
+
+    $about_json = json_encode($analysed_docs_about);
+    $about_doc = file_save_data($about_json, file_build_uri('npt_nodestats/about_doc.json'), FILE_EXISTS_REPLACE);
+
+    if ($about_doc == TRUE) {
+      drupal_set_message(format_plural($about_doc_count,
+        'There is a publication about biodiversity of @country, results saved.',
+        'There are @count publications about biodiversity of @country, results saved.',
+        array('@country' => $country)
+      ));
+    
+      $analysed_result['about']['file'] = 'about_doc.json';      
+    }
+  }
+  else {
+    drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of @country.', array('@country' => $country)));    
+  }
+  
+  variable_set('npt_mendeley_publication', $analysed_result);
+    
+}
+
+/*
+ * Helper function to resolve duplicate documents
+ */
+function _npt_mendeley_deduplicate(&$docs) {
+  $unique_docs = array();
+  foreach ($docs as $doc) {
+    $unique_docs[$doc->uuid] = $doc;
+  }
+  $docs = array_values($unique_docs);
+  return $docs;
+}
+
+function _npt_mendeley_update_page_requested() {
+  $_SESSION['mendeley_page_requested']++;
+}
+
+function _npt_mendeley_get_page_requested() {
+  return !empty($_SESSION['mendeley_page_requested']) ? $_SESSION['mendeley_page_requested'] : 0;
+}
