@@ -194,23 +194,31 @@ function npt_mendeley_retrieve() {
 
   } elseif ($documents_exist == FALSE || $documents_age >= 21600) {
 
-    drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
-    
-    $operations = array(); // For batch operations.
     // If there is no document retrieved or the local copy is older than 6 hrs,
     // then retrieve all documents into one array
+    drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
+    
     for ($i = 0; $i < $total_pages; $i++) {
-      
-      $operations[] = array('_npt_mendeley_retrieve_page', array($mendeley_gbif_url, $i));
+
+      $url_retrieval = $mendeley_gbif_url . '&page=' . $page_number;
+      $mendeley_result = json_decode(file_get_contents($url_retrieval));
+      foreach ($mendeley_result->documents as $document) {
+        array_push($mendeley_gbif_documents, $document);        
+      }
       
     }
+
+    // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.
+    $json_file = json_encode($mendeley_gbif_documents);
+    $file_save_success = file_save_data($json_file, $_SESSION['npt_mendeley_documents_file_loc'], FILE_EXISTS_REPLACE);
     
-    $batch = array(
-      'operations' => $operations,
-      'finished' => '_npt_mendeley_batch_finished',
-    );
-    
-    return $batch;
+    if (is_object($file_save_success)) {
+      drupal_set_message(t('Mendeley documents retrieved and saved.'));
+      return TRUE;
+    } else {
+      drupal_set_message(t('Mendeley documents are not successfully saved.'));
+      return FALSE;
+    }
     
   } else {
 
@@ -218,22 +226,6 @@ function npt_mendeley_retrieve() {
     return FALSE;
 
   }
-}
-
-function _npt_mendeley_retrieve_page($mendeley_gbif_url, $page_number, &$context) {
-
-  $url_retrieval = $mendeley_gbif_url . '&page=' . $page_number;
-  $mendeley_result = json_decode(file_get_contents($url_retrieval));
-  foreach ($mendeley_result->documents as $document) {
-    array_push($_SESSION['mendeley_gbif_documents'], $document);        
-  }
-}
-
-function _npt_mendeley_batch_finished($success, $results, $operations) {
-  // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.
-  $json_file = json_encode($_SESSION['mendeley_gbif_documents']);
-  file_save_data($json_file, $_SESSION['npt_mendeley_documents_file_loc'], FILE_EXISTS_REPLACE);
-  
 }
 
 function npt_mendeley_analyse() {

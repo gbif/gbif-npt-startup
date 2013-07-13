@@ -15,7 +15,7 @@ function npt_mendeley_settings_form() {
   $form['npt_mendeley_update']['update_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update now'),
-    '#submit' => array('npt_mendeley_retrieve_submit'),
+    '#submit' => array('npt_mendeley_retrieve'),
   );
   $form['npt_mendeley_update_interval'] = array(
     '#title' => t('Automatic update interval'),
@@ -30,11 +30,4 @@ function npt_mendeley_settings_form() {
     '#options' => $interval,
   );
   return system_settings_form($form);
-}
-
-function npt_mendeley_retrieve_submit() {
-  $_SESSION['mendeley_page_requested'] = 0; // reset counter for debug information.
-  $_SESSION['mendeley_gbif_documents'] = array(); // reset temporary document store.
-  $batch = npt_mendeley_retrieve();
-  batch_set($batch);
 }
