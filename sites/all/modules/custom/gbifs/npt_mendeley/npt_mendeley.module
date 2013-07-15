@@ -4,7 +4,7 @@
  * This module retrieves relevant literature entries about a node from Mendeley API.
  */
 
-define('NPT_MENDELEY_CONSUMER_KEY', '571f50a5930cf872cd4c6d129ea99b2b04ffe07de');
+define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
 define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
 define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 
@@ -175,8 +175,7 @@ function npt_mendeley_block_view($delta = '') {
 function npt_mendeley_retrieve() {
 
   // Begin accessing Mendeley API.
-  $mendeley_consumer_key = '571f50a5930cf872cd4c6d129ea99b2b04ffe07de';
-  $mendeley_gbif_url = 'http://api.mendeley.com/oapi/documents/groups/1068301/docs/?details=true&items=40&consumer_key='. $mendeley_consumer_key;
+  $mendeley_gbif_url = 'http://api.mendeley.com/oapi/documents/groups/1068301/docs/?details=true&items=40&consumer_key='. NPT_MENDELEY_CONSUMER_KEY;
   $mendeley_curl = curl_init();
   curl_setopt($mendeley_curl, CURLOPT_URL, $mendeley_gbif_url);
   curl_setopt($mendeley_curl, CURLOPT_RETURNTRANSFER, true);
@@ -226,6 +225,7 @@ function npt_mendeley_retrieve() {
     // then retrieve all documents into one array
     drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
     
+    $url_to_retrieve = array();
     $mendeley_gbif_documents = array();
     $progress = array(
       'total_pages' => $total_pages,
@@ -235,20 +235,34 @@ function npt_mendeley_retrieve() {
       'timestamp' => 0,
     );
     
+    // All urls to be retrieved.
     for ($i = 0; $i < $total_pages; $i++) {
+      $url_to_retrieve[] = $mendeley_gbif_url . '&page=' . $i;
+    }
 
-      $url_retrieval = $mendeley_gbif_url . '&page=' . $i;
-      $mendeley_result = json_decode(file_get_contents($url_retrieval));
-      foreach ($mendeley_result->documents as $document) {
-        array_push($mendeley_gbif_documents, $document);        
-      }
-      
+    $url_count = count($url_to_retrieve);
+    $mendeley_curl = array();
+    $master_curl = curl_multi_init();
+    
+    // Construct curl handlers
+    for ($i = 0; $i < $url_count; $i++) {
+      $mendeley_curl[$i] = curl_init($url_to_retrieve[$i]);
+      curl_setopt($mendeley_curl[$i], CURLOPT_RETURNTRANSFER, true);
+      curl_multi_add_handle($master_curl, $mendeley_curl[$i]);
+    }
+
+    do {
+      curl_multi_exec($master_curl, $running);
+    } while ($running > 0);
+    
+    // Push results together
+    for ($i = 0; $i < $url_count; $i++) {
+      $mendeley_result = json_decode(curl_multi_getcontent($mendeley_curl[$i]));
+      array_push($mendeley_gbif_documents, $mendeley_result->documents);
       $progress['page_retrieved'] = $i + 1;
       $progress['documents_retrieved'] = count($mendeley_gbif_documents);
       $progress['timestamp'] = time();
-      
       variable_set('npt_mendeley_retrieval_progress', $progress);
-      
     }
 
     // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.

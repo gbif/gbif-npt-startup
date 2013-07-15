@@ -15,7 +15,7 @@ function npt_mendeley_settings_form() {
   $form['npt_mendeley_update'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update against Mendeley API'),
-    '#description' => '<p>' . t('Manually trigger the update of the publication information from Mendeley API and refresh the list of publications that are relevant to the Node.') . '<br/>' . t('This may take longer than expected.') . '</p>',
+    '#description' => '<p>' . t('Manually trigger the update of the publication information from Mendeley API and refresh the list of publications that are relevant to the Node.') . '<br/>' . t('Please note that Mendeley API has a rate limit of 150 calls per hour for any given IP. Update with this in mind. This may take longer than expected.') . '</p>',
   );
   $form['npt_mendeley_update']['update_submit'] = array(
     '#type' => 'submit',
