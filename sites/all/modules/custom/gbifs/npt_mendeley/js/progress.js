@@ -24,7 +24,7 @@ Drupal.behaviors.npt_mendeley = {
         progressbar.progressbar( "value", percentage );
 
         if ( val < data.total_pages ) {
-          setTimeout( progressUpdate, 100 );
+          setTimeout( progressUpdate, 500 );
         }
       });
 

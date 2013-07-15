@@ -182,26 +182,17 @@ function npt_mendeley_retrieve() {
   curl_setopt($mendeley_curl, CURLOPT_HEADER, true);
   $mendeley_curl_result = curl_exec($mendeley_curl);
   curl_close($mendeley_curl);
-  $mendeley_curl_result_byline = explode("\r\n", $mendeley_curl_result);
-
-  // Get the remining available requests from Mendeley. For future use.
-  $mendeley_remain_rate = '';
-  foreach ($mendeley_curl_result_byline as $line) {
-    $header_available = strpos($line, "x-ratelimit-remaining");
-    if ($header_available === 0) {
-      $header = explode(":", $line);
-      $mendeley_remain_rate = trim($header[1]);
-    }
-  }
-  watchdog('npt_mendeley', 'Mendeley API rate remaining: @rate', array('@rate' => $mendeley_remain_rate));
-
-  $mendeley_json = end($mendeley_curl_result_byline);
-  $mendeley_result = json_decode($mendeley_json);
-  unset($mendeley_json);
-
-  $total_results = $mendeley_result->total_results;
-  $total_pages = $mendeley_result->total_pages;
   
+  $essential = _npt_mendeley_get_essential($mendeley_curl_result);
+  
+  $mendeley_result = $essential['documents'];
+  $mendeley_ratelimit_remaining = $essential['ratelimit_remaining'];
+  $total_results = $essential['total_results'];
+  $total_pages = $essential['total_pages'];
+
+  unset($essential);
+
+  // Prepare for uri
   $documents_file = 'npt_mendeley/documents.json';
   $documents_file_loc = file_build_uri($documents_file);
   $documents_file_path = drupal_realpath($documents_file_loc);
@@ -225,6 +216,7 @@ function npt_mendeley_retrieve() {
     // then retrieve all documents into one array
     drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
     
+    $mendeley_ratelimit_remaining = 0;
     $url_to_retrieve = array();
     $mendeley_gbif_documents = array();
     $progress = array(
@@ -233,6 +225,7 @@ function npt_mendeley_retrieve() {
       'total_documents' => $total_results,
       'documents_retrieved' => 0,
       'timestamp' => 0,
+      'ratelimit_remaining' => 0,
     );
     
     // All urls to be retrieved.
@@ -248,6 +241,7 @@ function npt_mendeley_retrieve() {
     for ($i = 0; $i < $url_count; $i++) {
       $mendeley_curl[$i] = curl_init($url_to_retrieve[$i]);
       curl_setopt($mendeley_curl[$i], CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($mendeley_curl[$i], CURLOPT_HEADER, true);
       curl_multi_add_handle($master_curl, $mendeley_curl[$i]);
     }
 
@@ -257,15 +251,23 @@ function npt_mendeley_retrieve() {
     
     // Push results together
     for ($i = 0; $i < $url_count; $i++) {
-      $mendeley_result = json_decode(curl_multi_getcontent($mendeley_curl[$i]));
-      array_push($mendeley_gbif_documents, $mendeley_result->documents);
+      $curl_result = curl_multi_getcontent($mendeley_curl[$i]);
+      $essential = _npt_mendeley_get_essential($curl_result);
+      
+      $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $essential['documents']);
+
+      // Update progress
+      $mendeley_ratelimit_remaining = $essential['ratelimit_remaining'];
       $progress['page_retrieved'] = $i + 1;
       $progress['documents_retrieved'] = count($mendeley_gbif_documents);
       $progress['timestamp'] = time();
+      $progress['ratelimit_remaining'] = $essential['ratelimit_remaining'];
       variable_set('npt_mendeley_retrieval_progress', $progress);
     }
 
-    // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.
+    curl_multi_close($master_curl);
+
+    // Save a local copy for use when there is no network connection or the rate is exceeded for Mendeley API.
     $json_file = json_encode($mendeley_gbif_documents);
     $file_save_success = file_save_data($json_file, $documents_file_loc, FILE_EXISTS_REPLACE);
     
@@ -389,6 +391,35 @@ function _npt_mendeley_analyse_country($country) {
   variable_set('npt_mendeley_publication', $analysed_result);
     
 }
+
+/**
+ * Helper function to digest essential variables in a mendeley call
+ */
+function _npt_mendeley_get_essential($curl_result) {
+  $essential = array();
+  $ratelimit_remaining = 0;
+  $result_by_line = explode("\r\n", $curl_result);
+  
+  // Get the remaining rate from the header.
+  foreach ($result_by_line as $line) {
+    $header_ratelimit = strpos($line, "x-ratelimit-remaining");
+    if ($header_ratelimit === 0) {
+      $header = explode(":", $line);
+      $ratelimit_remaining = trim($header[1]);
+    }
+  }
+  
+  // Get the documents in json format, convert it to array
+  $json_result = json_decode(end($result_by_line));
+  
+  $essential['ratelimit_remaining'] = $ratelimit_remaining;
+  $essential['documents'] = $json_result->documents;
+  $essential['total_results'] = $json_result->total_results;
+  $essential['total_pages'] = $json_result->total_pages;
+  
+  return $essential;
+}
+
 
 /*
  * Helper function to resolve duplicate documents
