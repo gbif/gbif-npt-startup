@@ -22,7 +22,35 @@ function npt_mendeley_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'npt_mendeley.admin.inc',
   );
+  $items['npt_mendeley/retrieval_progress'] = array(
+    'page callback' => '_npt_mendeley_retrievel_progress',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+
+/**
+ * Implements hook_library().
+ */
+function npt_mendeley_library() {
+  $libraries['progress'] = array(
+    'title' => 'progress bar for Mendeley retrievel',
+    'js' => array(
+      drupal_get_path('module', 'npt_mendeley') . '/js/progress.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'npt_mendeley') . '/css/progress.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+    ),
+  );
+  return $libraries;
 }
 
 /**
@@ -176,9 +204,9 @@ function npt_mendeley_retrieve() {
   $total_pages = $mendeley_result->total_pages;
   
   $documents_file = 'npt_mendeley/documents.json';
-  $_SESSION['npt_mendeley_documents_file_loc'] = file_build_uri($documents_file);
-  $documents_file_path = drupal_realpath($_SESSION['npt_mendeley_documents_file_loc']);
-  $documents_exist = file_exists($_SESSION['npt_mendeley_documents_file_loc']);
+  $documents_file_loc = file_build_uri($documents_file);
+  $documents_file_path = drupal_realpath($documents_file_loc);
+  $documents_exist = file_exists($documents_file_loc);
   $documents_time = filemtime($documents_file_path);
   $time = time();
   $documents_age = $time - $documents_time;
@@ -186,7 +214,7 @@ function npt_mendeley_retrieve() {
   // If documents are already retrieved and the local copy is only 6 hrs old,
   // then use the local copy. Otherwise retrieve and update again.
   if ($documents_exist == TRUE && $documents_age < 21600) {
-    $gbif_documents_content = file_get_contents($_SESSION['npt_mendeley_documents_file_loc']);
+    $gbif_documents_content = file_get_contents($documents_file_loc);
     $gbif_documents = json_decode($gbif_documents_content);
 
     drupal_set_message(t('The local copy of retrieved documents is used.'));
@@ -194,23 +222,46 @@ function npt_mendeley_retrieve() {
 
   } elseif ($documents_exist == FALSE || $documents_age >= 21600) {
 
-    drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
-    
-    $operations = array(); // For batch operations.
     // If there is no document retrieved or the local copy is older than 6 hrs,
     // then retrieve all documents into one array
-    for ($i = 0; $i < $total_pages; $i++) {
-      
-      $operations[] = array('_npt_mendeley_retrieve_page', array($mendeley_gbif_url, $i));
-      
-    }
+    drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
     
-    $batch = array(
-      'operations' => $operations,
-      'finished' => '_npt_mendeley_batch_finished',
+    $mendeley_gbif_documents = array();
+    $progress = array(
+      'total_pages' => $total_pages,
+      'page_retrieved' => 0,
+      'total_documents' => $total_results,
+      'documents_retrieved' => 0,
+      'timestamp' => 0,
     );
     
-    return $batch;
+    for ($i = 0; $i < $total_pages; $i++) {
+
+      $url_retrieval = $mendeley_gbif_url . '&page=' . $i;
+      $mendeley_result = json_decode(file_get_contents($url_retrieval));
+      foreach ($mendeley_result->documents as $document) {
+        array_push($mendeley_gbif_documents, $document);        
+      }
+      
+      $progress['page_retrieved'] = $i + 1;
+      $progress['documents_retrieved'] = count($mendeley_gbif_documents);
+      $progress['timestamp'] = time();
+      
+      variable_set('npt_mendeley_retrieval_progress', $progress);
+      
+    }
+
+    // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.
+    $json_file = json_encode($mendeley_gbif_documents);
+    $file_save_success = file_save_data($json_file, $documents_file_loc, FILE_EXISTS_REPLACE);
+    
+    if (is_object($file_save_success)) {
+      drupal_set_message(t('Mendeley documents retrieved and saved.'));
+      return TRUE;
+    } else {
+      drupal_set_message(t('Mendeley documents are not successfully saved.'));
+      return FALSE;
+    }
     
   } else {
 
@@ -218,22 +269,6 @@ function npt_mendeley_retrieve() {
     return FALSE;
 
   }
-}
-
-function _npt_mendeley_retrieve_page($mendeley_gbif_url, $page_number, &$context) {
-
-  $url_retrieval = $mendeley_gbif_url . '&page=' . $page_number;
-  $mendeley_result = json_decode(file_get_contents($url_retrieval));
-  foreach ($mendeley_result->documents as $document) {
-    array_push($_SESSION['mendeley_gbif_documents'], $document);        
-  }
-}
-
-function _npt_mendeley_batch_finished($success, $results, $operations) {
-  // Save a local copy in case there is no network connection or the rate is exceeded for Mendeley API.
-  $json_file = json_encode($_SESSION['mendeley_gbif_documents']);
-  file_save_data($json_file, $_SESSION['npt_mendeley_documents_file_loc'], FILE_EXISTS_REPLACE);
-  
 }
 
 function npt_mendeley_analyse() {
@@ -353,10 +388,17 @@ function _npt_mendeley_deduplicate(&$docs) {
   return $docs;
 }
 
-function _npt_mendeley_update_page_requested() {
-  $_SESSION['mendeley_page_requested']++;
-}
+function _npt_mendeley_retrievel_progress() {
+    
+  $progress = json_encode(variable_get('npt_mendeley_retrieval_progress'));
+  
+  header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+  header('Cache-Control: no-cache, must-revalidate');
+  header('Pragma: no-cache');
+  header('Expires: Mon, 26 Jul 1991 05:00:00 GMT');  // disable IE caching
+  header('Content-type: application/json');
+  print_r($progress);
 
-function _npt_mendeley_get_page_requested() {
-  return !empty($_SESSION['mendeley_page_requested']) ? $_SESSION['mendeley_page_requested'] : 0;
+  exit();
+
 }

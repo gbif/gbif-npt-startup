@@ -6,7 +6,12 @@
  */
  
 function npt_mendeley_settings_form() {
-
+  drupal_add_library('system', 'ui.progressbar');
+  drupal_add_library('npt_mendeley', 'progress', FALSE);
+  $progress_path = $base_url . '/npt_mendeley/retrieval_progress';
+  drupal_add_js(array('progress_path' => $progress_path), 'setting');
+  variable_del('npt_mendeley_retrieval_progress');
+  
   $form['npt_mendeley_update'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update against Mendeley API'),
@@ -14,8 +19,14 @@ function npt_mendeley_settings_form() {
   );
   $form['npt_mendeley_update']['update_submit'] = array(
     '#type' => 'submit',
+    '#prefix' => '<div id="progressbar"><div class="progress-label"></div></div>',
     '#value' => t('Update now'),
-    '#submit' => array('npt_mendeley_retrieve_submit'),
+    '#ajax' => array(
+      'event' => 'click',
+      'callback' => 'progressUpdate',
+      'wrapper' => 'progressbar',
+    ),
+    '#submit' => array('npt_mendeley_retrieve'),
   );
   $form['npt_mendeley_update_interval'] = array(
     '#title' => t('Automatic update interval'),
@@ -30,11 +41,4 @@ function npt_mendeley_settings_form() {
     '#options' => $interval,
   );
   return system_settings_form($form);
-}
-
-function npt_mendeley_retrieve_submit() {
-  $_SESSION['mendeley_page_requested'] = 0; // reset counter for debug information.
-  $_SESSION['mendeley_gbif_documents'] = array(); // reset temporary document store.
-  $batch = npt_mendeley_retrieve();
-  batch_set($batch);
 }
