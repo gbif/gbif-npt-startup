@@ -1,4 +1,11 @@
 var progressPath = Drupal.settings.progress_path;
+var barContainer = '<div id="progressbar"><div class="progress-label"></div></div>';
+
+jQuery(document).ready(function() {
+  $("#edit-update-submit").after(barContainer);
+});
+
+/*
 
 (function ($) {
 Drupal.behaviors.npt_mendeley = {
@@ -19,11 +26,10 @@ Drupal.behaviors.npt_mendeley = {
     function progressUpdate() {
 
       $.getJSON(progressPath, function(data) {
-        var val = progressbar.progressbar( "value" ) || 0;
         var percentage = Math.round(data.page_retrieved / data.total_pages);
         progressbar.progressbar( "value", percentage );
 
-        if ( val < data.total_pages ) {
+        if ( percentage < 100 ) {
           setTimeout( progressUpdate, 500 );
         }
       });

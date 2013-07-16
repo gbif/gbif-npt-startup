@@ -19,7 +19,6 @@ function npt_mendeley_settings_form() {
   );
   $form['npt_mendeley_update']['update_submit'] = array(
     '#type' => 'submit',
-    '#prefix' => '<div id="progressbar"><div class="progress-label"></div></div>',
     '#value' => t('Update now'),
     '#ajax' => array(
       'event' => 'click',
