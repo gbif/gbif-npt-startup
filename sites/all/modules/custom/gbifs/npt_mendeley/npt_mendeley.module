@@ -27,7 +27,35 @@ function npt_mendeley_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['mendeley_progress'] = array(
+    'title' => t('Mendeley progress'),
+    'description' => t('Progressbar.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_npt_mendeley_progres'),
+    'access arguments' => array('access content'),
+    'access callback' => TRUE,
+  );
   return $items;
+}
+
+function _npt_mendeley_progres() {
+  global $base_url;
+
+  drupal_add_library('system', 'ui.progressbar');
+  drupal_add_js(drupal_get_path('module', 'npt_mendeley') . '/js/d7dg_progress.js');
+
+  $progress_path = $base_url . '/npt_mendeley/retrieval_progress';
+  drupal_add_js(array('progress_path' => $progress_path), 'setting');
+
+  $form['npt_mendeley']['progress'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update now'),
+    '#prefix' => '<div id="update-div"><div id="progressbar"><div class="progressbar-label"></div></div></div>',
+    '#suffix' => '</div>',
+    //'#submit' => array('npt_mendeley_retrieve'),
+  );
+
+  return $form;
 }
 
 /**

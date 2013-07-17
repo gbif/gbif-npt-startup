@@ -2,10 +2,21 @@
   position: relative;
   width: 50%;
 }
-.progress-label {
+.progressbar-label {
   position: absolute;
-  left: 50%;
-  top: 4px;
-  font-weight: bold;
-  text-shadow: 1px 1px 0 #fff;
+  left: 20%;
+  top: 3px;
+  font-size: 0.95em;
+}
+#edit-update-submit {
+  position: relative;
+  display: inline-block;
+  float: left;
+}
+#progressbar {
+  position: relative;
+  display: inline-block;
+  float: left;
+  margin-left: 10px;
+  height: 25px;
 }

@@ -1,62 +1,36 @@
-var progressPath = Drupal.settings.progress_path;
-var barContainer = '<div id="progressbar"><div class="progress-label"></div></div>';
+Drupal.behaviors.nptMendeleyProgressbar = {
+  attach: function(context, settings) {
 
-jQuery(document).ready(function() {
-  $("#edit-update-submit").after(barContainer);
-});
+    jQuery("#update-div").append('<div id="progressbar"><div class="progressbar-label"></div></div></div>')
 
-/*
 
-(function ($) {
-Drupal.behaviors.npt_mendeley = {
-  attach:function(context, settings) {
-    var progressbar = $( "#progressbar" ),
-      progressLabel = $( ".progress-label" );
+    var progressPath = Drupal.settings.progress_path;
+
+    var progressbar = jQuery( "#progressbar" ),
+      progressLabel = jQuery( ".progressbar-label" );
 
     progressbar.progressbar({
       value: false,
       change: function() {
-        progressLabel.text( progressbar.progressbar( "value" ) + "%" );
       },
       complete: function() {
         progressLabel.text( "Complete!" );
       }
     });
 
-    function progressUpdate() {
+    function progress() {
+      jQuery.getJSON(progressPath, function(data) {
+        var percentage = Math.round((data.page_retrieved / data.total_pages) * 100);
+        progressbar.progressbar({ value: percentage });
+        progressLabel.text( data.documents_retrieved + " of " + data.total_documents + " documents retrieved (" + percentage + "%)");
 
-      $.getJSON(progressPath, function(data) {
-        var percentage = Math.round(data.page_retrieved / data.total_pages);
-        progressbar.progressbar( "value", percentage );
-
-        if ( percentage < 100 ) {
-          setTimeout( progressUpdate, 500 );
+        if ( percentage < 99 ) {
+          setTimeout( progress, 100 );
         }
       });
-
-
     }
 
-    setTimeout( progressUpdate, 3000 );    
+    setTimeout( progress, 3000 );
+
   }
 };
-})(jQuery);
-
-
-/*
-function dgd7progressbarUpdate(){
-
-  var progress;
-  progress = $("#progressbar").progressbar("value");
-  if (progress < 100) {
-    $(".progressbar").progressbar("value", progress + 5);
-    setTimeout(dgd7progressbarUpdate, 500);
-  }
-  Drupal.behaviors.npt_mendeley = {
-    attach: function(context, settings) {
-      $(".progressbar").progressbar({ value: 1 });
-      setTimeout(dgd7progressbarUpdate, 500);
-    }
-  };
-}          
-*/

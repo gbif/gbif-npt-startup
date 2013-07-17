@@ -6,26 +6,26 @@
  */
  
 function npt_mendeley_settings_form() {
+  global $base_url;
+  
   drupal_add_library('system', 'ui.progressbar');
   drupal_add_library('npt_mendeley', 'progress', FALSE);
+
   $progress_path = $base_url . '/npt_mendeley/retrieval_progress';
   drupal_add_js(array('progress_path' => $progress_path), 'setting');
-  variable_del('npt_mendeley_retrieval_progress');
+  //variable_del('npt_mendeley_retrieval_progress');
   
   $form['npt_mendeley_update'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update against Mendeley API'),
-    '#description' => '<p>' . t('Manually trigger the update of the publication information from Mendeley API and refresh the list of publications that are relevant to the Node.') . '<br/>' . t('Please note that Mendeley API has a rate limit of 150 calls per hour for any given IP. Update with this in mind. This may take longer than expected.') . '</p>',
+    '#title' => t('Update documents from Mendeley'),
+    '#description' => '<p>' . t('Manually trigger the update of the publication information via Mendeley API and refresh the list of publications that are relevant to the Node.') . '<br/>' . t('Please note that Mendeley API has a rate limit of 150 calls per hour for any given IP. Update with this in mind. This may take longer than expected.') . '</p>',
   );
   $form['npt_mendeley_update']['update_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update now'),
-    '#ajax' => array(
-      'event' => 'click',
-      'callback' => 'progressUpdate',
-      'wrapper' => 'progressbar',
-    ),
-    '#submit' => array('npt_mendeley_retrieve'),
+    '#prefix' => '<div id="update-div">',
+    '#suffix' => '</div>',
+    //'#submit' => array('npt_mendeley_retrieve'),
   );
   $form['npt_mendeley_update_interval'] = array(
     '#title' => t('Automatic update interval'),
@@ -39,5 +39,5 @@ function npt_mendeley_settings_form() {
     '#default_value' => variable_get('npt_mendeley_update_interval', 3600),
     '#options' => $interval,
   );
-  return system_settings_form($form);
+  return $form;
 }
