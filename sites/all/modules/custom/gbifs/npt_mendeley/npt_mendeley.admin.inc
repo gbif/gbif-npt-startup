@@ -20,12 +20,12 @@ function npt_mendeley_settings_form() {
   $form['npt_mendeley_update']['update_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update now'),
-    '#ajax' => array(
-      'event' => 'click',
-      'callback' => 'progressUpdate',
-      'wrapper' => 'progressbar',
+    '#prefix' => '<div id="update-div">',
+    '#suffix' => '</div>',
+    '#attributes' => array(
+      'onclick' => 'progressUpdate()',
     ),
-    '#submit' => array('npt_mendeley_retrieve'),
+    //'#submit' => array('npt_mendeley_retrieve'),
   );
   $form['npt_mendeley_update_interval'] = array(
     '#title' => t('Automatic update interval'),

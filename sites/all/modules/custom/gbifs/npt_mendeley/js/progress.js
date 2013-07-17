@@ -1,8 +1,17 @@
 var progressPath = Drupal.settings.progress_path;
 var barContainer = '<div id="progressbar"><div class="progress-label"></div></div>';
 
-jQuery(document).ready(function() {
+function progressUpdate() {
   $("#edit-update-submit").after(barContainer);
+}
+
+/*
+jQuery(document).ready(function() {
+  
+  $.("#update-div").append(barContainer);
+  
+  progressUpdate();
+  
 });
 
 /*
