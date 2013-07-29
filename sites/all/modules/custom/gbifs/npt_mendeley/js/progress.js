@@ -3,7 +3,6 @@ Drupal.behaviors.nptMendeleyProgressbar = {
 
     jQuery("#update-div").append('<div id="progressbar"><div class="progressbar-label"></div></div></div>')
 
-
     var progressPath = Drupal.settings.progress_path;
 
     var progressbar = jQuery( "#progressbar" ),
