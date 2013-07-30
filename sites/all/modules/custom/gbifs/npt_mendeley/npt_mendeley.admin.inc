@@ -25,6 +25,9 @@ function npt_mendeley_settings_form() {
     '#value' => t('Update now'),
     '#prefix' => '<div id="update-div">',
     '#suffix' => '</div>',
+    '#ajax' => array(
+      'callback' => '_npt_mendeley_progressbar',
+    ),
     //'#submit' => array('npt_mendeley_retrieve'),
   );
   $form['npt_mendeley_update_interval'] = array(

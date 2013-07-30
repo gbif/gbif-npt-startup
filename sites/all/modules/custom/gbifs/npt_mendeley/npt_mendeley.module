@@ -38,6 +38,14 @@ function npt_mendeley_menu() {
   return $items;
 }
 
+function _npt_mendeley_progress($form, $form_state) {
+  $selector = '#edit-update-submit';
+  
+  $commands = array();
+  $commands[] = ajax_command_after($selector, '<div id="progressbar"><div class="progressbar-label"></div></div>');
+  
+}
+
 function _npt_mendeley_progres() {
   global $base_url;
 
@@ -461,17 +469,24 @@ function _npt_mendeley_deduplicate(&$docs) {
   return $docs;
 }
 
+/**
+ * Helper function for ajax callback
+ */
 function _npt_mendeley_retrievel_progress() {
-    
-  $progress = json_encode(variable_get('npt_mendeley_retrieval_progress'));
+  $progress = array(
+    'message' => t('Starting retrieve'),
+    'percentage' => -1,
+  );
   
+  $stats = variable_get('npt_mendeley_retrieval_progress');
+
+  $progress['percentage'] = round(100 * $stats['page_retrieved'] / $stats['total_pages']);
+  $progress['messsage'] = t('@current of @total documents retrieved...', array('@current' => $stats['documents_retrieved'], '@total' => $stats['total_documents']));
+
   header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
   header('Cache-Control: no-cache, must-revalidate');
   header('Pragma: no-cache');
   header('Expires: Mon, 26 Jul 1991 05:00:00 GMT');  // disable IE caching
-  header('Content-type: application/json');
-  print_r($progress);
 
-  exit();
-
+  drupal_json_output($progress);
 }
