@@ -8,13 +8,6 @@
 function npt_mendeley_settings_form() {
   global $base_url;
   
-  drupal_add_library('system', 'ui.progressbar');
-  drupal_add_library('npt_mendeley', 'progress', FALSE);
-
-  $progress_path = $base_url . '/npt_mendeley/retrieval_progress';
-  drupal_add_js(array('progress_path' => $progress_path), 'setting');
-  //variable_del('npt_mendeley_retrieval_progress');
-  
   $form['npt_mendeley_update'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update documents from Mendeley'),
@@ -24,16 +17,23 @@ function npt_mendeley_settings_form() {
     '#type' => 'submit',
     '#value' => t('Update now'),
     '#prefix' => '<div id="update-div">',
-    '#suffix' => '</div>',
+    '#suffix' => '<span id="status-message"></span></div>',
     '#ajax' => array(
-      'callback' => '_npt_mendeley_progressbar',
+      'callback' => 'npt_mendeley_retrieve',
+      'wrapper' => 'status-message',
+      'effect' => 'fade',
+      'progress' => array(
+        'type' => 'bar',
+        'message' => t('Loading...'),
+        'url' => '/npt_mendeley/retrieval_progress',
+        'interval' => '100',
+      ),
     ),
-    //'#submit' => array('npt_mendeley_retrieve'),
   );
   $form['npt_mendeley_update_interval'] = array(
     '#title' => t('Automatic update interval'),
     '#type' => 'fieldset',
-    '#description' => t('You can decide how frequently you want the update to be conducted together with the system cron tasks.'),
+    '#description' => t('You can decide how frequently you want to run the update together with the system cron tasks.'),
   );
   $interval = drupal_map_assoc(array(1800, 3600, 10800, 21600, 32400, 43200, 86400, 259200), 'format_interval');
   $interval[0] = '<' . t('none') . '>';
@@ -42,5 +42,9 @@ function npt_mendeley_settings_form() {
     '#default_value' => variable_get('npt_mendeley_update_interval', 3600),
     '#options' => $interval,
   );
-  return $form;
+  return system_settings_form($form);
+}
+
+function npt_mendeley_settings_form_submit($form, &$form_state) {
+  variable_set('npt_mendeley_update_interval');
 }

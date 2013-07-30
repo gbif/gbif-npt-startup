@@ -5,6 +5,7 @@
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
+define('MENDELEY_GBIF_PUBLIC_GROUP_ID', '1068301');
 define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
 define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 
@@ -27,43 +28,7 @@ function npt_mendeley_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['mendeley_progress'] = array(
-    'title' => t('Mendeley progress'),
-    'description' => t('Progressbar.'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_npt_mendeley_progres'),
-    'access arguments' => array('access content'),
-    'access callback' => TRUE,
-  );
   return $items;
-}
-
-function _npt_mendeley_progress($form, $form_state) {
-  $selector = '#edit-update-submit';
-  
-  $commands = array();
-  $commands[] = ajax_command_after($selector, '<div id="progressbar"><div class="progressbar-label"></div></div>');
-  
-}
-
-function _npt_mendeley_progres() {
-  global $base_url;
-
-  drupal_add_library('system', 'ui.progressbar');
-  drupal_add_js(drupal_get_path('module', 'npt_mendeley') . '/js/d7dg_progress.js');
-
-  $progress_path = $base_url . '/npt_mendeley/retrieval_progress';
-  drupal_add_js(array('progress_path' => $progress_path), 'setting');
-
-  $form['npt_mendeley']['progress'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update now'),
-    '#prefix' => '<div id="update-div"><div id="progressbar"><div class="progressbar-label"></div></div></div>',
-    '#suffix' => '</div>',
-    //'#submit' => array('npt_mendeley_retrieve'),
-  );
-
-  return $form;
 }
 
 /**
@@ -71,14 +36,7 @@ function _npt_mendeley_progres() {
  */
 function npt_mendeley_library() {
   $libraries['progress'] = array(
-    'title' => 'progress bar for Mendeley retrievel',
-    'js' => array(
-      drupal_get_path('module', 'npt_mendeley') . '/js/progress.js' => array(
-        'type' => 'file',
-        'scope' => 'footer',
-        'weight' => 20,
-      ),
-    ),
+    'title' => 'Progress bar for Mendeley retrievel',
     'css' => array(
       drupal_get_path('module', 'npt_mendeley') . '/css/progress.css' => array(
         'type' => 'file',
@@ -208,16 +166,41 @@ function npt_mendeley_block_view($delta = '') {
 /**
  * Ensure a local digest of citations from the GBIF Public Library on Mendeley.
  */
-function npt_mendeley_retrieve() {
+function npt_mendeley_retrieve($form, &$form_state) {
 
-  // Begin accessing Mendeley API.
+  // Trial accessing Mendeley API.
   $mendeley_gbif_url = 'http://api.mendeley.com/oapi/documents/groups/1068301/docs/?details=true&items=40&consumer_key='. NPT_MENDELEY_CONSUMER_KEY;
-  $mendeley_curl = curl_init();
-  curl_setopt($mendeley_curl, CURLOPT_URL, $mendeley_gbif_url);
-  curl_setopt($mendeley_curl, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($mendeley_curl, CURLOPT_HEADER, true);
-  $mendeley_curl_result = curl_exec($mendeley_curl);
-  curl_close($mendeley_curl);
+  $mendeley_ch = curl_init(); // Create a cURL resource
+  curl_setopt($mendeley_ch, CURLOPT_URL, $mendeley_gbif_url);
+  curl_setopt($mendeley_ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($mendeley_ch, CURLOPT_HEADER, true);
+  $mendeley_ch_result = curl_exec($mendeley_ch);
+  $mendeley_api_status = curl_getinfo($mendeley_ch);
+  curl_close($mendeley_ch);
+  unset($mendeley_ch);
+  
+  // Debug step: checking Mendeley API status
+  // Refer to: http://apidocs.mendeley.com/home/responses-and-errors-1
+  switch ($mendeley_api_status['http_code']) {
+    case 200:
+      break; // Proceed! Success! This header is sent for GET requests together with a JSON object containing the data requested.
+    case 201:
+      break; // Another success header! This one is sent after a POST request has been successful.
+    case 204:
+      return t('No content from Mendeley.');
+    case 400:
+      return t('Bad Request to Mendeley.');
+    case 401:
+      return t('Unauthorized: Authentication credentials were missing or incorrect.');
+    case 403:
+      return t('Forbidden.');
+    case 404:
+      return t('Not found.');
+    case 429:
+      return t('Too many requests: Rate limit reached. Please try an hour later.');
+    case 503:
+      return t('Service Unavailable: Mendeley is up, but something went wrong, please try again later.');
+  }
   
   $essential = _npt_mendeley_get_essential($mendeley_curl_result);
   
@@ -228,7 +211,7 @@ function npt_mendeley_retrieve() {
 
   unset($essential);
 
-  // Prepare for uri
+  // Prepare the uri for storing retrieved documents
   $documents_file = 'npt_mendeley/documents.json';
   $documents_file_loc = file_build_uri($documents_file);
   $documents_file_path = drupal_realpath($documents_file_loc);
@@ -243,7 +226,7 @@ function npt_mendeley_retrieve() {
     $gbif_documents_content = file_get_contents($documents_file_loc);
     $gbif_documents = json_decode($gbif_documents_content);
 
-    drupal_set_message(t('The local copy of retrieved documents is used.'));
+    drupal_set_message(t('The local copy of documents is used.'));
     return TRUE;
 
   } elseif ($documents_exist == FALSE || $documents_age >= 21600) {
@@ -308,8 +291,8 @@ function npt_mendeley_retrieve() {
     $file_save_success = file_save_data($json_file, $documents_file_loc, FILE_EXISTS_REPLACE);
     
     if (is_object($file_save_success)) {
-      drupal_set_message(t('Mendeley documents retrieved and saved.'));
-      return TRUE;
+      //drupal_set_message(t('Mendeley documents retrieved and saved.'));
+      return 'Task completed.';
     } else {
       drupal_set_message(t('Mendeley documents are not successfully saved.'));
       return FALSE;
@@ -429,7 +412,8 @@ function _npt_mendeley_analyse_country($country) {
 }
 
 /**
- * Helper function to digest essential variables in a mendeley call
+ * Helper function to get essential variables in a mendeley call
+ * from http headers and the top level of JSON output.
  */
 function _npt_mendeley_get_essential($curl_result) {
   $essential = array();
@@ -473,16 +457,11 @@ function _npt_mendeley_deduplicate(&$docs) {
  * Helper function for ajax callback
  */
 function _npt_mendeley_retrievel_progress() {
-  $progress = array(
-    'message' => t('Starting retrieve'),
-    'percentage' => -1,
-  );
-  
-  $stats = variable_get('npt_mendeley_retrieval_progress');
+  $progress = variable_get('npt_mendeley_retrieve_sleep');
 
   $progress['percentage'] = round(100 * $stats['page_retrieved'] / $stats['total_pages']);
   $progress['messsage'] = t('@current of @total documents retrieved...', array('@current' => $stats['documents_retrieved'], '@total' => $stats['total_documents']));
-
+  
   header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
   header('Cache-Control: no-cache, must-revalidate');
   header('Pragma: no-cache');
