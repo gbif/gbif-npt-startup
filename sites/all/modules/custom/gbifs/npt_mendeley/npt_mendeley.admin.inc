@@ -2,7 +2,7 @@
 /**
  * @file
  * Providing administrative functions to update the statistics.
- *
+ * @todo throbber is not shown under the scratchpads_admin theme.
  */
  
 function npt_mendeley_settings_form() {

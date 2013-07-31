@@ -13,9 +13,7 @@
 }
 #status-wrapper {
   display: block;
-  border: 1px solid #ccc;
 }
 .ajax-progress {
   display: block;
-  width:100%;
 }

@@ -2,6 +2,7 @@
 /**
  * @file
  * This module retrieves relevant literature entries about a node from Mendeley API.
+ * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
@@ -72,7 +73,7 @@ function npt_mendeley_block_view($delta = '') {
       // Prepare the block content
       $block_content = '<article>';
       
-      $analysed_result = variable_get('npt_memdeley_publication');
+      $analysed_result = variable_get('npt_mendeley_publication');
       $analysed_result_count = $analysed_result['authored']['count'] + $analysed_result['about']['count'];
 
       if ($analysed_result_count > 0) {
@@ -88,7 +89,7 @@ function npt_mendeley_block_view($delta = '') {
           );
           $output .= '<ol class="mendeley-citation">';
 
-          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_memdeley/' . $analysed_result['authored']['file'])));
+          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $analysed_result['authored']['file'])));
 
           foreach ($authored_docs as $adoc) {
             $output .= '<li>';
@@ -125,7 +126,7 @@ function npt_mendeley_block_view($delta = '') {
           );
           $output .= '<ol class="mendeley-citation">';
 
-          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_memdeley/' . $analysed_result['about']['file'])));
+          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $analysed_result['about']['file'])));
 
           foreach ($authored_docs as $adoc) {
             $output .= '<li>';
@@ -258,7 +259,6 @@ function npt_mendeley_retrieve($form, &$form_state) {
       $url_to_retrieve[] = $mendeley_gbif_url . '&page=' . $i;
     }
 
-    $url_count = count($url_to_retrieve);
     $mendeley_ch = array();
     $master_ch = curl_multi_init();
     
@@ -268,6 +268,7 @@ function npt_mendeley_retrieve($form, &$form_state) {
       curl_setopt($mendeley_ch[$i], CURLOPT_RETURNTRANSFER, true);
       curl_setopt($mendeley_ch[$i], CURLOPT_HEADER, true);
       curl_setopt($mendeley_ch[$i], CURLOPT_NOPROGRESS, false);
+      _npt_mendeley_curl_progress_callback($mendeley_ch[$i]); //@todo To figure out why size doesn't show in debug session
       curl_multi_add_handle($master_ch, $mendeley_ch[$i]);
     }
 
@@ -449,16 +450,17 @@ function _npt_mendeley_get_essential($curl_result) {
 /**
  * Helper function to inform the progress of download during
  * curl_multi_exec().
+ * @todo It was once working. The debug session shows all variables as zero.
  */
-function _npt_mendeley_curl_progress($current_handle) {
-	curl_setopt($current_handle, CURLOPT_PROGRESSFUNCTION, function ($download_size, $downloaded_size, $upload_size, $uploaded_size) use ($current_handle) {
-	  if ($downloaded_size != 0 && $downloaded_size/$download_size == 1) {
-		  $_SESSION['mendeley_progress']['page_retrieved']++;
-			$_SESSION['mendeley_progress']['message'] = t('@page_retrieved of @total_pages retrieved', array('@page_retrieved' => $_SESSION['mendeley_progress']['page_retrieved'], '@total_pages' => $_SESSION['mendeley_progress']['total_pages']));
-			$_SESSION['mendeley_progress']['percentage'] = round(100 * $_SESSION['mendeley_progress']['page_retrieved'] / $_SESSION['mendeley_progress']['total_pages']);
-			variable_set('npt_mendeley_retrieval_progress', $_SESSION['mendeley_progress']);
-		}
-	});
+function _npt_mendeley_curl_progress_callback($ch) {
+  curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, function ($to_download = 0, $downloaded = 0, $to_upload = 0, $uploaded = 0) {
+    if ($downloaded != 0 && $downloaded / $to_download == 1) {
+  	  $_SESSION['mendeley_progress']['page_retrieved']++;
+  		$_SESSION['mendeley_progress']['message'] = t('@page_retrieved of @total_pages retrieved', array('@page_retrieved' => $_SESSION['mendeley_progress']['page_retrieved'], '@total_pages' => $_SESSION['mendeley_progress']['total_pages']));
+  		$_SESSION['mendeley_progress']['percentage'] = round(100 * $_SESSION['mendeley_progress']['page_retrieved'] / $_SESSION['mendeley_progress']['total_pages']);
+  		variable_set('npt_mendeley_retrieval_progress', $_SESSION['mendeley_progress']);
+    }
+  });
 }
 
 /**
