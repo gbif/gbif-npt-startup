@@ -271,6 +271,8 @@ function npt_mendeley_retrieve($form, &$form_state) {
       curl_multi_add_handle($master_ch, $mendeley_ch[$i]);
     }
 
+    // Seems not possible to get http header and use x-ratelimit-remaining for
+    // more precise progress reporting.
     do {
       curl_multi_exec($master_ch, $running);
     } while ($running > 0);
@@ -278,9 +280,13 @@ function npt_mendeley_retrieve($form, &$form_state) {
     // Push results together
     foreach ($url_to_retrieve as $i => $url) {
       $curl_result = curl_multi_getcontent($mendeley_ch[$i]);
-      curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
-      curl_close($mendeley[$i]);
+      $essential = _npt_mendeley_get_essential($curl_result);
       $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $essential['documents']);
+    }
+
+    foreach ($url_to_retreive as $i => $url) {
+      curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
+      curl_close($mendeley_ch[$i]);
     }
 
     curl_multi_close($master_ch);
@@ -444,9 +450,13 @@ function _npt_mendeley_get_essential($curl_result) {
  * curl_multi_exec().
  */
 function _npt_mendeley_curl_progress($current_handle) {
-	curl_setopt($current_handle, CURLOPT_PROGRESSFUNCTION, function ($download_size = 0, $downloaded_size = 0, $upload_size = 0, $uploaded_size = 0) use ($current_handle) {
-		if($downloaded_size != 0 && $downloaded_size/$download_size == 1) {
-			$_SESSION['mendeley_progress']['page_retrieved']++;
+	curl_setopt($current_handle, CURLOPT_PROGRESSFUNCTION, function ($download_size, $downloaded_size, $upload_size, $uploaded_size) use ($current_handle) {
+	  if($downloaded_size != 0 && $downloaded_size/$download_size == 1) {
+      global $mendeley_gbif_documents;
+	    $curl_result = curl_getcontent($current_handle);
+		  $essential = _npt_mendeley_get_essential($curl_result);
+		  $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $essential['documents']);
+		  $_SESSION['mendeley_progress']['page_retrieved']++;
 			$_SESSION['mendeley_progress']['message'] = t('@page_retrieved of @total_pages retrieved', array('@page_retrieved' => $_SESSION['mendeley_progress']['page_retrieved'], '@total_pages' => $_SESSION['mendeley_progress']['total_pages']));
 			$_SESSION['mendeley_progress']['percentage'] = round(100 * $_SESSION['mendeley_progress']['page_retrieved'] / $_SESSION['mendeley_progress']['total_pages']);
 			variable_set('npt_mendeley_retrieval_progress', $_SESSION['mendeley_progress']);
