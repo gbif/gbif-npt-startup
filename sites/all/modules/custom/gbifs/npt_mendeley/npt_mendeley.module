@@ -211,7 +211,7 @@ function npt_mendeley_retrieve($form, &$form_state) {
   // For storing the progress for ajax callback
   $_SESSION['mendeley_progress'] = array(
     'percentage' => 0,
-    'message' => '',
+    'message' => t('Initialising...'),
     'ratelimit_remaining' => $essential['ratelimit_remaining'],
     'page_retrieved' => 0,
     'total_pages' => $essential['total_pages'],
@@ -219,6 +219,7 @@ function npt_mendeley_retrieve($form, &$form_state) {
     'total_results' => $essential['total_results'],
     'timestamp' => time(),
   );
+  variable_set('npt_mendeley_retrieval_progress', $_SESSION['mendeley_progress']);
   unset($essential);
 
   // Prepare the uri for storing retrieved documents
@@ -238,8 +239,8 @@ function npt_mendeley_retrieve($form, &$form_state) {
 
     $gbif_documents_content = file_get_contents($documents_file_loc);
     $gbif_documents = json_decode($gbif_documents_content);
-    drupal_set_message(t('The local copy of documents is used.'));
-    return TRUE;
+
+    return t('The local copy is still new to use.');
 
   } elseif ($documents_exist == FALSE || $documents_age >= $interval) {
 
@@ -302,17 +303,12 @@ function npt_mendeley_retrieve($form, &$form_state) {
     
     if (is_object($file_save_success)) {
       //drupal_set_message(t('Mendeley documents retrieved and saved.'));
-      return 'Task completed.';
+      return t('Mendeley documents retrieved and saved.');
     } else {
-      drupal_set_message(t('Mendeley documents are not successfully saved.'));
-      return FALSE;
+      return t('Mendeley documents not successfully saved.');
     }
-    
   } else {
-
-    drupal_set_message(t('An exception occurred during the retrival.'));
-    return FALSE;
-
+    return t('An exception occurred during the retrival.');
   }
 }
 

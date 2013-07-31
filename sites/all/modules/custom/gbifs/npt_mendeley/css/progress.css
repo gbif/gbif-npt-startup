@@ -10,10 +10,10 @@
 }
 #edit-update-submit {
   float: none;
-  margin-bottom: 10px;
 }
 #status-wrapper {
   display: block;
+  border: 1px solid #ccc;
 }
 .ajax-progress {
   display: block;
