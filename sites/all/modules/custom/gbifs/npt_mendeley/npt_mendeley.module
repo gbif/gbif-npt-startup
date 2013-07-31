@@ -202,89 +202,88 @@ function npt_mendeley_retrieve($form, &$form_state) {
       return t('Service Unavailable: Mendeley is up, but something went wrong, please try again later.');
   }
   
-  $essential = _npt_mendeley_get_essential($mendeley_curl_result);
-  
-  $mendeley_result = $essential['documents'];
+  // Get essential stats for determining the workflow
+  $essential = _npt_mendeley_get_essential($mendeley_ch_result);
   $mendeley_ratelimit_remaining = $essential['ratelimit_remaining'];
   $total_results = $essential['total_results'];
   $total_pages = $essential['total_pages'];
 
+  // For storing the progress for ajax callback
+  $_SESSION['mendeley_progress'] = array(
+    'percentage' => 0,
+    'message' => '',
+    'rate_remaining' => $essential['ratelimit_remaining'],
+    'page_retrieved' => 0,
+    'total_pages' => $essential['total_pages'],
+    'documents_retrieved' => 0,
+    'total_results' => $essential['total_results'],
+    'timestamp' => time(),
+  );
   unset($essential);
 
   // Prepare the uri for storing retrieved documents
-  $documents_file = 'npt_mendeley/documents.json';
-  $documents_file_loc = file_build_uri($documents_file);
+  $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
   $documents_file_path = drupal_realpath($documents_file_loc);
   $documents_exist = file_exists($documents_file_loc);
-  $documents_time = filemtime($documents_file_path);
+  $documents_time = filemtime($documents_file_path)? filemtime($documents_file_path) : 0;
   $time = time();
   $documents_age = $time - $documents_time;
 
-  // If documents are already retrieved and the local copy is only 6 hrs old,
-  // then use the local copy. Otherwise retrieve and update again.
-  if ($documents_exist == TRUE && $documents_age < 21600) {
+  $interval = variable_get('npt_mendeley_update_interval', 3600);
+  if ($documents_exist == TRUE && $documents_age < $interval) {
+
+    // If documents are already retrieved and it's younger than defined in
+    // npt_mendeley_update_interval, then use the local copy.
+    // Otherwise retrieve and update again.
+
     $gbif_documents_content = file_get_contents($documents_file_loc);
     $gbif_documents = json_decode($gbif_documents_content);
-
     drupal_set_message(t('The local copy of documents is used.'));
     return TRUE;
 
-  } elseif ($documents_exist == FALSE || $documents_age >= 21600) {
+  } elseif ($documents_exist == FALSE || $documents_age >= $interval) {
 
     // If there is no document retrieved or the local copy is older than 6 hrs,
     // then retrieve all documents into one array
-    drupal_set_message(t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages)));
+
+    $_SESSION['mendeley_progress']['message'] = t('@results documents in @pages pages to be retrieved from GBIF Public Library.', array('@results' => $total_results, '@pages' => $total_pages));
+    $_SESSION['mendeley_progress']['percentage'] = 0;
     
-    $mendeley_ratelimit_remaining = 0;
     $url_to_retrieve = array();
     $mendeley_gbif_documents = array();
-    $progress = array(
-      'total_pages' => $total_pages,
-      'page_retrieved' => 0,
-      'total_documents' => $total_results,
-      'documents_retrieved' => 0,
-      'timestamp' => 0,
-      'ratelimit_remaining' => 0,
-    );
-    
-    // All urls to be retrieved.
+
+    // Append all urls to be retrieved.
     for ($i = 0; $i < $total_pages; $i++) {
       $url_to_retrieve[] = $mendeley_gbif_url . '&page=' . $i;
     }
 
     $url_count = count($url_to_retrieve);
-    $mendeley_curl = array();
-    $master_curl = curl_multi_init();
+    $mendeley_ch = array();
+    $master_ch = curl_multi_init();
     
     // Construct curl handlers
-    for ($i = 0; $i < $url_count; $i++) {
-      $mendeley_curl[$i] = curl_init($url_to_retrieve[$i]);
-      curl_setopt($mendeley_curl[$i], CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($mendeley_curl[$i], CURLOPT_HEADER, true);
-      curl_multi_add_handle($master_curl, $mendeley_curl[$i]);
+    foreach ($url_to_retrieve as $i => $url) {
+      $mendeley_ch[$i] = curl_init($url);
+      curl_setopt($mendeley_ch[$i], CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($mendeley_ch[$i], CURLOPT_HEADER, true);
+      curl_setopt($mendeley_ch[$i], CURLOPT_NOPROGRESS, false);
+      _npt_mendeley_curl_progress($mendeley_ch[$i]);
+      curl_multi_add_handle($master_ch, $mendeley_ch[$i]);
     }
 
     do {
-      curl_multi_exec($master_curl, $running);
+      curl_multi_exec($master_ch, $running);
     } while ($running > 0);
     
     // Push results together
-    for ($i = 0; $i < $url_count; $i++) {
-      $curl_result = curl_multi_getcontent($mendeley_curl[$i]);
-      $essential = _npt_mendeley_get_essential($curl_result);
-      
+    foreach ($url_to_retrieve as $i => $url) {
+      $curl_result = curl_multi_getcontent($mendeley_ch[$i]);
+      curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
+      curl_close($mendeley[$i]);
       $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $essential['documents']);
-
-      // Update progress
-      $mendeley_ratelimit_remaining = $essential['ratelimit_remaining'];
-      $progress['page_retrieved'] = $i + 1;
-      $progress['documents_retrieved'] = count($mendeley_gbif_documents);
-      $progress['timestamp'] = time();
-      $progress['ratelimit_remaining'] = $essential['ratelimit_remaining'];
-      variable_set('npt_mendeley_retrieval_progress', $progress);
     }
 
-    curl_multi_close($master_curl);
+    curl_multi_close($master_ch);
 
     // Save a local copy for use when there is no network connection or the rate is exceeded for Mendeley API.
     $json_file = json_encode($mendeley_gbif_documents);
@@ -440,8 +439,22 @@ function _npt_mendeley_get_essential($curl_result) {
   return $essential;
 }
 
+/**
+ * Helper function to inform the progress of download during
+ * curl_multi_exec().
+ */
+function _npt_mendeley_curl_progress($current_handle) {
+	curl_setopt($current_handle, CURLOPT_PROGRESSFUNCTION, function ($download_size = 0, $downloaded_size = 0, $upload_size = 0, $uploaded_size = 0) use ($current_handle) {
+		if($downloaded_size != 0 && $downloaded_size/$download_size == 1) {
+			$_SESSION['mendeley_progress']['page_retrieved']++;
+			$_SESSION['mendeley_progress']['message'] = t('@page_retrieved of @total_pages retrieved', array('@page_retrieved' => $_SESSION['mendeley_progress']['page_retrieved'], '@total_pages' => $_SESSION['mendeley_progress']['total_pages']));
+			$_SESSION['mendeley_progress']['percentage'] = round(100 * $_SESSION['mendeley_progress']['page_retrieved'] / $_SESSION['mendeley_progress']['total_pages']);
+			variable_set('npt_mendeley_retrieval_progress', $_SESSION['mendeley_progress']);
+		}
+	});
+}
 
-/*
+/**
  * Helper function to resolve duplicate documents
  */
 function _npt_mendeley_deduplicate(&$docs) {
@@ -457,10 +470,8 @@ function _npt_mendeley_deduplicate(&$docs) {
  * Helper function for ajax callback
  */
 function _npt_mendeley_retrievel_progress() {
-  $progress = variable_get('npt_mendeley_retrieve_sleep');
-
-  $progress['percentage'] = round(100 * $stats['page_retrieved'] / $stats['total_pages']);
-  $progress['messsage'] = t('@current of @total documents retrieved...', array('@current' => $stats['documents_retrieved'], '@total' => $stats['total_documents']));
+  
+  $progress = variable_get('npt_mendeley_retrieval_progress');
   
   header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
   header('Cache-Control: no-cache, must-revalidate');
@@ -468,4 +479,5 @@ function _npt_mendeley_retrievel_progress() {
   header('Expires: Mon, 26 Jul 1991 05:00:00 GMT');  // disable IE caching
 
   drupal_json_output($progress);
+
 }

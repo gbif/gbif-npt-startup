@@ -6,8 +6,8 @@
  */
  
 function npt_mendeley_settings_form() {
-  global $base_url;
-  
+ 
+  drupal_add_library('npt_mendeley', 'progress', false); 
   $form['npt_mendeley_update'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update documents from Mendeley'),
@@ -17,10 +17,10 @@ function npt_mendeley_settings_form() {
     '#type' => 'submit',
     '#value' => t('Update now'),
     '#prefix' => '<div id="update-div">',
-    '#suffix' => '<span id="status-message"></span></div>',
+    '#suffix' => '<div id="status-wrapper"></div></div>',
     '#ajax' => array(
       'callback' => 'npt_mendeley_retrieve',
-      'wrapper' => 'status-message',
+      'wrapper' => 'status-wrapper',
       'effect' => 'fade',
       'progress' => array(
         'type' => 'bar',
@@ -42,9 +42,10 @@ function npt_mendeley_settings_form() {
     '#default_value' => variable_get('npt_mendeley_update_interval', 3600),
     '#options' => $interval,
   );
+  $form['#submit'] = array('npt_mendeley_settings_form_submit');
   return system_settings_form($form);
 }
 
 function npt_mendeley_settings_form_submit($form, &$form_state) {
-  variable_set('npt_mendeley_update_interval');
+  variable_set('npt_mendeley_update_interval', $form_state['values']['update_interval']);
 }
