@@ -7,11 +7,14 @@
  * @todo JSON interface for country pages, accepting call by ISO country code.
  * @todo Analysis according to country and the need of communication.
  * @todo Presenting lists with block.
+ * @todo UUID not exist in the Mendeley documents as of 1 Aug 13.
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
 define('MENDELEY_GBIF_PUBLIC_GROUP_ID', '1068301');
-define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
+define('MENDELEY_PUBLIC_GROUPS_DOCUMENTS', 'http://api.mendeley.com/oapi/documents/groups');
+define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details');
+define('GBIF_ENUMERATION_COUNTRY', 'http://apidev.gbif.org/enumeration/countries');
 
 /**
  * Implements hook_menu().
@@ -180,7 +183,7 @@ function npt_mendeley_block_view($delta = '') {
 function npt_mendeley_retrieve($form, &$form_state) {
 
   // Trial accessing Mendeley API.
-  $mendeley_gbif_url = 'http://api.mendeley.com/oapi/documents/groups/1068301/docs/?details=true&items=40&consumer_key='. NPT_MENDELEY_CONSUMER_KEY;
+  $mendeley_gbif_url = MENDELEY_PUBLIC_GROUPS_DOCUMENTS . '/' . MENDELEY_GBIF_PUBLIC_GROUP_ID . '/docs/?details=true&items=40&consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
   $mendeley_ch = curl_init(); // Create a cURL resource
   curl_setopt($mendeley_ch, CURLOPT_URL, $mendeley_gbif_url);
   curl_setopt($mendeley_ch, CURLOPT_RETURNTRANSFER, true);
@@ -324,6 +327,54 @@ function npt_mendeley_retrieve($form, &$form_state) {
 }
 
 function npt_mendeley_analyse() {
+
+  // Prepare sets of tags for analysis
+  $tag_sets = array();
+  $tag_sets[] = array(
+    'name' => t('Data papers'),
+    'machine_name' => 'data_paper',
+    'desc' => t('Peer-reviewed data papers describing biodiversity datasets published through the GBIF network'),
+    'tags' => array('datapaper'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Invasive alien species'),
+    'machine_name' => 'invasive_alien_species',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on invasive alien species'),
+    'tags' => array('GBIF_used', 'invasive'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Climate change'),
+    'machine_name' => 'climate_change',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on impacts of climate change on biodiversity'),
+    'tags' => array('GBIF_used', 'climate'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Conservation'),
+    'machine_name' => 'conservation',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on conservation, including threatened species and protected areas'),
+    'tags' => array('GBIF_used', 'conservation'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Human health'),
+    'machine_name' => 'human_health',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to human health and biodiversity, including disease vectors and medicines'),
+    'tags' => array('GBIF_used', 'human health'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Food and farming'),
+    'machine_name' => 'food_and_farming',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to agriculture, biofuels, aquaculture and wild fisheries'),
+    'tags' => array('GBIF_used', 'agriculture'),
+    'tags_alt' => array('GBIF_used', 'biofuel'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Species distributions'),
+    'machine_name' => 'species_distribution',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to species distributions, including biogeography and ecology'),
+    'tags' => array('GBIF_used', 'species distribution'),
+  );
+
+
   $gbif_participant_node_uuid = variable_get('gbif_participant_node_uuid');
   
   // Determine the country of the Node.
@@ -331,7 +382,7 @@ function npt_mendeley_analyse() {
   $gbif_registry_node_api_response = json_decode(file_get_contents($json_url));
 
   if (isset($gbif_registry_node_api_response->country) == TRUE) {
-    $country = strtolower($gbif_registry_node_api_response->country);
+    $country = ucwords(strtolower($gbif_registry_node_api_response->country));
     _npt_mendeley_analyse_country($country);
   } elseif (isset($gbif_registry_node_api_response->country) == FALSE) {
     drupal_set_message(t('The current associated GBIF Participant Node is not a country. No further activities with Mendeley API for now.'), 'warning');
@@ -351,14 +402,11 @@ function _npt_mendeley_analyse_country($country) {
 
   // First iteration: get only documents tagged with country name
   foreach ($documents as $k => $doc) {
-  // Only retrieve documents with Mendeley UUID
-    if (isset($doc->uuid)) {
-      if (in_array($tag_authored, $doc->tags)) {
-        $analysed_docs_authored[] = $doc;
-      }
-      if (in_array($tag_about, $doc->tags)) {
-        $analysed_docs_about[] = $doc;
-      }
+    if (in_array($tag_authored, $doc->tags)) {
+      $analysed_docs_authored[] = $doc;
+    }
+    if (in_array($tag_about, $doc->tags)) {
+      $analysed_docs_about[] = $doc;
     }
     unset($documents[$k]);
   }
@@ -376,7 +424,7 @@ function _npt_mendeley_analyse_country($country) {
 
     // Insert publication_outlet from Mendeley detail call
     foreach ($analysed_docs_authored as $adoc) {
-      $url = MENDELEY_DOC_DETAIL_URL . $adoc->uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
       $detail = json_decode(file_get_contents($url));
       $adoc->publication_outlet = $detail->publication_outlet;
     }
@@ -479,7 +527,7 @@ function _npt_mendeley_curl_progress_callback($ch) {
 function _npt_mendeley_deduplicate(&$docs) {
   $unique_docs = array();
   foreach ($docs as $doc) {
-    $unique_docs[$doc->uuid] = $doc;
+    $unique_docs[$doc->id] = $doc;
   }
   $docs = array_values($unique_docs);
   return $docs;
