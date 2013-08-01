@@ -2,8 +2,9 @@
 /**
  * @file
  * Providing administrative functions to update the necessary Node information.
+ * @todo Determine the country according to the node UUID.
  */
- 
+
 function npt_setup_settings() {
   $gbif_participant_node_uuid = variable_get('gbif_participant_node_uuid');
   $gbif_participant_shortname = variable_get('gbif_participant_shortname');

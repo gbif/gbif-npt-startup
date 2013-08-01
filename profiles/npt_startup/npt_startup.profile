@@ -7,6 +7,7 @@
  */
 
 define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/node');
+define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 
 /**
  * Implements hook_install_tasks()
