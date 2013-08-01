@@ -3,15 +3,19 @@
  * @file
  * This module retrieves relevant literature entries about a node from Mendeley API.
  * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
+ * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
+ * @todo JSON interface for country pages, accepting call by ISO country code.
+ * @todo Analysis according to country and the need of communication.
+ * @todo Presenting lists with block.
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
 define('MENDELEY_GBIF_PUBLIC_GROUP_ID', '1068301');
 define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details/');
-define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 
 /**
  * Implements hook_menu().
+ * @todo Access point for JSON call
  */
 function npt_mendeley_menu() {
   $items = array();
@@ -23,6 +27,12 @@ function npt_mendeley_menu() {
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'npt_mendeley.admin.inc',
+  );
+  // JSON list for country pages
+  $items['npt_mendeley/country'] = array(
+    'page callback' => '_npt_mendeley_country',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
   );
   $items['npt_mendeley/retrieval_progress'] = array(
     'page callback' => '_npt_mendeley_retrievel_progress',
@@ -321,7 +331,7 @@ function npt_mendeley_analyse() {
   $gbif_registry_node_api_response = json_decode(file_get_contents($json_url));
 
   if (isset($gbif_registry_node_api_response->country) == TRUE) {
-    $country = $gbif_registry_node_api_response->country;
+    $country = strtolower($gbif_registry_node_api_response->country);
     _npt_mendeley_analyse_country($country);
   } elseif (isset($gbif_registry_node_api_response->country) == FALSE) {
     drupal_set_message(t('The current associated GBIF Participant Node is not a country. No further activities with Mendeley API for now.'), 'warning');

@@ -30,6 +30,22 @@ function npt_mendeley_settings_form() {
       ),
     ),
   );
+  $form['npt_mendeley_analyse'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Analyse retrieved documents from Mendeley'),
+    '#description' => '<p>' . t('Group retrieved documents according to prefined sets of tags and produce lists in configurable blocks.') . '</p>',
+  );
+  $form['npt_mendeley_analyse']['analyse_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Analyse now'),
+    '#prefix' => '<div id="analyse-div">',
+    '#suffix' => '<div id="analyse-status-wrapper"></div></div>',
+    '#ajax' => array(
+      'callback' => 'npt_mendeley_analyse',
+      'wrapper' => 'analyse-status-wrapper',
+      'effect' => 'fade',
+    ),
+  );
   $form['npt_mendeley_update_interval'] = array(
     '#title' => t('Automatic update interval'),
     '#type' => 'fieldset',
