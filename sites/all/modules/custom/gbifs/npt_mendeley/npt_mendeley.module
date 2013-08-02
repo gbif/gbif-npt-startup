@@ -65,117 +65,80 @@ function npt_mendeley_library() {
  * Implements hook_block_info().
  */
 function npt_mendeley_block_info() {
-  $blocks['npt_mendeley'] = array(
-    'info' => t("Peer-reviewed publications using/discussing GBIF-mediated data"),
-    'region' => 'content',
-    'weight' => 1,
-    'theme' => NPTSTARTUP_THEME,
-    'status' => 0,
-  );
+  $tag_sets = variable_get('npt_mendeley_tags');
+  
+  foreach ($tag_sets as $tag_set) {
+    $delta = $tag_set['machine_name'];
+    $blocks[$delta] = array(
+      'info' => $tag_set['name'],
+      'region' => 'content',
+      'weight' => 1,
+      'theme' => NPTSTARTUP_THEME,
+      'status' => 0,
+    );
+  }
   return $blocks;
 }
 
 /**
  * Implements hook_block_view().
+ * @todo not finished.
  */
 function npt_mendeley_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'npt_mendeley':
-      // Get entries from local documents.json
-      // Prepare the block content
-      $block_content = '<article>';
-      
-      $analysed_result = variable_get('npt_mendeley_publication');
-      $analysed_result_count = $analysed_result['authored']['count'] + $analysed_result['about']['count'];
-
-      if ($analysed_result_count > 0) {
-        $block_content .= '<h4>' . t('Professional publication') . '</h4>';
-        $block_content .= '<h5>' . t('Peer-reviewed publications using or discussing GBIF-mediated data') . '</h5>';
-
-        if ($analysed_result['authored']['count'] > 0) {
-          $block_content .= '<p>';
-          $output = format_plural($analysed_result['authored']['count'],
-            'There is 1 publication authored by scientists from @country:',
-            'There are @count publications authored by scientists from @country:',
-            array('@country' => $country)
-          );
-          $output .= '<ol class="mendeley-citation">';
-
-          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $analysed_result['authored']['file'])));
-
-          foreach ($authored_docs as $adoc) {
-            $output .= '<li>';
-
-            // author
-            for ($i = 0; $i < count($adoc->authors); $i++) {
-              $output .= $adoc->authors[$i]->surname . ', ' . substr($adoc->authors[$i]->forename, 0, 1) . '.';
-              $output .= ', ';          
-            }
-            // year 
-            $output .= $adoc->year . '. ';
-            $output .= $adoc->title . '. ';
-            $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
-            $output .= $adoc->volume;
-            $output .= '(' . $adoc->issue . '), ';
-            $output .= 'p.' . $adoc->pages . '. ';
-            $output .= 'Available at: ';
-            $output .= l($adoc->url, $adoc->url) . '.';
-
-            $output .= '</li>';
-          }
-          $output .= '</ol>';
-          $block_content .= $output;
-          $output = '';
-          $block_content .= '</p>';
-        }
-
-        if ($analysed_result['about']['count'] > 0) {
-          $block_content .= '<p>';
-          $output = format_plural($analysed_result['about']['count'],
-            'There is 1 publication about biodiversity in @country:',
-            'There are @count publications about biodiversity in @country:',
-            array('@country' => $country)
-          );
-          $output .= '<ol class="mendeley-citation">';
-
-          $authored_docs = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $analysed_result['about']['file'])));
-
-          foreach ($authored_docs as $adoc) {
-            $output .= '<li>';
-
-            // author
-            for ($i = 0; $i < count($adoc->authors); $i++) {
-              $output .= $adoc->authors[$i]->surname . ', ' . substr($adoc->authors[$i]->forename, 0, 1) . '.';
-              $output .= ', ';          
-            }
-            // year 
-            $output .= (isset($adoc->year)) ? $adoc->year . '. ' : '';
-            $output .= (isset($adoc->title)) ? $adoc->title . '. ' : '';
-            $output .= '<em>' . $adoc->publication_outlet . '</em>, ';
-            $output .= (isset($adoc->volume)) ? $adoc->volume : '';
-            $output .= (isset($adoc->issue)) ? '(' . $adoc->issue . '), ' : '';
-            $output .= (isset($adoc->pages)) ? 'p.' . $adoc->pages . '. ' : '';
-            $output .= 'Available at: ';
-            $output .= l($adoc->url, $adoc->url) . '.';
-
-            $output .= '</li>';
-          }
-          $output .= '</ol>';
-          $block_content .= $output;
-          $output = '';
-          $block_content .= '</p>';
-        }
-
-        $block_content .= '<p>(' . t('Depending on how it is categorised, an article may be listed twice.') . ')</p>';
-        $block_content .= '</article>';
-      }
-      $block['content'] = array(
-        '#markup' => $block_content,
-      );
       break;
   }
 }
+
+/**
+ * Generate the list of documents for block display
+ */
+function _npt_mendeley_list_documents($machine_name) {
+  $tag_sets = variable_get('npt_mendeley_tags');
+  foreach ($tag_sets as $tag_set) {
+    if ($machine_name == $tag_set['machine_name']) {
+      $$machine_name = json_decode(file_get_content(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
+      $doc_count = count($$machine_name);
+      if ($doc_count > 0) {
+        $block_content = '<article>';
+        $block_content .= '<h4>' . $tag_set['name'] . '</h4>';
+        $block_content .= '<h5>' . $tag_set['desc'] . '</h5>';
+        $block_content .= '<p>';
+        $block_content .= format_plural($doc_count,
+          '1 publication in this category',
+          '@count publications in this category');
+        $block_content .= '<ol class="mendeley-citation">';
+        foreach ($$machine_name as $doc) {
+          $block_content .= '<li>';
+          // Author
+          foreach ($doc->authors as $author) {
+            $block_content .= $author->surname . ', ' . substr($author->forename, 0, 1) . '.';
+            $block_content .= ', ';          
+          }
+          // Year, title and the rest
+          $block_content .= $doc->year . '. ';
+          $block_content .= $doc->title . '. ';
+          
+          // This line is pending because of faulty mendeley call.
+          $block_content .= '<em>' . $doc->publication_outlet . '</em>, ';
+          $block_content .= $doc->volume;
+          $block_content .= '(' . $doc->issue . '), ';
+          $block_content .= 'p.' . $doc->pages . '. ';
+          $block_content .= 'Available at: ';
+          $block_content .= l($doc->url, $doc->url) . '.';
+          $block_content .= '</li>';
+        }
+        $block_content .= '</ol>';
+        $block_content .= '</p>';
+        $block_content .= '</article>';
+      }
+    }
+  }
+  return $block_content;
+}
+
 
 /**
  * Ensure a local digest of citations from the GBIF Public Library on Mendeley.
@@ -326,57 +289,73 @@ function npt_mendeley_retrieve($form, &$form_state) {
   }
 }
 
+/**
+ * @todo Order the documents before saving. (Year and the first author.)
+ */
 function npt_mendeley_analyse() {
 
-  // Prepare sets of tags for analysis
-  $tag_sets = array();
-  $tag_sets[] = array(
-    'name' => t('Data papers'),
-    'machine_name' => 'data_paper',
-    'desc' => t('Peer-reviewed data papers describing biodiversity datasets published through the GBIF network'),
-    'tags' => array('datapaper'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases: Invasive alien species'),
-    'machine_name' => 'invasive_alien_species',
-    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on invasive alien species'),
-    'tags' => array('GBIF_used', 'invasive'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases: Climate change'),
-    'machine_name' => 'climate_change',
-    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on impacts of climate change on biodiversity'),
-    'tags' => array('GBIF_used', 'climate'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases: Conservation'),
-    'machine_name' => 'conservation',
-    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on conservation, including threatened species and protected areas'),
-    'tags' => array('GBIF_used', 'conservation'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases: Human health'),
-    'machine_name' => 'human_health',
-    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to human health and biodiversity, including disease vectors and medicines'),
-    'tags' => array('GBIF_used', 'human health'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases: Food and farming'),
-    'machine_name' => 'food_and_farming',
-    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to agriculture, biofuels, aquaculture and wild fisheries'),
-    'tags' => array('GBIF_used', 'agriculture'),
-    'tags_alt' => array('GBIF_used', 'biofuel'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases: Species distributions'),
-    'machine_name' => 'species_distribution',
-    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to species distributions, including biogeography and ecology'),
-    'tags' => array('GBIF_used', 'species distribution'),
-  );
+  $tag_sets = variable_get('npt_mendeley_tags');
+
+  $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
+  $file_save_error = FALSE;
+
+  foreach ($tag_sets as $tag_set) {
+    $machine_name = $tag_set['machine_name'];
+    $$machine_name = array();
+    $file_loc = file_build_uri('npt_mendeley/' . $machine_name . '.json');
+
+    foreach ($documents as $k => $doc) {
+      $tag_count = count($tag_set['tags']);
+      
+      if (count(array_intersect($tag_set['tags'], $doc->tags)) == $tag_count) {
+        array_push($$machine_name, $doc);
+      }
+    }
+
+    // Some categories have a sub-category that mix documents in the same list.
+    if (isset($tag_set['tags_alt'])) {
+      foreach ($documents as $k => $doc) {
+        $tag_count = count($tag_set['tags_alt']);
+      
+        if (count(array_intersect($tag_set['tags_alt'], $doc->tags)) == $tag_count) {
+          array_push($$machine_name, $doc);
+        }
+      }
+    }
+
+    // 
+    $file_save_success = file_save_data(json_encode($$machine_name), $file_loc, FILE_EXISTS_REPLACE);
+    
+    if ($file_save_success == FALSE) $file_save_error = TRUE;
+    
+  }
+
+  if ($file_save_error == TRUE) {
+    return t('Error while saving files.');
+  } else {
+    return t('All files successfully saved.');
+  }
+
+}
+
+
+/**
+ * Create document groupings according to country.
+ * @todo To proceed once the tagging pattern of Mendeley is agreed.
+ */
+function _npt_mendeley_analyse_country($country) {
+  // Prepare sets of tags for analysis by country.
+  // [country], [country]_biodiversity, GBIF_used as the combination of tags.
+
+  $tag_sets_country = array();
+  $gbif_enum_country = json_decode(file_get_contents(GBIF_ENUMERATION_COUNTRY));
+  $gbif_country = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/country'));
 
 
   $gbif_participant_node_uuid = variable_get('gbif_participant_node_uuid');
-  
+
+
+
   // Determine the country of the Node.
   $json_url = GBIF_REGISTRY_API_NODE . '/' . $gbif_participant_node_uuid;
   $gbif_registry_node_api_response = json_decode(file_get_contents($json_url));
@@ -388,9 +367,6 @@ function npt_mendeley_analyse() {
     drupal_set_message(t('The current associated GBIF Participant Node is not a country. No further activities with Mendeley API for now.'), 'warning');
     exit;
   }
-}
-
-function _npt_mendeley_analyse_country($country) {
 
   $tag_authored = $country;
   $tag_about = $country . '_biodiversity';
@@ -422,7 +398,8 @@ function _npt_mendeley_analyse_country($country) {
   // Publications authored by scientists from a country
   if ($authored_doc_count > 0) {
 
-    // Insert publication_outlet from Mendeley detail call
+    // Insert the journal name from Mendeley detail call
+    // publication_outlet is the property for journal name
     foreach ($analysed_docs_authored as $adoc) {
       $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
       $detail = json_decode(file_get_contents($url));
@@ -472,7 +449,7 @@ function _npt_mendeley_analyse_country($country) {
     drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of @country.', array('@country' => $country)));    
   }
   
-  variable_set('npt_mendeley_publication', $analysed_result);
+  //variable_set('npt_mendeley_publication', $analysed_result);
     
 }
 
