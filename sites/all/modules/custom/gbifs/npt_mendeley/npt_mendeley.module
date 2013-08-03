@@ -108,7 +108,8 @@ function _npt_mendeley_list_documents($machine_name) {
         $block_content .= '<p>';
         $block_content .= format_plural($doc_count,
           '1 publication in this category',
-          '@count publications in this category');
+          '@count publications in this category')
+        );
         $block_content .= '<ol class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
           $block_content .= '<li>';
