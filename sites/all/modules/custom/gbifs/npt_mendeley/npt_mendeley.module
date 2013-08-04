@@ -86,10 +86,16 @@ function npt_mendeley_block_info() {
  */
 function npt_mendeley_block_view($delta = '') {
   $block = array();
-  switch ($delta) {
-    case 'npt_mendeley':
-      break;
+  $tag_sets = variable_get('npt_mendeley_tags');
+  foreach ($tag_sets as $tag_set) {
+    if ($delta == $tag_set['machine_name']) {
+      // $block['subject'] = $tag_set['name']; 
+      $block['content'] = array(
+        '#markup' => _npt_mendeley_list_documents($tag_set['machine_name']),
+      );
+    }
   }
+  return $block;
 }
 
 /**
@@ -99,17 +105,15 @@ function _npt_mendeley_list_documents($machine_name) {
   $tag_sets = variable_get('npt_mendeley_tags');
   foreach ($tag_sets as $tag_set) {
     if ($machine_name == $tag_set['machine_name']) {
-      $$machine_name = json_decode(file_get_content(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
+      $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
       $doc_count = count($$machine_name);
       if ($doc_count > 0) {
         $block_content = '<article>';
-        $block_content .= '<h4>' . $tag_set['name'] . '</h4>';
         $block_content .= '<h5>' . $tag_set['desc'] . '</h5>';
         $block_content .= '<p>';
         $block_content .= format_plural($doc_count,
           '1 publication in this category',
-          '@count publications in this category')
-        );
+          '@count publications in this category');
         $block_content .= '<ol class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
           $block_content .= '<li>';
