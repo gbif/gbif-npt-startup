@@ -1,0 +1,96 @@
+<?php
+
+/**
+ * @file
+ * Main file of this module. Loads include files and implements general hooks.
+ */
+
+module_load_include('inc', 'postgis', '/includes/postgis.feeds');
+module_load_include('inc', 'postgis', '/includes/postgis.field');
+module_load_include('inc', 'postgis', '/includes/postgis.field.formatter');
+module_load_include('inc', 'postgis', '/includes/postgis.field.widget');
+module_load_include('inc', 'postgis', '/includes/postgis.geometry');
+module_load_include('inc', 'postgis', '/includes/postgis.openlayers');
+
+define('POSTGIS_DEFAULT_SRID', 4326);
+
+// Primitive names as used in WKT.
+define('POSTGIS_PRIMITIVE_POINT', 'POINT');
+define('POSTGIS_PRIMITIVE_LINESTRING', 'LINESTRING');
+define('POSTGIS_PRIMITIVE_POLYGON', 'POLYGON');
+define('POSTGIS_PRIMITIVE_MULTIPOINT', 'MULTIPOINT');
+define('POSTGIS_PRIMITIVE_MULTILINESTRING', 'MULTILINESTRING');
+define('POSTGIS_PRIMITIVE_MULTIPOLYGON', 'MULTIPOLYGON');
+define('POSTGIS_PRIMITIVE_GEOMETRYCOLLECTION', 'GEOMETRYCOLLECTION');
+
+/**
+ * Implements hook_ctools_plugin_api().
+ *
+ * Required for OpenLayers integration.
+ */
+function postgis_ctools_plugin_api($module, $api) {
+  if ($module == 'openlayers') {
+    switch ($api) {
+      case 'openlayers_maps':
+        return array('version' => 1);
+
+      case 'openlayers_layers':
+        return array('version' => 1);
+    }
+  }
+  elseif ($module == 'geoserver') {
+    switch ($api) {
+      case 'geoserver_layer_types':
+        return array('version' => 1);
+    }
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function postgis_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'geoserver' && $plugin == 'layer_types') {
+    return 'plugins/geoserver/layer_types';
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function postgis_ctools_plugin_type() {
+  return array('layer_types' => array());
+}
+
+/**
+ * Implements hook_help().
+ */
+function postgis_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#postgis':
+      return t('This module requires a PostGIS 1.5 enabled PostgreSQL database. See the PostGIS documentation on <a href="@link">how to install PostGIS</a>. To manage geospatial content add a PostGIS field to any <a href="@types">content type</a> you like.', array('@link' => 'http://postgis.org/documentation/manual-1.5/ch02.html', '@types' => url('admin/structure/types')));
+  }
+}
+
+/**
+ * Implements hook_view_api().
+ */
+function postgis_views_api() {
+  return array(
+    'api' => '3',
+    'path' => drupal_get_path('module', 'postgis') . '/views',
+  );
+}
+
+/**
+ * Returns PostGIS version number.
+ */
+function postgis_version() {
+  try {
+    $version = db_query('SELECT substring(PostGIS_Version() from 1 for 3)')->fetchField();
+  }
+  catch (PDOException $e) {
+    $version = '';
+  }
+  return $version;
+}

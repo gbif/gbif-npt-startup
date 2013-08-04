@@ -1,0 +1,76 @@
+<?php
+/**
+ * @file
+ * This file holds the functions for the installing
+ * and enabling of the OpenLayers Editor module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function ole_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+
+  // We should not require a specfic version of the OpenLayers library,
+  // but we should tell the administrator that specific versions are more
+  // compatible than others.
+  if ($phase == 'runtime') {
+
+    // Check if version is compatible.
+    $info = libraries_load('ole');
+    if (version_compare($info['version'], '1') === 1) {
+      $requirements['ole_version'] = array(
+        'title' => $t('OpenLayers Editor library version'),
+        'value' => $t('Using suggested compatible version %version.',
+          array(
+            '%version' => $info['version'],
+          )),
+        'severity' => REQUIREMENT_OK,
+      );
+    }
+    else {
+      $requirements['ole_version'] = array(
+        'title' => $t('OpenLayers Editor library version'),
+        'value' => $t('Using incompatible version %version.',
+          array(
+            '%version' => $info['version'],
+          )),
+        'description' => $t('Though you are very welcome to use whatever version of the OpenLayers Editor library you want, it is suggested that you use a 1.x version.  You are currently not using a compatible version or we are unable to determine which version you are using.  Update your library settings at !settings.',
+          array(
+            '%version' => $info['version'],
+            '!settings' => l(t('OpenLayers Editor settings'), 'admin/structure/openlayers/editor'),
+          )),
+        'severity' => REQUIREMENT_WARNING,
+      );
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function ole_uninstall() {
+  // Get module variables
+  global $conf;
+  foreach (array_keys($conf) as $key) {
+    // Find variables that have the module prefix
+    if (strpos($key, 'ole_') === 0) {
+      variable_del($key);
+    }
+  }
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Delete unused variables.
+ */
+function ole_update_7101(){
+  $vars = array('ole_version_check', 'ole_source', 'ole_css');
+  foreach ($vars as $var) {
+  	variable_del($var);
+  }
+}

@@ -1,0 +1,15 @@
+name = PostGIS
+description = Provides a field for geospatial data using the Field API. Requires PostGIS 1.5 or later.
+core = 7.x
+
+files[] = includes/postgis.geometry.inc
+files[] = plugins/geoserver/layer_types/geoserver_layer_type_postgis_field.inc
+files[] = postgis.test
+
+files[] = views/postgis_views_handler_filter_geometry.inc
+; Information added by drupal.org packaging script on 2013-07-15
+version = "7.x-1.0"
+core = "7.x"
+project = "postgis"
+datestamp = "1373899575"
+

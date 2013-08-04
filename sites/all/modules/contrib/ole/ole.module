@@ -1,0 +1,171 @@
+<?php
+
+/**
+ * Implements hook_help().
+ */
+function ole_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#ole':
+      return '<p>' . t('OpenLayers Editor is a web-based tool for easy and precise creation of spatial data.
+        It is build purely with HTML and JavaScript and thus runs on the desktop and mobile devices without plug-ins.
+        This module simply adds an additional behavior to the OpenLayers module.
+        For Server-side geometry processing you need to run Drupal on a PostGIS database.') . '</p>';
+  }
+  return '';
+}
+
+/**
+ * Implements hook_openlayers_behaviors().
+ */
+function ole_openlayers_behaviors() {
+  return array(
+    'openlayers_behavior_ole' => array(
+      'title' => t('OpenLayers Editor'),
+      'description' => t('Provides advanced geo editing capabilities.'),
+      'type' => 'map',
+      'path' => drupal_get_path('module', 'ole') . '/includes',
+      'behavior' => array(
+        'file' => 'openlayers_behavior_ole.inc',
+        'class' => 'openlayers_behavior_ole',
+        'parent' => 'openlayers_behavior',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function ole_menu() {
+
+  $items['admin/structure/openlayers/editor/callbacks/version_check/%'] = array(
+    'title' => 'OpenLayers Version Check',
+    'page callback' => 'ole_version_check',
+    'page arguments' => array(6),
+    'access arguments' => array('administer openlayers'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/structure/openlayers/editor/callbacks/process/%'] = array(
+    'title' => 'OLE processing callback',
+    'page callback' => 'ole_process',
+    'page arguments' => array(6),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  // Editor settings
+  $items['admin/structure/openlayers/editor'] = array(
+    'title' => 'Editor',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ole_admin_settings'),
+    'access arguments' => array('administer openlayers'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -15,
+  );
+
+  return $items;
+}
+
+function ole_get_sql($method, $type = '') {
+  $filename = dirname(__FILE__) . '/sql.json';
+  $sql = json_decode(file_get_contents($filename));
+  if (isset($sql->$method) && isset($sql->$method->$type)) {
+    return $sql->$method->$type;
+  } 
+  elseif (isset($sql->$method)) {
+    return $sql->$method;
+  }
+}
+
+function ole_process($method = '') {
+
+  if (!in_array($method, array('clean', 'split', 'merge'))) {
+    return;
+  }
+
+  $params = drupal_get_query_parameters($_POST);
+  $result = array();
+
+  if (isset($params['geo'])) {
+
+    if (strpos($params['geo'], 'POLYGON') != FALSE) {
+      $type = 'polygon';
+    }
+    elseif (strpos($params['geo'], 'LINE') != FALSE) {
+      $type = 'line';
+    }
+    else {
+      $type = 'point';
+    }
+
+    $data = array(':geo' => $params['geo']);
+    if (isset($params['cut'])) {
+      $data[':cut'] = $params['cut'];
+    }
+
+    if ($sql = ole_get_sql($method, $type)) {
+      $result['geo'] = db_query($sql, $data)->fetchField();
+    }
+  }
+
+  drupal_json_output($result);
+}
+
+function ole_admin_settings() {
+
+  // Define Form
+  $form = array();
+
+  $library = libraries_info('ole');
+  $variants = array('original' => 'original') + $library['variants'];
+
+  $form['ole_source_variant'] = array(
+    '#type' => 'radios',
+    '#options' => array_combine(array_keys($variants), array_map('ucfirst', array_keys($variants))),
+    '#title' => t('OpenLayers Editor source variant'),
+    '#description' => t('The OpenLayers Editor library has different variants. Select the one you prefer for your installation.'),
+    '#default_value' => variable_get('ole_source_variant', 'original'),
+  );
+
+  // Make a system setting form and return
+  return system_settings_form($form);
+}
+
+
+function ole_include() {
+  $variant = variable_get('ole_source_variant', NULL);
+  if ($variant == 'original') $variant = NULL;
+  libraries_load('ole', $variant);
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function ole_libraries_info() {
+  $libraries['ole'] = array(
+    'name' => 'OpenLayers Editor',
+    'vendor url' => 'http://ole.geops.de/',
+    'download url' => 'http://dl.geops.de/ole/ole-1.0-beta4.tar.gz',
+    'version arguments' => array(
+      'file' => 'lib/Editor.js',
+      'pattern' => '/OpenLayers.Editor.VERSION_NUMBER="(.*?)"/',
+      'lines' => 1000,
+    ),
+    'files' => array(
+      'js' => array('ole.min.js'),
+      'css' => array('theme/geosilk/geosilk.css'),
+    ),
+    'dependencies' => array('openlayers'),
+    'variants' => array(
+      'debug' => array(
+        'files' => array(
+          'js' => array(
+            'lib/loader.js'
+          ),
+        ),
+      ),
+    ),
+  );
+
+  return $libraries;
+}

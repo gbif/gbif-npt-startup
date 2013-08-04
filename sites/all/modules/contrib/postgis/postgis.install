@@ -1,0 +1,128 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the PostGIS module.
+ */
+
+/**
+ * Adds a geometry column to the field definition.
+ *
+ * Implements hook_field_schema().
+ */
+function postgis_field_schema($field) {
+
+  return array(
+    'columns' => array(
+      // Column that stores geometry (whatever type is chosen).
+      'geometry' => array(
+        'type' => 'blob',
+        'pgsql_type' => 'geometry',
+        'not null' => FALSE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Verifies that PostGIS is installed in a suitable version.
+ * Implements hook_requirements().
+ */
+function postgis_requirements($phase) {
+
+  if (drupal_get_bootstrap_phase() < DRUPAL_BOOTSTRAP_DATABASE) {
+    // Database configuration not available yet, ie. profile installation.
+    return array();
+  }
+
+  $requirements = array();
+  // Ensure translations don't break at install time.
+  $t = get_t();
+
+  $severity = REQUIREMENT_OK;
+  $description_extension = NULL;
+  switch ($phase) {
+    case 'install':
+    case 'update':
+    case 'runtime':
+      // Check if PostGIS is installed.
+      drupal_load('module', 'postgis');
+      $version = postgis_version();
+      if (empty($version)) {
+        $description_extension = $t('Unable to determinate version of PostGIS installation.');
+        $severity = REQUIREMENT_ERROR;
+      }
+      $comparisson = version_compare($version, '1.5');
+      if ($comparisson === False) {
+        // version compare failed -- version seems to be not parseable
+        $severity = REQUIREMENT_WARNING;
+      }
+      if ($comparisson == -1) {
+        $description_extension = $t('PostGIS installation uses unsupported old version '.$version.'.');
+        $severity = REQUIREMENT_WARNING;
+      }
+
+      // Check if PostGIS can also be used.
+      if ($severity === REQUIREMENT_OK || $severity === REQUIREMENT_WARNING) {
+        try {
+          $has_spatial_refs = db_query('select count(*)>0 from spatial_ref_sys')->fetchField();
+          if (!$has_spatial_refs) {
+            $description_extension = $t('PostGIS installation lacks spatial reference systems.');
+            $severity = REQUIREMENT_ERROR;
+          }
+        } catch (PDOException $e){
+          // Cannot access PostGIS installation with Drupal user
+          // (PostGIS was installed into Drupal's database using another user).
+          $description_extension = $t('Cannot access existing PostGIS installation from Drupal. This might also be caused by missing read permissions on the spatial_ref_sys and geometry_columns tables.');
+          $severity = REQUIREMENT_ERROR;
+        }
+      }
+
+      $description_extension = ($description_extension === NULL) ? '' : ' ' . $description_extension;
+      $requirements[] = array(
+        'title' => 'PostGIS',
+        'description' => $t('A <a href="@link">PostGIS</a> enabled database is required; version 1.5 is strongly recommended.',
+          array('@link' => 'http://postgis.org')) . $description_extension,
+        'value' => $version,
+        'severity' => $severity,
+      );
+  }
+
+  return $requirements;
+}
+
+/**
+ * Replace PostGIS Formatter and Widget map with default map
+ *   (only if they haven't been overwridden).
+ */
+function postgis_update_7100() {
+
+  $maps = openlayers_maps(TRUE);
+
+  foreach (field_info_fields() as $field_name => $field){
+
+    if ($field['type'] === 'postgis') {
+
+      foreach ($field['bundles'] as $entity_type => $bundles){
+
+        foreach ($bundles as $bundle_name) {
+
+          $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+
+          if ($instance['display']['default']['type'] === 'openlayers' && 
+            !isset($maps['postgis_formatter_map'])) {
+            $instance['display']['default']['settings']['map'] = 'default';
+          }
+
+          if ($instance['widget']['type'] === 'openlayers' && 
+            !isset($maps['postgis_widget_map'])) {
+            $instance['widget']['settings']['map'] = 'default';
+          }
+
+          field_update_instance($instance);
+        }
+      }
+    }
+  }
+}
+

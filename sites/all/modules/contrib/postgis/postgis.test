@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * @file
+ * Tests for the PostGIS module.
+ */
+
+class PostgisValidationsTestCase extends DrupalUnitTestCase {
+
+  /**
+   * Info about available test cases.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Geometry Validations',
+      'description' => 'Verifies geometry validating functions work correctly',
+      'group' => 'PostGIS'
+    );
+  }
+
+  /**
+   * Test GeometrySet validation.
+   */
+  public function testPostgisGeometrySetValidation() {
+    $set = new PostgisGeometrySet(POSTGIS_PRIMITIVE_POINT, 4236);
+    $result = $set->validate();
+    $this->assertTrue($result === NULL, 'An empty set should be valid');
+
+    $set->fromText('POINT(9 48)');
+    $result = $set->validate();
+    $this->assertTrue($result === NULL, 'A valid point should be seen as valid');
+
+    $set->fromText('LINESTRING(10 5, 12 14)');
+    $result = $set->validate();
+    $this->assertTrue(is_array($result), 'An validation error should arise since types mismatch');
+    $this->assertTrue(array_key_exists('error', $result), 'Error key is provided');
+    $this->assertTrue($result['error'] === 'postgis_typemismatch', 'Geometries were correctly parsed but it was detected that their types mismatch.');
+  }
+
+  /**
+   * Test GeometrySet parsing.
+   */
+  public function testPostgisGeometrySetParseError() {
+    $set = new PostgisGeometrySet(POSTGIS_PRIMITIVE_POINT, 4236);
+    $set->fromText('POINT(9 48)');
+    $set->fromText('POINT(11.4 15.8)');
+    $result = $set->validate();
+    $this->assertTrue($result === NULL, 'Valid geometries should be seen as valid');
+
+    $set->fromText('POINT(15)');
+    $result = $set->validate();
+    $this->assertTrue($result['error'] === 'postgis_unparsable', 'Point with wrong data should result in parse errors.');
+  }
+
+  /**
+   * Test geometry types for GeometryCollection.
+   */
+  public function testPostgisGeometryCollectionIgnoresTypes() {
+    $set = new PostgisGeometrySet(POSTGIS_PRIMITIVE_GEOMETRYCOLLECTION, 4236);
+    $set->fromText('POINT(9 48)');
+    $set->fromText('LINESTRING(10 5, 12 14)');
+    $set->fromText('POLYGON((10 5, 12 14, 10.4 5, 10 5))');
+    $result = $set->validate();
+    $this->assertTrue($result === NULL, 'GeometryCollection should allow all geometry types');
+  }
+
+  /**
+   * Test unpack of GeometryCollections.
+   */
+  public function testPostgisGeometryCollectionUnpack() {
+    $set = new PostgisGeometrySet(POSTGIS_PRIMITIVE_GEOMETRYCOLLECTION, 4236);
+    $set->fromText('POINT(9 48)');
+    $set->fromText('GEOMETRYCOLLECTION(POLYGON((10 5, 12 14, 10.4 5, 10 5)))');
+
+    $result = $set->validate();
+    $this->assertTrue($result === NULL, 'GeometryCollection should allow all geometry types, even other collections');
+
+    $unpacked = $set->getText();
+    $this->assertTrue($unpacked === 'GEOMETRYCOLLECTION(POINT(9 48),POLYGON((10 5,12 14,10.4 5,10 5)))', 'Geometries are merged into one GeometryCollection.');
+  }
+}
+
+class PostgisSingleGeometries extends DrupalUnitTestCase {
+
+  /**
+   * Info about available test cases.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Single Geometry Uses',
+      'description' => 'Verifies class for single geometry can be used',
+      'group' => 'PostGIS'
+    );
+  }
+
+  /**
+   * Test empty geometries.
+   */
+  public function testEmptyGeometries() {
+    $geo = new PostgisGeometry('line', 4236);
+    $result = $geo->getText();
+    $this->assertTrue($result === NULL, 'WKT is NULL unless set first');
+  }
+
+  /**
+   * Test if Geometry returns same input.
+   */
+  public function testSameReturned() {
+    $geo = new PostgisGeometry('point', 4236);
+    $wkt = 'POINT(9 48)';
+    $geo->fromText($wkt);
+    $this->assertTrue($wkt === $geo->getText(), 'Geometry is returned unaltered');
+  }
+
+  /**
+   * Test Geometry length.
+   */
+  public function testLength() {
+    $geom = new PostgisGeometry(POSTGIS_PRIMITIVE_LINESTRING, 4236);
+    $geom->fromText('LINESTRING(9 48, 5 10)');
+    $this->assertEqual(4229270, $geom->length('m'), 'Length in meters is correct');
+    $this->assertEqual(4229, $geom->length('km'), 'Length in kilometers is correct');
+
+    $area = new PostgisGeometry(POSTGIS_PRIMITIVE_POLYGON, 4236);
+    $area->fromText('POLYGON((10 5, 12 14, 10.4 5, 10 5))');
+    $this->assertEqual(2074513, $area->length('m'), 'Area perimeter was returned as area length.');
+
+    $exception_thrown = FALSE;
+    try {
+      $area->length('mi');
+    } catch(PostgisGeometryException $e){
+      $exception_thrown = TRUE;
+    }
+    $this->assertTrue($exception_thrown, 'Code refused to calculate length for unknown units.');
+  }
+}
