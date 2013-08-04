@@ -99,6 +99,7 @@ function npt_mendeley_block_view($delta = '') {
 
 /**
  * Generate the list of documents for block display
+ * @todo Forename of authors with dash or multiple words
  */
 function _npt_mendeley_list_documents($machine_name) {
   $tag_sets = variable_get('npt_mendeley_tags');
@@ -113,25 +114,40 @@ function _npt_mendeley_list_documents($machine_name) {
         $block_content .= format_plural($doc_count,
           '1 publication in this category:',
           '@count publications in this category:');
+        
+        // Start the list.
         $block_content .= '<ol class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
           $block_content .= '<li>';
-          // Author
-          foreach ($doc->authors as $author) {
-            $block_content .= $author->surname . ', ' . substr($author->forename, 0, 1) . '.';
-            $block_content .= ', ';          
-          }
-          // Year, title and the rest
-          $block_content .= $doc->year . '. ';
-          $block_content .= $doc->title . '. ';
           
+          // Title first
+          if ($doc->title) $block_content .= '<strong>' . l($doc->title, $doc->url) . '. </strong>';
+
+          // Author
+          $author_count = count($doc->authors);
+          if ($author_count >= 3) {
+            $block_content .= $doc->authors[0]->surname . ', ' . substr($doc->authors[0]->forename, 0, 1) . '. ';
+            $block_content .= 'et al. ';
+          }
+          else {
+            foreach ($doc->authors as $i => $author) {
+              $block_content .= $author->surname . ', ' . substr($author->forename, 0, 1) . '.';
+              if ($i < $author_count - 1) $block_content .= ', ';          
+            }
+          }
+
           // This line is pending because of faulty mendeley call.
-          $block_content .= '<em>' . $doc->publication_outlet . '</em>, ';
+          if ($doc->publication_outlet) $block_content .= '<em>' . $doc->publication_outlet . '</em>, ';
+          $block_content .= '<em>[Pending journal name]</em>, ';
+
+          // Volume, issue and page.
           $block_content .= $doc->volume;
-          $block_content .= '(' . $doc->issue . '), ';
-          $block_content .= 'p.' . $doc->pages . '. ';
-          $block_content .= 'Available at: ';
-          $block_content .= l($doc->url, $doc->url) . '.';
+          if ($doc->issue) $block_content .= '(' . $doc->issue . '), ';
+          if ($doc->pages) $block_content .= 'p.' . $doc->pages . '. ';
+
+          // Year, title and the rest
+          if ($doc->year) $block_content .= '(' . $doc->year . ')';
+          
           $block_content .= '</li>';
         }
         $block_content .= '</ol>';
