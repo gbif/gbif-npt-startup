@@ -3,11 +3,11 @@
  * @file
  * This module retrieves relevant literature entries about a node from Mendeley API.
  * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
- * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
  * @todo JSON interface for country pages, accepting call by ISO country code.
  * @todo Analysis according to country and the need of communication.
- * @todo Presenting lists with block.
  * @todo UUID not exist in the Mendeley documents as of 1 Aug 13.
+ * @todo Provide a read more block and a page for full view.
+ * @todo Country groups yet finished.
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
@@ -82,7 +82,6 @@ function npt_mendeley_block_info() {
 
 /**
  * Implements hook_block_view().
- * @todo not finished.
  */
 function npt_mendeley_block_view($delta = '') {
   $block = array();
@@ -112,8 +111,8 @@ function _npt_mendeley_list_documents($machine_name) {
         $block_content .= '<h5>' . $tag_set['desc'] . '</h5>';
         $block_content .= '<p>';
         $block_content .= format_plural($doc_count,
-          '1 publication in this category',
-          '@count publications in this category');
+          '1 publication in this category:',
+          '@count publications in this category:');
         $block_content .= '<ol class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
           $block_content .= '<li>';
@@ -295,7 +294,7 @@ function npt_mendeley_retrieve($form, &$form_state) {
 }
 
 /**
- * @todo Order the documents before saving. (Year and the first author.)
+ * Groupt retrieved documents into various defined categories.
  */
 function npt_mendeley_analyse() {
 
@@ -328,7 +327,11 @@ function npt_mendeley_analyse() {
       }
     }
 
-    // 
+    // Sort according to year and the first author
+    foreach ($$machine_name as $doc) {
+      $doc->firstAuthor = $doc->authors[0]->surname;
+    }
+    usort($$machine_name, npt_mendeley_make_comparer('year', 'firstAuthor'));
     $file_save_success = file_save_data(json_encode($$machine_name), $file_loc, FILE_EXISTS_REPLACE);
     
     if ($file_save_success == FALSE) $file_save_error = TRUE;
@@ -343,6 +346,43 @@ function npt_mendeley_analyse() {
 
 }
 
+/**
+ * Helper function for sorting articles
+ * http://goo.gl/PjtC0B
+ */
+function npt_mendeley_make_comparer() {
+  $criteria_names = func_get_args();
+  $comparer = function($first, $second) use ($criteria_names) {
+    // Do we have anything to compare?
+    while(!empty($criteria_names)) {
+      // What will we compare now?
+      $criterion = array_shift($criteria_names);
+
+      // Do the actual comparison
+      // If it's year, then sort desendingly
+      if ($criterion == 'year') {
+        if ($first->$criterion < $second->$criterion) {
+          return 1;
+        }
+        else if ($first->$criterion > $second->$criterion) {
+          return -1;
+        }
+      }
+      else {
+        if ($first->$criterion < $second->$criterion) {
+          return -1;
+        }
+        else if ($first->$criterion > $second->$criterion) {
+          return 1;
+        }
+      }
+    }
+
+    // Nothing more to compare with, so $first == $second
+    return 0;                               
+  };
+  return $comparer;    
+}
 
 /**
  * Create document groupings according to country.
