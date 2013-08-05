@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * @file
+ * Main Drupal module file for the GeoServer UI module
+ *
+ * @ingroup geoserver
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function geoserver_ui_menu() {
+  $items = array();
+
+  // Core geoserver settings pages.
+  $items['admin/structure/geoserver'] = array(
+    'title' => 'GeoServer',
+    'description' => 'Manage a GeoServer instance.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('geoserver_ui_admin_settings_form'),
+    'access arguments' => array('administer geoserver'),
+    'file' => 'geoserver_ui.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/structure/geoserver/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -20,
+  );
+
+  // Layer-type-wide settings form.
+  $items['admin/structure/geoserver/layers/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('geoserver_ui_layers_settings'),
+    'access arguments' => array('administer geoserver'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -10,
+  );
+  
+  return $items;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function geoserver_ui_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'export_ui') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Layer type settings form.
+ */
+function geoserver_ui_layers_settings($form_state, $layer = NULL) {
+  $form = array();
+  ctools_include('plugins');
+  $layer_types = ctools_get_plugins('geoserver', 'layer_types');
+
+  foreach ($layer_types as $name => $type_def) {
+    $type = geoserver_layer_type_load($name);
+    if (method_exists($type, 'settings_form')) {
+      $form[$name] = array(
+        '#type' => 'fieldset',
+        '#tree' => TRUE,
+        '#title' => $type_def['title'],
+      );
+      $form[$name]['settings'] = $type->settings_form();
+    }
+  }
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submit callback for layer type settings form.
+ */
+function geoserver_ui_layers_settings_submit(&$form, &$form_state) {
+  $layer_types = geoserver_layer_types();
+  foreach ($form_state['values'] as $key => $value) {
+    if (in_array($key, array_keys($layer_types))) {
+      foreach ($value['settings'] as $k => $v) {
+        variable_set($k, $v);
+      }
+    }
+  }
+}
+

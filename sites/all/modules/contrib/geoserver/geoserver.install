@@ -1,0 +1,279 @@
+<?php
+
+/**
+ * @file
+ * This file holds the functions for the installing
+ * and enabling of the geoserver module.
+ *
+ * @ingroup geoserver
+ */
+
+/**
+ * Implements hook_install().
+ */
+function geoserver_install() {
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function geoserver_uninstall() {
+  // Get module variables.
+  $variables = db_query("SELECT v.name FROM {variable} AS v WHERE v.name LIKE ':pattern'",
+    array(':pattern' => db_like('geoserver_') . '%'))->fetchAll();
+  // Remove variables.
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}
+
+/**
+ * Implements hook_schema().
+ */
+function geoserver_schema() {
+  $schema = array();
+
+  // Layer table (ctools extras).
+  $schema['geoserver_layers'] = array(
+    'description' => 'Storage for user defined GeoServer layers.',
+    'export' => array(
+      'key' => 'name',
+      'key name' => 'Name',
+      'primary key' => 'name',
+      'identifier' => 'geoserver_layers',
+      'default hook' => 'geoserver_layers',
+      'save callback' => 'geoserver_layer_save',
+      'delete callback' => 'geoserver_layer_delete',
+      'api' => array(
+        'owner' => 'geoserver',
+        'api' => 'geoserver_layers',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'description' => 'Layer name.',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'description' => 'Layer title.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Layer description.',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Layer data serialized.',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+    'indexes' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  // Style table (ctools extras).
+  $schema['geoserver_styles'] = array(
+    'description' => 'Storage for user defined GeoServer styles.',
+    'export' => array(
+      'key' => 'name',
+      'key name' => 'Name',
+      'primary key' => 'name',
+      'identifier' => 'geoserver_styles',
+      'default hook' => 'geoserver_styles',
+      'save callback' => 'geoserver_style_save',
+      'delete callback' => 'geoserver_style_delete',
+      'api' => array(
+        'owner' => 'geoserver',
+        'api' => 'geoserver_styles',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Style name.',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Style title.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Style description.',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Style SLD.',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+    'indexes' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  $schema['geoserver_pk_metadata_table'] = array(
+    'description' => 'Specifies which columns to use and what strategy to use to generate new primary key value.',
+    'fields' => array(
+      'table_schema' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+        'description' => 'Name of the database schema in which the table is located.',
+      ),
+      'table_name' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+        'description' => 'Name of the table to be published.',
+      ),
+      'pk_column' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+        'description' => 'Name of a column used to form the feauture IDs.',
+      ),
+      'pk_column_idx' => array(
+        'type' => 'int',
+        'description' => 'Index of the column in a multi-column key. In case multi column keys are needed multiple records with the same table schema and table name will be used.',
+      ),
+      'pk_policy' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'description' => 'The new value generation policy (sequence, assigned, autoincrement), used in case a new feature needs to be added in the table (following a WFS-T insert operation).',
+      ),
+      'pk_sequence' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'description' => 'The name of the database sequence to be used when generating a new value for the pk_column.',
+      ),
+    ),
+    'unique keys' => array(
+      'schema_table_column' => array('table_schema', 'table_name', 'pk_column'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Create table geoserver_pk_metadata_table.
+ */
+function geoserver_update_7100() {
+
+  $schema = array(
+    'description' => 'Specifies which columns to use and what strategy to use to generate new primary key value.',
+    'fields' => array(
+      'table_schema' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'description' => 'Name of the database schema in which the table is located.',
+      ),
+      'table_name' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'description' => 'Name of the table to be published.',
+      ),
+      'pk_column' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'description' => 'Name of a column used to form the feauture IDs.',
+      ),
+      'pk_column_idx' => array(
+        'type' => 'int',
+        'description' => 'Index of the column in a multi-column key. In case multi column keys are needed multiple records with the same table schema and table name will be used.',
+      ),
+      'pk_policy' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'description' => 'The new value generation policy (sequence, assigned, autoincrement), used in case a new feature needs to be added in the table (following a WFS-T insert operation).',
+      ),
+      'pk_sequence' => array(
+        'type' => 'varchar',
+        'length' => '64',
+        'description' => 'The name of the database sequence to be used when generating a new value for the pk_column.',
+      ),
+    ),
+    'unique keys' => array(
+      'schema_table_column' => array('table_schema', 'table_name', 'pk_column'),
+    ),
+  );
+
+  db_create_table('geoserver_pk_metadata_table', $schema);
+}
+
+/**
+ * Update OpenLayers configuration of GeoServer layers.
+ */
+function geoserver_update_7101() {
+  geoserver_update_7102();
+  foreach (geoserver_layers_load() as $key => $layer) {
+    if ($layer->export_type === EXPORT_IN_CODE) continue;
+    $openlayers = $layer->data['openlayers'];
+    if (isset($openlayers['wfs_strategy'])) {
+      $openlayers['wfs_data'] = isset($openlayers['wfs_data']) ? $openlayers['wfs_data'] : array();
+      $openlayers['wfs_data']['strategy'] = $openlayers['wfs_strategy'];
+      unset($openlayers['wfs_strategy']);
+    }
+    if (isset($openlayers['gwc_srs'])) {
+      $openlayers['gwc_data'] = isset($openlayers['gwc_data']) ? $openlayers['gwc_data'] : array();
+      $openlayers['gwc_data']['projection'] = array(substr($openlayers['gwc_srs'], 5));
+      unset($openlayers['gwc_srs']);
+    }
+    if (isset($openlayers['wms_srs'])) {
+      $openlayers['wms_data'] = isset($openlayers['wms_data']) ? $openlayers['wms_data'] : array();
+      $openlayers['wms_data']['projection'] = array(substr($openlayers['wms_srs'], 5));
+      unset($openlayers['wms_srs']);
+    }
+    $layer->data['openlayers'] = $openlayers;
+    ctools_export_crud_save('geoserver_layers', $layer);
+  }
+}
+
+/**
+ * Update column length of geoserver_pk_metadata_table.
+ */
+function geoserver_update_7102() {
+  db_change_field('geoserver_pk_metadata_table', 'table_schema', 'table_schema', array(
+    'type' => 'varchar',
+    'length' => '64',
+    'not null' => TRUE,
+    'description' => 'Name of the database schema in which the table is located.',
+  ));
+  db_change_field('geoserver_pk_metadata_table', 'table_name', 'table_name', array(
+    'type' => 'varchar',
+    'length' => '64',
+    'not null' => TRUE,
+    'description' => 'Name of the table to be published.',
+  ));
+  db_change_field('geoserver_pk_metadata_table', 'pk_column', 'pk_column', array(
+    'type' => 'varchar',
+    'length' => '64',
+    'not null' => TRUE,
+    'description' => 'Name of a column used to form the feauture IDs.',
+  ));
+}
