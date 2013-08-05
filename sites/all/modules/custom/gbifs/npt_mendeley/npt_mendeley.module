@@ -293,6 +293,11 @@ function npt_mendeley_retrieve($form, &$form_state) {
     }
 
     curl_multi_close($master_ch);
+    
+    // Interate through all documents to get their journal names
+    // $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
+    // $detail = json_decode(file_get_contents($url));
+    // $adoc->publication_outlet = $detail->publication_outlet;
 
     // Save a local copy for use when there is no network connection or the rate is exceeded for Mendeley API.
     $json_file = json_encode($mendeley_gbif_documents);
@@ -315,14 +320,19 @@ function npt_mendeley_retrieve($form, &$form_state) {
 function npt_mendeley_analyse() {
 
   $tag_sets = variable_get('npt_mendeley_tags');
-
+  
   $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
   $file_save_error = FALSE;
 
   foreach ($tag_sets as $tag_set) {
     $machine_name = $tag_set['machine_name'];
     $$machine_name = array();
-    $file_loc = file_build_uri('npt_mendeley/' . $machine_name . '.json');
+    if ($tag_set['type'] == 'generic') {
+      $file_loc = file_build_uri('npt_mendeley/' . $machine_name . '.json');
+    }
+    else if ($tag_set['type'] == 'country') {
+      $file_loc = file_build_uri('npt_mendeley/countries/' . $machine_name . '.json');
+    }
 
     foreach ($documents as $k => $doc) {
       $tag_count = count($tag_set['tags']);
@@ -398,120 +408,6 @@ function npt_mendeley_make_comparer() {
     return 0;                               
   };
   return $comparer;    
-}
-
-/**
- * Create document groupings according to country.
- * @todo To proceed once the tagging pattern of Mendeley is agreed.
- */
-function _npt_mendeley_analyse_country($country) {
-  // Prepare sets of tags for analysis by country.
-  // [country], [country]_biodiversity, GBIF_used as the combination of tags.
-
-  $tag_sets_country = array();
-  $gbif_enum_country = json_decode(file_get_contents(GBIF_ENUMERATION_COUNTRY));
-  $gbif_country = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/country'));
-
-
-  $gbif_participant_node_uuid = variable_get('gbif_participant_node_uuid');
-
-
-
-  // Determine the country of the Node.
-  $json_url = GBIF_REGISTRY_API_NODE . '/' . $gbif_participant_node_uuid;
-  $gbif_registry_node_api_response = json_decode(file_get_contents($json_url));
-
-  if (isset($gbif_registry_node_api_response->country) == TRUE) {
-    $country = ucwords(strtolower($gbif_registry_node_api_response->country));
-    _npt_mendeley_analyse_country($country);
-  } elseif (isset($gbif_registry_node_api_response->country) == FALSE) {
-    drupal_set_message(t('The current associated GBIF Participant Node is not a country. No further activities with Mendeley API for now.'), 'warning');
-    exit;
-  }
-
-  $tag_authored = $country;
-  $tag_about = $country . '_biodiversity';
-
-  $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
-  $analysed_docs_authored = array();
-  $analysed_docs_about = array();
-  $analysed_result = array();
-
-  // First iteration: get only documents tagged with country name
-  foreach ($documents as $k => $doc) {
-    if (in_array($tag_authored, $doc->tags)) {
-      $analysed_docs_authored[] = $doc;
-    }
-    if (in_array($tag_about, $doc->tags)) {
-      $analysed_docs_about[] = $doc;
-    }
-    unset($documents[$k]);
-  }
-  if (count($documents) == 0) drupal_set_message(t('Finished analysing documents for @country.', array('@country' => $country)));
-
-  // Produce the count of documents
-  $authored_doc_count = count(_npt_mendeley_deduplicate($analysed_docs_authored));
-  $analysed_result['authored']['count'] = $authored_doc_count;
-
-  $about_doc_count = count(_npt_mendeley_deduplicate($analysed_docs_about));
-  $analysed_result['about']['count'] = $about_doc_count;
-
-  // Publications authored by scientists from a country
-  if ($authored_doc_count > 0) {
-
-    // Insert the journal name from Mendeley detail call
-    // publication_outlet is the property for journal name
-    foreach ($analysed_docs_authored as $adoc) {
-      $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
-      $detail = json_decode(file_get_contents($url));
-      $adoc->publication_outlet = $detail->publication_outlet;
-    }
-    
-    $authored_json = json_encode($analysed_docs_authored);
-    $authored_doc = file_save_data($authored_json, file_build_uri('npt_mendeley/authored_doc.json'), FILE_EXISTS_REPLACE);
-    
-    if ($authored_doc == TRUE) {
-      drupal_set_message(format_plural($authored_doc_count,
-        'There is a publication authored by scientists from @country, results saved.',
-        'There are @count publications authored by scientists from @country, results saved.',
-        array('@country' => $country)
-      ));
-    
-      $analysed_result['authored']['file'] = 'authored_doc.json';
-    }
-  }
-  else {
-    drupal_set_message(t('In GBIF Public Library, so far no document found authored by scientists from @country.', array('@country' => $country)));
-  }
-
-  // Publications about biodiversity in a country
-  if ($about_doc_count > 0) {
-    // Insert publication_outlet from Mendeley detail call
-    foreach ($analysed_docs_about as $adoc) {
-      $url = MENDELEY_DOC_DETAIL_URL . $adoc->uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
-      $detail = json_decode(file_get_contents($url));
-      $adoc->publication_outlet = $detail->publication_outlet;
-    }
-
-    $about_json = json_encode($analysed_docs_about);
-    $about_doc = file_save_data($about_json, file_build_uri('npt_nodestats/about_doc.json'), FILE_EXISTS_REPLACE);
-
-    if ($about_doc == TRUE) {
-      drupal_set_message(format_plural($about_doc_count,
-        'There is a publication about biodiversity of @country, results saved.',
-        'There are @count publications about biodiversity of @country, results saved.',
-        array('@country' => $country)
-      ));
-    
-      $analysed_result['about']['file'] = 'about_doc.json';      
-    }
-  }
-  else {
-    drupal_set_message(t('In GBIF Public Library, so far no document found about biodiversity of @country.', array('@country' => $country)));    
-  }
-  
-  //variable_set('npt_mendeley_publication', $analysed_result);
-    
 }
 
 /**

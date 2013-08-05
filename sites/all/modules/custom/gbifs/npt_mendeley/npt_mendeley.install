@@ -76,6 +76,31 @@ function npt_mendeley_default_tag_sets() {
     'tags' => array('GBIF_used', 'species distribution'),
   );
 
+  // Prepare tag sets for countries
+  $gbif_countries = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/country'));
+  $gbif_enum_countries = json_decode(file_get_contents(GBIF_ENUMERATION_COUNTRY));
+  
+  foreach ($gbif_countries as $gbif_country) {
+    foreach ($gbif_enum_countries as $gbif_enum_country) {
+      if ($gbif_enum_country->enumName == $gbif_country) $iso_name = $gbif_enum_country;
+    }
+    $tag_sets[] = array(
+      'name' => $iso_name->title,
+      'machine_name' => strtolower($iso_name->enumName),
+      'type' => 'country',
+      'desc' => t('Peer-reviewed publications using GBIF-mediated data authored by researchers based in @country', array('@country' => $iso_name->title)),
+      'tags' => array('GBIF_used', ucwords(strtolower($iso_name->enumName))),
+    );
+    $tag_sets[] = array(
+      'name' => $iso_name->title . ' biodiversity',
+      'machine_name' => strtolower($iso_name->enumName) . '_bio',
+      'type' => 'country',
+      'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to biodiversity in @country', array('@country' => $iso_name->title)),
+      'tags' => array('GBIF_used', ucwords(strtolower($iso_name->enumName)) . '_biodiversity'),
+    );
+
+  }
+
   variable_set('npt_mendeley_tags', $tag_sets);
 }
 
