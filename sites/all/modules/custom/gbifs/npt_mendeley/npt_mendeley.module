@@ -4,10 +4,9 @@
  * This module retrieves relevant literature entries about a node from Mendeley API.
  * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
  * @todo JSON interface for country pages, accepting call by ISO country code.
- * @todo Analysis according to country and the need of communication.
  * @todo UUID not exist in the Mendeley documents as of 1 Aug 13.
  * @todo Provide a read more block and a page for full view.
- * @todo Country groups yet finished.
+ * @todo Country groups yet finished. To include _biodiversity or not in the same list?
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');
@@ -31,6 +30,13 @@ function npt_mendeley_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'npt_mendeley.admin.inc',
   );
+  
+  $items['data/use'] = array(
+    'page callback' => 'npt_mendeley_full_list',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
   // JSON list for country pages
   $items['npt_mendeley/country'] = array(
     'page callback' => '_npt_mendeley_country',
@@ -69,8 +75,9 @@ function npt_mendeley_block_info() {
   
   foreach ($tag_sets as $tag_set) {
     $delta = $tag_set['machine_name'];
+    $info = ($tag_set['type'] == 'country') ? 'Country: ' . $tag_set['name'] : $tag_set['name'];
     $blocks[$delta] = array(
-      'info' => $tag_set['name'],
+      'info' => $info,
       'region' => 'content',
       'weight' => 1,
       'theme' => NPTSTARTUP_THEME,
@@ -88,75 +95,146 @@ function npt_mendeley_block_view($delta = '') {
   $tag_sets = variable_get('npt_mendeley_tags');
   foreach ($tag_sets as $tag_set) {
     if ($delta == $tag_set['machine_name']) {
-      // $block['subject'] = $tag_set['name']; 
+      $subject = ($tag_set['type'] == 'country') ? 'Country: ' . $tag_set['name'] : $tag_set['name'];
+      $block['subject'] = $subject; 
       $block['content'] = array(
-        '#markup' => _npt_mendeley_list_documents($tag_set['machine_name']),
+        '#markup' => _npt_mendeley_list_documents($tag_set['type'], $tag_set['machine_name'], 'block'),
       );
     }
   }
   return $block;
 }
 
+
+/**
+ *
+ */
+function npt_mendeley_full_list($type = '', $machine_name = '', $json = '') {
+  // Determine where to extract the analysed documents
+  if ($type == 'country') {
+    $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/countries/' . $machine_name . '.json')));
+  }
+  elseif ($type == 'generic') {
+    $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
+  }
+
+  // Export the result accordingly
+  if ($type == 'country' && $json == 'json') {
+    drupal_json_output($$machine_name);
+  }
+  else {
+    $content = _npt_mendeley_list_documents($type, $machine_name, 'page');
+    $tag_sets = variable_get('npt_mendeley_tags');
+    foreach ($tag_sets as $tag_set) {
+      if ($type == 'country') {
+        if ($tag_set['machine_name'] == $machine_name) drupal_set_title('Publication: ' . $tag_set['name']);
+      } else {
+        if ($tag_set['machine_name'] == $machine_name) drupal_set_title($tag_set['name']);
+      }
+      
+    }
+    return $content;
+  }
+}
+
 /**
  * Generate the list of documents for block display
  * @todo Forename of authors with dash or multiple words
+ * @todo Be careful that the most recent 3 in the block rendering
+ *       is not accurate given that we don't have actual date to sort.
+ *
  */
-function _npt_mendeley_list_documents($machine_name) {
+function _npt_mendeley_list_documents($type, $machine_name, $render) {
   $tag_sets = variable_get('npt_mendeley_tags');
   foreach ($tag_sets as $tag_set) {
     if ($machine_name == $tag_set['machine_name']) {
-      $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
+      if ($type == 'country') {
+        $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/countries/' . $machine_name . '.json')));
+      }
+      elseif ($type == 'generic') {
+        $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
+      }
       $doc_count = count($$machine_name);
+      
+      // If there are more then 3 documents, we only keep the recent 3
+      // for block view.
+      if ($doc_count > 0 && $render == 'block') {
+        $$machine_name = array_slice($$machine_name, 0, 3);
+      }
+      
+      $content = '<article>';
+      
+      if ($render == 'block') {
+        $content .= '<p>';
+        $content .= $tag_set['desc'] . '</p><p>';
+      } else {
+        $content .= '<h5>' . $tag_set['desc'] . '</h5>';
+        $content .= '<p>';
+      }
+      
       if ($doc_count > 0) {
-        $block_content = '<article>';
-        $block_content .= '<h5>' . $tag_set['desc'] . '</h5>';
-        $block_content .= '<p>';
-        $block_content .= format_plural($doc_count,
-          '1 publication in this category:',
-          '@count publications in this category:');
+        if ($doc_count >= 3 && $render == 'block') {
+          $content .= t('Most recent 3 publications in this category:');
+        } else {
+          $content .= format_plural($doc_count,
+            '1 publication in this category:',
+            '@count publications in this category:');
+        }
         
         // Start the list.
-        $block_content .= '<ol class="mendeley-citation">';
+        $content .= '<ol class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
-          $block_content .= '<li>';
+          $content .= '<li>';
           
           // Title first
-          if ($doc->title) $block_content .= '<strong>' . l($doc->title, $doc->url) . '. </strong>';
+          if ($doc->title) $content .= '<strong>' . l($doc->title, $doc->url) . '. </strong>';
 
           // Author
           $author_count = count($doc->authors);
           if ($author_count >= 3) {
-            $block_content .= $doc->authors[0]->surname . ', ' . substr($doc->authors[0]->forename, 0, 1) . '. ';
-            $block_content .= 'et al. ';
+            $content .= $doc->authors[0]->surname . ', ' . substr($doc->authors[0]->forename, 0, 1) . '. ';
+            $content .= 'et al. ';
           }
           else {
             foreach ($doc->authors as $i => $author) {
-              $block_content .= $author->surname . ', ' . substr($author->forename, 0, 1) . '.';
-              if ($i < $author_count - 1) $block_content .= ', ';          
+              $content .= $author->surname . ', ' . substr($author->forename, 0, 1) . '.';
+              if ($i < $author_count - 1) $content .= ', ';          
             }
           }
 
           // This line is pending because of faulty mendeley call.
-          if ($doc->publication_outlet) $block_content .= '<em>' . $doc->publication_outlet . '</em>, ';
-          $block_content .= '<em>[Pending journal name]</em>, ';
+          if ($doc->publication_outlet) $content .= '<em>' . $doc->publication_outlet . '</em>, ';
+          $content .= '<em>[Pending journal name]</em>, ';
 
           // Volume, issue and page.
-          $block_content .= $doc->volume;
-          if ($doc->issue) $block_content .= '(' . $doc->issue . '), ';
-          if ($doc->pages) $block_content .= 'p.' . $doc->pages . '. ';
+          $content .= $doc->volume;
+          if ($doc->issue) $content .= '(' . $doc->issue . '), ';
+          if ($doc->pages) $content .= 'p.' . $doc->pages . '. ';
 
           // Year, title and the rest
-          if ($doc->year) $block_content .= '(' . $doc->year . ')';
+          if ($doc->year) $content .= '(' . $doc->year . ')';
           
-          $block_content .= '</li>';
+          $content .= '</li>';
         }
-        $block_content .= '</ol>';
-        $block_content .= '</p>';
-        $block_content .= '</article>';
+        $content .= '</ol>';
+        
+        // Provide 'see more' link to the page render.
+        if ($doc_count > 3 && $render == 'block') {
+          global $base_url;
+          $content .= l('see more...', $base_url . '/data/use/' . $type . '/' . $machine_name);
+        }
+        elseif ($doc_count <= 3 && $render == 'block') {
+          $content .= l('see page view...', $base_url . '/data/use/' . $type . '/' . $machine_name);
+        }
       }
+      elseif ($doc_count === 0) {
+        $content .= t('There are so far no publication in this category.');
+      }
+      $content .= '</p>';
+      $content .= '</article>';
     }
   }
-  return $block_content;
+  return $content;
 }
 
 
@@ -330,7 +408,7 @@ function npt_mendeley_analyse() {
     if ($tag_set['type'] == 'generic') {
       $file_loc = file_build_uri('npt_mendeley/' . $machine_name . '.json');
     }
-    else if ($tag_set['type'] == 'country') {
+    elseif ($tag_set['type'] == 'country') {
       $file_loc = file_build_uri('npt_mendeley/countries/' . $machine_name . '.json');
     }
 
@@ -390,7 +468,7 @@ function npt_mendeley_make_comparer() {
         if ($first->$criterion < $second->$criterion) {
           return 1;
         }
-        else if ($first->$criterion > $second->$criterion) {
+        elseif ($first->$criterion > $second->$criterion) {
           return -1;
         }
       }
@@ -398,7 +476,7 @@ function npt_mendeley_make_comparer() {
         if ($first->$criterion < $second->$criterion) {
           return -1;
         }
-        else if ($first->$criterion > $second->$criterion) {
+        elseif ($first->$criterion > $second->$criterion) {
           return 1;
         }
       }
