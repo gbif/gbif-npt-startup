@@ -81,7 +81,6 @@ function npt_mendeley_block_info() {
       'info' => $info,
       'region' => 'content',
       'weight' => 1,
-      'theme' => NPTSTARTUP_THEME,
       'status' => 0,
     );
   }
