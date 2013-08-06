@@ -4,3 +4,5 @@ version = 7.x-0.5
 package = GBIFS
 project = Nodes Portal Toolkit
 core = 7.x
+
+configure = admin/config/npt/mendeley_settings

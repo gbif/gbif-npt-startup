@@ -9,14 +9,101 @@
  */
 function npt_mendeley_enable() {
   // Create a directory for storing generated data files
-  $uri = 'public://npt_mendeley';
-  $dir_exists = file_prepare_directory($uri);
-  if (!$dir_exists) {
-    drupal_mkdir($uri);
+  $uris = array('public://npt_mendeley', 'public://npt_mendeley/countries');
+  foreach ($uris as $uri) {
+    $dir_exists = file_prepare_directory($uri);
+    if (!$dir_exists) {
+      drupal_mkdir($uri);
+    }
   }
-  $mendeley_tags = array('GBIF_used', 'GBIF_discussed', 'GBIF_mentioned');
-  variable_set('mendeley_tags', $mendeley_tags);
+
+  npt_mendeley_default_tag_sets();
 }
+
+function npt_mendeley_default_tag_sets() {
+  // The default tag sets for grouping documents
+  $tag_sets = array();
+  
+  // Generic tag sets on data use
+  $tag_sets[] = array(
+    'name' => t('Data papers'),
+    'machine_name' => 'datapaper',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed data papers describing biodiversity datasets published through the GBIF network'),
+    'tags' => array('datapaper'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Invasive alien species'),
+    'machine_name' => 'invasive_alien_species',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on invasive alien species'),
+    'tags' => array('GBIF_used', 'invasive'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Climate change'),
+    'machine_name' => 'climate_change',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on impacts of climate change on biodiversity'),
+    'tags' => array('GBIF_used', 'climate'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Conservation'),
+    'machine_name' => 'conservation',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on conservation, including threatened species and protected areas'),
+    'tags' => array('GBIF_used', 'conservation'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Human health'),
+    'machine_name' => 'human_health',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to human health and biodiversity, including disease vectors and medicines'),
+    'tags' => array('GBIF_used', 'human health'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Food and farming'),
+    'machine_name' => 'food_and_farming',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to agriculture, biofuels, aquaculture and wild fisheries'),
+    'tags' => array('GBIF_used', 'agriculture'),
+    'tags_alt' => array('GBIF_used', 'biofuel'),
+  );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases: Species distributions'),
+    'machine_name' => 'species_distribution',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to species distributions, including biogeography and ecology'),
+    'tags' => array('GBIF_used', 'species distribution'),
+  );
+
+  // Prepare tag sets for countries
+  $gbif_countries = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/country'));
+  $gbif_enum_countries = json_decode(file_get_contents(GBIF_ENUMERATION_COUNTRY));
+  
+  foreach ($gbif_countries as $gbif_country) {
+    foreach ($gbif_enum_countries as $gbif_enum_country) {
+      if ($gbif_enum_country->enumName == $gbif_country) $iso_name = $gbif_enum_country;
+    }
+    $tag_sets[] = array(
+      'name' => $iso_name->title,
+      'machine_name' => strtolower($iso_name->enumName),
+      'type' => 'country',
+      'desc' => t('Peer-reviewed publications using GBIF-mediated data authored by researchers based in @country', array('@country' => $iso_name->title)),
+      'tags' => array('GBIF_used', ucwords(strtolower($iso_name->enumName))),
+    );
+    $tag_sets[] = array(
+      'name' => $iso_name->title . ' biodiversity',
+      'machine_name' => strtolower($iso_name->enumName) . '_bio',
+      'type' => 'country',
+      'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to biodiversity in @country', array('@country' => $iso_name->title)),
+      'tags' => array('GBIF_used', ucwords(strtolower($iso_name->enumName)) . '_biodiversity'),
+    );
+
+  }
+
+  variable_set('npt_mendeley_tags', $tag_sets);
+}
+
 
 /**
  * Implementation of hook_uninstall()
@@ -33,4 +120,6 @@ function npt_mendeley_uninstall() {
   }
   variable_del('npt_mendeley_update_interval');
   variable_del('npt_mendeley_last_update');
+  variable_del('npt_mendeley_tags');
+  variable_del('npt_mendeley_retrieval_progress');
 }
