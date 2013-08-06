@@ -119,24 +119,24 @@ function npt_mendeley_block_view($delta = '') {
 /**
  *
  */
-function npt_mendeley_full_list($type = '', $machine_name = '', $json = '') {
+function npt_mendeley_full_list($gbif_cat_type = '', $machine_name = '', $json = '') {
   // Determine where to extract the analysed documents
-  if ($type == 'country') {
+  if ($gbif_cat_type == 'country') {
     $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/countries/' . $machine_name . '.json')));
   }
-  elseif ($type == 'generic') {
+  elseif ($gbif_cat_type == 'generic') {
     $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
   }
 
   // Export the result accordingly
-  if ($type == 'country' && $json == 'json') {
+  if ($gbif_cat_type == 'country' && $json == 'json') {
     drupal_json_output($$machine_name);
   }
   else {
-    $content = _npt_mendeley_list_documents($type, $machine_name, 'page');
+    $content = _npt_mendeley_list_documents($gbif_cat_type, $machine_name, 'page');
     $tag_sets = variable_get('npt_mendeley_tags');
     foreach ($tag_sets as $tag_set) {
-      if ($type == 'country') {
+      if ($gbif_cat_type == 'country') {
         if ($tag_set['machine_name'] == $machine_name) drupal_set_title('Publication: ' . $tag_set['name']);
       } else {
         if ($tag_set['machine_name'] == $machine_name) drupal_set_title($tag_set['name']);
@@ -154,14 +154,14 @@ function npt_mendeley_full_list($type = '', $machine_name = '', $json = '') {
  *       is not accurate given that we don't have actual date to sort.
  *
  */
-function _npt_mendeley_list_documents($type, $machine_name, $render) {
+function _npt_mendeley_list_documents($gbif_cat_type, $machine_name, $render) {
   $tag_sets = variable_get('npt_mendeley_tags');
   foreach ($tag_sets as $tag_set) {
     if ($machine_name == $tag_set['machine_name']) {
-      if ($type == 'country') {
+      if ($gbif_cat_type == 'country') {
         $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/countries/' . $machine_name . '.json')));
       }
-      elseif ($type == 'generic') {
+      elseif ($gbif_cat_type == 'generic') {
         $$machine_name = json_decode(file_get_contents(file_build_uri('npt_mendeley/' . $machine_name . '.json')));
       }
       $doc_count = count($$machine_name);
@@ -234,10 +234,10 @@ function _npt_mendeley_list_documents($type, $machine_name, $render) {
         // Provide 'see more' link to the page render.
         if ($doc_count > 3 && $render == 'block') {
           global $base_url;
-          $content .= l('see more...', $base_url . '/data/use/' . $type . '/' . $machine_name);
+          $content .= l('see more...', $base_url . '/data/use/' . $gbif_cat_type . '/' . $machine_name);
         }
         elseif ($doc_count <= 3 && $render == 'block') {
-          $content .= l('see page view...', $base_url . '/data/use/' . $type . '/' . $machine_name);
+          $content .= l('see page view...', $base_url . '/data/use/' . $gbif_cat_type . '/' . $machine_name);
         }
       }
       elseif ($doc_count === 0) {
