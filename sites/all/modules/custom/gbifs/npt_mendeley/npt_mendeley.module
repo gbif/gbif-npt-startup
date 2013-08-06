@@ -194,41 +194,38 @@ function _npt_mendeley_list_documents($type, $machine_name, $render) {
         // Start the list.
         $content .= '<ul class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
+          foreach ($doc as $key => $value) {
+            $$key = (isset($key)) ? $value : NULL;
+          }
+
           $content .= '<li>';
           
           // Title first
-          $title = (isset($doc->title)) ? $doc->title : NULL;
-          $url = (isset($doc->url)) ? $doc->url : NULL;
-          if ($title) $content .= '<strong>' . l($title, $url) . '. </strong>';
+          $content .= (isset($url)) ? '<strong>' . l($title, $url) . '. </strong>' : '<strong>' . $title . '. </strong>';
 
           // Author
-          $author_count = count($doc->authors);
+          $author_count = count($authors);
           if ($author_count >= 3) {
-            $content .= $doc->authors[0]->surname . ', ' . substr($doc->authors[0]->forename, 0, 1) . '. ';
+            $content .= $authors[0]->surname . ', ' . substr($authors[0]->forename, 0, 1) . '. ';
             $content .= 'et al. ';
           }
           else {
-            foreach ($doc->authors as $i => $author) {
+            foreach ($authors as $i => $author) {
               $content .= $author->surname . ', ' . substr($author->forename, 0, 1) . '.';
               if ($i < $author_count - 1) $content .= ', ';          
             }
           }
 
           // This line is pending because of faulty mendeley call.
-          $publication_outlet = isset($doc->publication_outlet) ? $doc->publication_outlet : NULL;
-          if ($publication_outlet) $content .= '<em>' . $publication_outlet . '</em>, ';
-          $content .= '<em>[Pending journal name]</em>, ';
+          $content .= (isset($publication_outlet)) ? ' <em>' . $publication_outlet . '</em>, ' : '';
 
           // Volume, issue and page.
-          $volume = isset($doc->volume) ? $doc->volume : NULL;
-          $content .= $volume;
-          $issue = isset($doc->issue) ? $doc->issue : NULL;
-          if ($issue) $content .= '(' . $issue . '), ';
-          $page = isset($doc->pages) ? $doc->pages : NULL;
-          if ($page) $content .= 'p.' . $page . '. ';
+          $content .= (isset($volume)) ? 'Volume: ' . $volume : '';
+          $content .= (isset($issue)) ? '(' . $issue . '), ' : '';
+          $content .= (isset($page)) ? 'p.' . $page . '. ' : '';
 
           // Year, title and the rest
-          if ($doc->year) $content .= '(' . $doc->year . ')';
+          $content .= (isset($year)) ? '(' . $year . ')' : '';
           
           $content .= '</li>';
         }
@@ -389,9 +386,12 @@ function npt_mendeley_retrieve($form, &$form_state) {
     curl_multi_close($master_ch);
     
     // Interate through all documents to get their journal names
-    // $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
-    // $detail = json_decode(file_get_contents($url));
-    // $adoc->publication_outlet = $detail->publication_outlet;
+    foreach ($mendeley_gbif_documents as $doc) {
+      // $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
+      // $detail = json_decode(file_get_contents($url));
+      // $adoc->publication_outlet = $detail->publication_outlet;
+      $doc->publication_outlet = '[Pending journal name]';
+    }
 
     // Save a local copy for use when there is no network connection or the rate is exceeded for Mendeley API.
     $json_file = json_encode($mendeley_gbif_documents);
