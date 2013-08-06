@@ -409,7 +409,7 @@ function npt_mendeley_retrieve($form, &$form_state) {
 }
 
 /**
- * Groupt retrieved documents into various defined categories.
+ * Group retrieved documents into various defined categories.
  */
 function npt_mendeley_analyse() {
 
