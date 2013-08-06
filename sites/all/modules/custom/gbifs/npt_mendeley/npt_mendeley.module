@@ -22,6 +22,16 @@ define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/node');
  */
 function npt_mendeley_menu() {
   $items = array();
+  $items['admin/config/npt'] = array(
+    'title' => t('NPT Configuration'),
+    'description' => t("Configure settings that determine how this Drupal site presents itself as a Nodes' portal."),
+    'position' => 'right',
+    'weight' => -10,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
   $items['admin/config/npt/mendeley_settings'] = array(
     'title' => t('Mendeley API'),
     'description' => t('Settings for accessing GBIF public library on Mendeley and updating statistics.'),
