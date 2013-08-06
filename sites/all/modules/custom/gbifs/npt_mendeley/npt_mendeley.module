@@ -192,7 +192,7 @@ function _npt_mendeley_list_documents($type, $machine_name, $render) {
         }
         
         // Start the list.
-        $content .= '<ol class="mendeley-citation">';
+        $content .= '<ul class="mendeley-citation">';
         foreach ($$machine_name as $doc) {
           $content .= '<li>';
           
@@ -226,7 +226,7 @@ function _npt_mendeley_list_documents($type, $machine_name, $render) {
           
           $content .= '</li>';
         }
-        $content .= '</ol>';
+        $content .= '</ul>';
         
         // Provide 'see more' link to the page render.
         if ($doc_count > 3 && $render == 'block') {
