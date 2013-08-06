@@ -197,7 +197,9 @@ function _npt_mendeley_list_documents($type, $machine_name, $render) {
           $content .= '<li>';
           
           // Title first
-          if ($doc->title) $content .= '<strong>' . l($doc->title, $doc->url) . '. </strong>';
+          $title = (isset($doc->title)) ? $doc->title : NULL;
+          $url = (isset($doc->url)) ? $doc->url : NULL;
+          if ($title) $content .= '<strong>' . l($title, $url) . '. </strong>';
 
           // Author
           $author_count = count($doc->authors);
@@ -213,13 +215,17 @@ function _npt_mendeley_list_documents($type, $machine_name, $render) {
           }
 
           // This line is pending because of faulty mendeley call.
-          if ($doc->publication_outlet) $content .= '<em>' . $doc->publication_outlet . '</em>, ';
+          $publication_outlet = isset($doc->publication_outlet) ? $doc->publication_outlet : NULL;
+          if ($publication_outlet) $content .= '<em>' . $publication_outlet . '</em>, ';
           $content .= '<em>[Pending journal name]</em>, ';
 
           // Volume, issue and page.
-          $content .= $doc->volume;
-          if ($doc->issue) $content .= '(' . $doc->issue . '), ';
-          if ($doc->pages) $content .= 'p.' . $doc->pages . '. ';
+          $volume = isset($doc->volume) ? $doc->volume : NULL;
+          $content .= $volume;
+          $issue = isset($doc->issue) ? $doc->issue : NULL;
+          if ($issue) $content .= '(' . $issue . '), ';
+          $page = isset($doc->pages) ? $doc->pages : NULL;
+          if ($page) $content .= 'p.' . $page . '. ';
 
           // Year, title and the rest
           if ($doc->year) $content .= '(' . $doc->year . ')';
