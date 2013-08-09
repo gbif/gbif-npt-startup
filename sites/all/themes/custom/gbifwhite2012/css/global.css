@@ -53,7 +53,7 @@ a {
 /* Regions */
 div#edit-facet label {
   font-size: 0.9em;
-  color:grey;
+  color:white;
 }
 div#edit-facet input {
   margin-top: -4px;
@@ -61,7 +61,7 @@ div#edit-facet input {
 div#edit-facet {
   position: relative;
   float: right;
-  margin-top: 5px;
+  margin-top: 13px;
   width: 200px;
   right: -30px;
 }
@@ -78,10 +78,10 @@ div#edit-facet {
 #region-user-second {
   top: -3px;
   height: 17px;
-  color: #09C;
+  color: #fff;
   text-align: right;
   float: right;
-  font-size: 0.85em;
+  font-size: 1em;
   line-height: 25px;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -91,7 +91,7 @@ div#edit-facet {
 }
 
 #region-user-second a {
-  color: #09C;
+  color: #fff;
   text-decoration: none;
 }
 
@@ -105,12 +105,17 @@ div#edit-facet {
 }
 
 #zone-branding-wrapper {
-  margin-top: 0px;
+  margin-top: 10px;
   height: 50px;
 }
 
+#region-branding {
+  margin-top: 50px;
+}
+
 #zone-menu-wrapper {
-  margin-top: -5px;
+  margin-top: 93px;
+  background-color: rgba(50, 50, 50, 0.5);
 }
 
 #secondary-menu {
@@ -124,6 +129,10 @@ div#edit-facet {
   display: block;
 }
 
+.region-menu-inner {
+  margin-top: 3px;
+}
+
 #region-menu ul li {
   display: inline;
   list-style: none;
@@ -132,18 +141,19 @@ div#edit-facet {
 
 #region-menu ul li a {
   text-decoration: none;
-  text-shadow: 0 1px white;
+  text-shadow: 0 1px grey;
   padding-bottom: 12px;
-  color: #09C;
+  color: #ccc;
 }
 
 #region-menu ul li a:hover {
-  color: #333;
-  background: url("../images/triangle_white.png") no-repeat center bottom;
+  color: #fff;
+  background: url("../images/triangle_grey_trans.png") no-repeat center bottom;
 }
 
 #region-menu ul li .active {
-  background: url("../images/triangle_white.png") no-repeat center bottom;
+  color: #fff;
+  background: url("../images/triangle_grey_trans.png") no-repeat center bottom;
 }
 
 #region-menu {
@@ -151,80 +161,7 @@ div#edit-facet {
   padding: 0 0 0 0;
   font-family: DINOT-Medium;
   font-size: 1.15em;
-  height: 27px;
-}
-
-#block-superfish-1 {
-  margin-top: 18px;
-  z-index: 10;
-  font-size: 1em;
-}
-#block-superfish-1 ul li { background: none; border: none; }
-#block-superfish-1 ul li a {
-  text-decoration: none;
-  text-shadow: 0 1px white;
-  color: #09C;
-  padding: 0 0 31px 0px;
-  margin: 0 20px 0px 10px;
-  border: none;
-  background: none;
-}
-
-#block-superfish-1 ul li.last ul {
-  padding-right: 5px;
-}
-
-#block-superfish-1 ul li.last ul li {
-  padding-right: 5px;
-}
-
-#block-superfish-1 ul li ul {
-  margin: -10px 0 0 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 2px 0 4px 0px rgba(204, 204, 204, 1);
-  -webkit-box-shadow: 2px 0 4px 0px rgba(204, 204, 204, 1); 
-  -moz-box-shadow: 2px 0 4px 0px rgba(204, 204, 204, 1);
-}
-
-#block-superfish-1 ul li ul li {
-  padding: 0 0 0 0;
-  height: 24px;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  background-color: #F9F9F9;
-}
-
-#block-superfish-1 ul li ul li a {
-  padding: 0 0 0 9px;
-  margin: 0;
-}
-
-#block-superfish-1 ul li ul li a:hover {
-  opacity: .4;
-}
-
-#block-superfish-1 ul li ul li.first {
-  padding-top: 7px;
-  border-top: 1px solid #ccc;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-#block-superfish-1 ul li ul li.last {
-  padding-bottom: 4px;
-  border-bottom: 1px solid #ccc;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-#block-superfish-1 ul li.active-trail {
-  background: url("../images/triangle_white.png") no-repeat center bottom;
-}
-
-#block-superfish-1 ul li ul li.active-trail {
-  background-color: #F9F9F9;
-  background-image: none;
+  height: 30px;
 }
 
 .sf-menu.sf-style-light-blue .sf-sub-indicator {
@@ -247,40 +184,44 @@ h4, h5, h6 {
 }
 
 h1.site-name {
-  font-size: 1.35em;
+  font-size: 3em;
   margin-top: 0px;
   line-height: 1.6em;
+  font-weight: bold;
+  font-family: Times, serif;
+  text-shadow: 2px 2px #333;
 }
 
 h2.site-name {
-  font-size: 1.35em;
+  font-size: 3em;
   margin-top: 0px;
   line-height: 1.6em;
 }
 
 .site-name a {
-  color: #333;
+  color: #fff;
   text-transform: uppercase;
 }
 
 .site-slogan {
-  font-size: 0.85em;
+  font-size: 1.3em;
   font-family: Arial, Helvetica, sans-serif;
-  margin-top: -3px;
-  color: #333;
-  opacity: .5;
+  margin-top: -7px;
+  color: #fff;
+  opacity: .7;
 }
 
 .logo-img {
-  margin-right: 10px;
+  margin: 10px 10px 0 0;
 }
 
 img#logo {
-  height: 38px;
+  height: 60px;
 }
 
 #region-search {
-  margin: 0 10px 0 0;
+  position: relative;
+  margin: 95px 10px 0 0;
   float: right;
 }
 
@@ -321,6 +262,8 @@ img#logo {
 
 Header {
   border-bottom: #ccc solid 1px;
+  height: 200px;
+  background: url("../images/banner_1920x200.jpg") center;
 }
 
 #section-header {
