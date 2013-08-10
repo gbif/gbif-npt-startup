@@ -188,7 +188,7 @@ h1.site-name {
   margin-top: 0px;
   line-height: 1.6em;
   font-weight: bold;
-  font-family: Times, serif;
+  font-family: DINOT-Medium, sans-serif;
   text-shadow: 2px 2px #333;
 }
 
@@ -207,6 +207,7 @@ h2.site-name {
   font-size: 1.3em;
   font-family: Arial, Helvetica, sans-serif;
   margin-top: -7px;
+  margin-left: 2px;
   color: #fff;
   opacity: .7;
 }
