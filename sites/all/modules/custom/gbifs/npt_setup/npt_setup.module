@@ -525,9 +525,9 @@ function npt_setup_block_info() {
   $blocks['npt_setup'] = array(
     'info' => t('NPT setup'),
     'cache' => DRUPAL_NO_CACHE,
-    'region' => 'dashboard_sidebar',
+    'region' => 'content',
     'status' => 1,
-    'theme' => 'scratchpads_admin'
+    'theme' => 'seven'
   );
   return $blocks;
 }

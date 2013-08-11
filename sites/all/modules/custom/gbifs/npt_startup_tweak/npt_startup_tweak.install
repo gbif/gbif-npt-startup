@@ -12,7 +12,8 @@ function npt_startup_tweak_install() {
   // Disable default theme and the Scratchpads theme.
   theme_disable(array(
     'bartik',
-    'scratchpads'
+    'scratchpads',
+    'scratchpads_admin',
   ));
 
   // Enable NPT default theme.
