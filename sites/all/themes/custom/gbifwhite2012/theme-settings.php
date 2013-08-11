@@ -1,7 +1,8 @@
 <?php
 /**
  * @file
- * This file provides a toggle switch for displaying GBIF links in the footer area
+ * This file provides a toggle switch for displaying GBIF links in the footer area    
+ * @todo Provide a form to submit a banner image, including validation of the image. 
  */
 
 function gbifwhite2012_form_system_theme_settings_alter(&$form, &$form_state) {
