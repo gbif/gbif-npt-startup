@@ -1,0 +1,147 @@
+/* Regions */
+div#edit-facet label {
+  color:white;
+}
+
+div#edit-facet {
+  margin-top: 13px;
+}
+
+#region-user-second {
+  color: #fff;
+}
+
+#region-user-second a {
+  color: #fff;
+}
+
+#zone-branding-wrapper {
+  margin-top: 10px;
+}
+
+#region-branding {
+  margin-top: 50px;
+}
+
+#zone-menu-wrapper {
+  margin-top: 93px;
+  background-color: rgba(50, 50, 50, 0.5);
+}
+
+#secondary-menu {
+  position: absolute;
+  top: 70px;
+  z-index: 1000;
+  opacity: .4;
+}
+
+#secondary-menu li {
+  display: block;
+}
+
+.region-menu-inner {
+  margin-top: 3px;
+}
+
+#region-menu ul li a {
+  text-shadow: 0 1px grey;
+  color: #ccc;
+}
+
+#region-menu ul li a:hover {
+  color: #fff;
+  background: url("../images/triangle_grey_trans.png") no-repeat center bottom;
+}
+
+#region-menu ul li .active {
+  color: #fff;
+  background: url("../images/triangle_grey_trans.png") no-repeat center bottom;
+}
+
+#region-menu {
+  height: 30px;
+}
+
+h1, h2, h3 {
+  font-family: DINOT-Medium;
+}
+
+h4, h5, h6 {
+  font-family: DINOT-Regular;
+}
+
+h1.site-name {
+  font-size: 3em;
+  margin-top: 0px;
+  line-height: 1.6em;
+  font-weight: bold;
+  font-family: DINOT-Medium, sans-serif;
+  text-shadow: 2px 2px #333;
+}
+
+h2.site-name {
+  font-size: 3em;
+}
+
+.site-name a {
+  color: #fff;
+}
+
+.site-slogan {
+  font-size: 1.3em;
+  margin-top: -7px;
+  margin-left: 2px;
+  color: #fff;
+  opacity: .7;
+}
+
+.logo-img {
+  margin: 10px 10px 0 0;
+}
+
+img#logo {
+  height: 60px;
+}
+
+#region-search {
+  position: relative;
+  margin: 95px 10px 0 0;
+  float: right;
+}
+
+#search-block-form div.container-inline {
+  width: 139px;
+  height: 33px;
+  float: right;
+  padding: 0px 12px 0px 28px;
+  background: url("../images/input_bkg.png") no-repeat scroll left 3px;
+}
+
+#search-block-form div.container-inline input#edit-search-block-form--2.form-text {
+  color: #333;
+  padding-left: 28px;
+  margin-top: 4px;
+  margin-left: -25px;
+  height: 26px;
+  width: 172px;
+  background: none;
+  border-radius: 11px;
+  border: none;
+}
+
+#search-block-form div.container-inline input#edit-search-block-form--2.form-text:focus {
+  border: 1px solid #ccc;
+  box-shadow: 0 0 5px rgba(72, 154, 59, 1);
+  -webkit-box-shadow: 0 0 5px rgba(72, 154, 59, 1); 
+  -moz-box-shadow: 0 0 5px rgba(72, 154, 59, 1);
+}
+
+#search-block-form input.form-submit {
+  display: none;
+}
+
+Header {
+  border-bottom: #ccc solid 1px;
+  height: 200px;
+  background: url("../images/banner_1920x200.jpg") center;
+}

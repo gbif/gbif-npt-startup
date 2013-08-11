@@ -53,7 +53,7 @@ a {
 /* Regions */
 div#edit-facet label {
   font-size: 0.9em;
-  color:white;
+  color:grey;
 }
 div#edit-facet input {
   margin-top: -4px;
@@ -61,7 +61,7 @@ div#edit-facet input {
 div#edit-facet {
   position: relative;
   float: right;
-  margin-top: 13px;
+  margin-top: 5px;
   width: 200px;
   right: -30px;
 }
@@ -78,10 +78,10 @@ div#edit-facet {
 #region-user-second {
   top: -3px;
   height: 17px;
-  color: #fff;
+  color: #09C;
   text-align: right;
   float: right;
-  font-size: 1em;
+  font-size: 0.85em;
   line-height: 25px;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -91,7 +91,7 @@ div#edit-facet {
 }
 
 #region-user-second a {
-  color: #fff;
+  color: #09C;
   text-decoration: none;
 }
 
@@ -105,17 +105,12 @@ div#edit-facet {
 }
 
 #zone-branding-wrapper {
-  margin-top: 10px;
+  margin-top: 0px;
   height: 50px;
 }
 
-#region-branding {
-  margin-top: 50px;
-}
-
 #zone-menu-wrapper {
-  margin-top: 93px;
-  background-color: rgba(50, 50, 50, 0.5);
+  margin-top: -5px;
 }
 
 #secondary-menu {
@@ -129,10 +124,6 @@ div#edit-facet {
   display: block;
 }
 
-.region-menu-inner {
-  margin-top: 3px;
-}
-
 #region-menu ul li {
   display: inline;
   list-style: none;
@@ -141,19 +132,18 @@ div#edit-facet {
 
 #region-menu ul li a {
   text-decoration: none;
-  text-shadow: 0 1px grey;
+  text-shadow: 0 1px white;
   padding-bottom: 12px;
-  color: #ccc;
+  color: #09C;
 }
 
 #region-menu ul li a:hover {
-  color: #fff;
-  background: url("../images/triangle_grey_trans.png") no-repeat center bottom;
+  color: #333;
+  background: url("../images/triangle_white.png") no-repeat center bottom;
 }
 
 #region-menu ul li .active {
-  color: #fff;
-  background: url("../images/triangle_grey_trans.png") no-repeat center bottom;
+  background: url("../images/triangle_white.png") no-repeat center bottom;
 }
 
 #region-menu {
@@ -161,7 +151,7 @@ div#edit-facet {
   padding: 0 0 0 0;
   font-family: DINOT-Medium;
   font-size: 1.15em;
-  height: 30px;
+  height: 27px;
 }
 
 .sf-menu.sf-style-light-blue .sf-sub-indicator {
@@ -184,45 +174,40 @@ h4, h5, h6 {
 }
 
 h1.site-name {
-  font-size: 3em;
+  font-size: 1.35em;
   margin-top: 0px;
   line-height: 1.6em;
-  font-weight: bold;
-  font-family: DINOT-Medium, sans-serif;
-  text-shadow: 2px 2px #333;
 }
 
 h2.site-name {
-  font-size: 3em;
+  font-size: 1.35em;
   margin-top: 0px;
   line-height: 1.6em;
 }
 
 .site-name a {
-  color: #fff;
+  color: #333;
   text-transform: uppercase;
 }
 
 .site-slogan {
-  font-size: 1.3em;
+  font-size: 0.85em;
   font-family: Arial, Helvetica, sans-serif;
-  margin-top: -7px;
-  margin-left: 2px;
-  color: #fff;
-  opacity: .7;
+  margin-top: -3px;
+  color: #333;
+  opacity: .5;
 }
 
 .logo-img {
-  margin: 10px 10px 0 0;
+  margin-right: 10px;
 }
 
 img#logo {
-  height: 60px;
+  height: 38px;
 }
 
 #region-search {
-  position: relative;
-  margin: 95px 10px 0 0;
+  margin: 0 10px 0 0;
   float: right;
 }
 
@@ -263,8 +248,6 @@ img#logo {
 
 Header {
   border-bottom: #ccc solid 1px;
-  height: 200px;
-  background: url("../images/banner_1920x200.jpg") center;
 }
 
 #section-header {
