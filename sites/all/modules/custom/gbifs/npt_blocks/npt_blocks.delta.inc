@@ -15,11 +15,11 @@ function npt_blocks_delta_default_templates() {
   $delta->machine_name = 'front_page';
   $delta->name = 'Front page';
   $delta->description = 'Front page for NPT Startup';
-  $delta->theme = 'gbifwhite2012';
+  $delta->theme = 'gbifwhite';
   $delta->mode = 'preserve';
   $delta->parent = '';
   $delta->settings = array(
-    'theme_gbifwhite2012_settings' => array(
+    'theme_gbifwhite_settings' => array(
       'toggle_logo' => 1,
       'toggle_name' => 1,
       'toggle_slogan' => 1,
@@ -32,7 +32,7 @@ function npt_blocks_delta_default_templates() {
       'toggle_gbif_footer' => 0,
       'toggle_gbif_credit' => 0,
       'default_logo' => 0,
-      'logo_path' => 'sites/all/themes/custom/gbifwhite2012/logo.svg',
+      'logo_path' => 'sites/all/themes/custom/gbifwhite/logo.svg',
       'logo_upload' => '',
       'default_favicon' => 1,
       'favicon_path' => '',

@@ -6,8 +6,8 @@
  */
 
 function npt_startup_tweak_install() {
-  // Set the default theme to "gbifwhite2012".
-  variable_set('theme_default', 'gbifwhite2012');
+  // Set the default theme to "gbifwhite".
+  variable_set('theme_default', 'gbifwhite');
 
   // Disable default theme and the Scratchpads theme.
   theme_disable(array(
@@ -17,7 +17,7 @@ function npt_startup_tweak_install() {
 
   // Enable NPT default theme.
   theme_enable(array(
-    'gbifwhite2012'
+    'gbifwhite'
   ));
 
   // Default site name and slogan. To be replaced by values from setup form

@@ -27,7 +27,7 @@ function npt_feeds_block_info_alter(&$blocks, $theme, $code_blocks) {
   }
 
   switch ($theme) {
-    case 'gbifwhite2012':
+    case 'gbifwhite':
       foreach ($gbif_feed as $feedblock) {
         $dlt = $feedblock['delta'];
         $rgn = $feedblock['region'];
