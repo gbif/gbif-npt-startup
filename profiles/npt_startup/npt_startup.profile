@@ -22,6 +22,13 @@ function npt_startup_install_tasks() {
   return $tasks;
 }
 
+/**
+ * Preprocess the install page variables to add our logo.
+ */
+function npt_startup_process_maintenance_page(&$variables) {
+  $variables['logo'] = drupal_get_path('profile', 'npt_startup') . '/logo.png';
+}
+
 function node_definition_form() {
   drupal_set_title(t('NPT Startup settings'));
 
