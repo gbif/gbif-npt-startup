@@ -5,7 +5,7 @@
  * @todo Provide a form to submit a banner image, including validation of the image. 
  */
 
-function gbifwhite2012_form_system_theme_settings_alter(&$form, &$form_state) {
+function gbifwhite_form_system_theme_settings_alter(&$form, &$form_state) {
   $form['theme_settings']['toggle_gbif_footer'] = array(
     '#type' => 'checkbox',
     '#title' => t('GBIF links in the footer block'),

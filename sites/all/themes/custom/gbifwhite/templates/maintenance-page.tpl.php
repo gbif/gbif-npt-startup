@@ -23,7 +23,7 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
 <head profile="http://www.w3.org/1999/xhtml/vocab">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="shortcut icon" href="http://npt.bkolocal:10088/sites/all/themes/gbifwhite2012/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="shortcut icon" href="http://npt.bkolocal:10088/sites/all/themes/gbifwhite/favicon.ico" type="image/vnd.microsoft.icon" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 <meta about="/node/2" property="sioc:num_replies" content="0" datatype="xsd:integer" />
 <link rel="shortlink" href="/node/2" />
@@ -71,17 +71,17 @@
 @import url("http://npt.bkolocal:10088/sites/all/themes/omega/omega/css/omega-menu.css?mfc8nk");
 @import url("http://npt.bkolocal:10088/sites/all/themes/omega/omega/css/omega-forms.css?mfc8nk");
 @import url("http://npt.bkolocal:10088/sites/all/themes/omega/omega/css/omega-visuals.css?mfc8nk");
-@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite2012/css/global.css?mfc8nk");</style>
+@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite/css/global.css?mfc8nk");</style>
 
 <!--[if (lt IE 9)&(!IEMobile)]>
-<style type="text/css" media="all">@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite2012/css/gbifwhite2012-alpha-default.css?mfc8nk");
-@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite2012/css/gbifwhite2012-alpha-default-normal.css?mfc8nk");
+<style type="text/css" media="all">@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite/css/gbifwhite-alpha-default.css?mfc8nk");
+@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite/css/gbifwhite-alpha-default-normal.css?mfc8nk");
 @import url("http://npt.bkolocal:10088/sites/all/themes/omega/alpha/css/grid/alpha_default/normal/alpha-default-normal-24.css?mfc8nk");</style>
 <![endif]-->
 
 <!--[if gte IE 9]><!-->
-<style type="text/css" media="all and (min-width: 980px) and (min-device-width: 980px), all and (max-device-width: 1024px) and (min-width: 1024px) and (orientation:landscape)">@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite2012/css/gbifwhite2012-alpha-default.css?mfc8nk");
-@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite2012/css/gbifwhite2012-alpha-default-normal.css?mfc8nk");
+<style type="text/css" media="all and (min-width: 980px) and (min-device-width: 980px), all and (max-device-width: 1024px) and (min-width: 1024px) and (orientation:landscape)">@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite/css/gbifwhite-alpha-default.css?mfc8nk");
+@import url("http://npt.bkolocal:10088/sites/all/themes/gbifwhite/css/gbifwhite-alpha-default-normal.css?mfc8nk");
 @import url("http://npt.bkolocal:10088/sites/all/themes/omega/alpha/css/grid/alpha_default/normal/alpha-default-normal-24.css?mfc8nk");</style>
 <!--<![endif]-->
 </head>
@@ -105,7 +105,7 @@
   <div class="region-inner region-branding-inner">
         <div class="branding-data clearfix">
             <div class="logo-img">
-        <a href="/" rel="home" title="GBIF Benin" class="active"><img src="http://npt.bkolocal:10088/sites/all/themes/custom/gbifwhite2012/logo.svg" alt="GBIF Benin" id="logo" /></a>      </div>
+        <a href="/" rel="home" title="GBIF Benin" class="active"><img src="http://npt.bkolocal:10088/sites/all/themes/custom/gbifwhite/logo.svg" alt="GBIF Benin" id="logo" /></a>      </div>
                         <hgroup class="site-name-slogan">        
                                 
         <h1 class="site-name"><a href="/" rel="home" title="Home" class="active">GBIF Benin</a></h1>
