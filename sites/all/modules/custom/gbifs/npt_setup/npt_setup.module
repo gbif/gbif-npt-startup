@@ -525,9 +525,9 @@ function npt_setup_block_info() {
   $blocks['npt_setup'] = array(
     'info' => t('NPT setup'),
     'cache' => DRUPAL_NO_CACHE,
-    'region' => 'content',
+    'region' => 'dashboard_sidebar',
     'status' => 1,
-    'theme' => 'seven'
+    'theme' => 'shiny'
   );
   return $blocks;
 }
@@ -569,7 +569,7 @@ function npt_setup_block_view($delta = '') {
         ),
         'text' => array(
           '#type' => 'html_tag',
-          '#tag' => 'p',
+          '#tag' => 'span',
           '#value' => t('!percentage% complete', array(
             '!percentage' => $percentage_complete
           ))

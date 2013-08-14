@@ -19,13 +19,11 @@
 }
 
 .block-npt-setup p{
-  float: left;
-  width: 100px;
+  display: inline-block;
 }
 
-.block-npt-setupT a{
-  text-align: right;
-  display: block;
+.block-npt-setup a{
+  float: right;
 }
 
 .wizard-trail-current {
