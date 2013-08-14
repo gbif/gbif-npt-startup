@@ -33,9 +33,12 @@
     </div>
 
   </div>
+<!--
   <?php if ($page['footer']):?>
     <div id="footer">
       <?php print render($page['footer']);?>
     </div>
   <?php endif;?>
+-->
+
   </div>
