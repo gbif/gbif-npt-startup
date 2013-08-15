@@ -18,8 +18,11 @@ function npt_startup_tweak_install() {
 
   // Enable NPT default theme.
   theme_enable(array(
-    'gbifwhite'
+    'gbifwhite',
+    'npt_admin',
   ));
+  variable_set('admin_theme', 'npt_admin');
+  variable_set('node_admin_theme', '1');
 
   // Default site name and slogan. To be replaced by values from setup form
   variable_set('site_name', 'NPT Startup');
@@ -38,6 +41,7 @@ function npt_startup_tweak_install() {
   // Disable unnecessary modules
   module_disable(array(
     'overlay',
+    'toolbar'
   ), TRUE);
   
   variable_set('creative_commons_block_display_type', '80x15.png');

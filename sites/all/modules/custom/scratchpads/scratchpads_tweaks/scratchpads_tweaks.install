@@ -279,8 +279,8 @@ function scratchpads_tweaks_install(){
    * Additional Scratchpad settings: 
    */
   // Date API stuff
-  variable_set('site_default_country', 'GB');
-  variable_set('date_default_timezone', 'Europe/London');
+  //variable_set('site_default_country', 'GB');
+  //variable_set('date_default_timezone', 'Europe/London');
   variable_set('date_first_day', '1');
   variable_set('date_format_long', 'l, F j, Y - H:i');
   variable_set('date_format_medium', 'D, Y-m-d H:i');
