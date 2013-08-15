@@ -19,6 +19,9 @@ dependencies[] = scratchpads_tweaks
 ; Contributed modules
 dependencies[] = delta
 dependencies[] = delta_ui
+dependencies[] = admin_menu
+dependencies[] = admin_menu_toolbar
+dependencies[] = module_filter
 
 ; Customised modules
 dependencies[] = eolapi
