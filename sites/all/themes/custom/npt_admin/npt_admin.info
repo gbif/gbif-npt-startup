@@ -1,0 +1,16 @@
+name = NPT Admin
+description = NPT admin theme based on Shiny - A simple one-column, tableless, fluid width administration theme.
+core = 7.x    
+base theme = shiny
+
+; Install and Maintenance Pages
+stylesheets[all][] = css/npt_admin.css
+
+settings[shortcut_module_link] = 1
+regions[content] = Content
+regions[help] = Help
+regions[page_top] = Page top
+regions[page_bottom] = Page bottom
+regions[sidebar_first] = First sidebar
+regions[footer] = Footer
+regions_hidden[] = sidebar_first
