@@ -76,6 +76,7 @@ function npt_blocks_delta_default_templates() {
         'omega-forms.css' => 'omega-forms.css',
         'omega-visuals.css' => 'omega-visuals.css',
         'global.css' => 'global.css',
+        'banner.css' => 0,
       ),
       'alpha_exclude' => array(
         'modules/aggregator/aggregator.css' => 0,
@@ -368,6 +369,7 @@ function npt_blocks_delta_default_templates() {
       'alpha_zone_content_css' => '',
       'alpha_zone_content_wrapper_css' => '',
       'alpha_zone_content_equal_height_container' => 0,
+      'alpha_region_sidebar_first_zone' => NULL,
       'alpha_region_sidebar_first_force' => 0,
       'alpha_region_sidebar_first_prefix' => '0',
       'alpha_region_sidebar_first_columns' => '6',
