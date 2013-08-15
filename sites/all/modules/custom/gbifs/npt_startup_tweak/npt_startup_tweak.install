@@ -38,7 +38,6 @@ function npt_startup_tweak_install() {
   // Disable unnecessary modules
   module_disable(array(
     'overlay',
-    'toolbar'
   ), TRUE);
   
   variable_set('creative_commons_block_display_type', '80x15.png');

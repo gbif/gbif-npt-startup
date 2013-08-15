@@ -27,7 +27,7 @@ dependencies[] = rdf
 dependencies[] = search
 dependencies[] = shortcut
 dependencies[] = taxonomy
-dependencies[] = toolbar
+;dependencies[] = toolbar
 
 ; Contrib
 dependencies[] = advanced_help
