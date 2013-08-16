@@ -33,7 +33,6 @@ function npt_startup_tweak_install() {
     'npt_blocks',
     'npt_news',
     'npt_setup',
-    'npt_mollom',
     'npt_solr',
     'image_allow_insecure_derivatives', // Temporary fix, see https://drupal.org/project/image_allow_insecure_derivatives
   ), TRUE);
