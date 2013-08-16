@@ -23,9 +23,9 @@ body.in-maintenance #credit {
   /* LTR */
   float: right;
   /* LTR */
-  margin-bottom: 20px;
-  width: 210px;
-  color: #666666;
+  margin-bottom: 10px;
+  width: 180px;
+  color: #333;
 }
 
 /* CG Logo on White */
@@ -38,13 +38,13 @@ body.in-maintenance #credit {
   height: 0;
   overflow: hidden;
   padding: 50px 0 0;
-  width: 180px;
+  width: 142px;
 }
 
 /* CG Logo on Blue */
 body.in-maintenance #credit .logo a {
-  background: transparent url("../images/ViBRANT_Logo_180.png") no-repeat 0 0;
-  height: 89px;
+  background: transparent url("../images/vibrant_logo_142.png") no-repeat 0 0;
+  height: 70px;
 }
 
 /* CG Logo on Black */
@@ -54,18 +54,18 @@ body.in-maintenance #credit .logo a {
 
 /* Installation/Maintenance Page */
 body.in-maintenance {
-  background: #dddddd url("../images/installation-bg.png") repeat 0 0;
+  background: #95cd83 url("../images/installation-bg.png") repeat 0 0;
   /* Welcome Page Styles */
   /* DFP Styles */
 }
 body.in-maintenance .body-wrapper {
-  background: #dddddd;
-  background: -moz-linear-gradient(top, #a8cda1 0%, #dddddd 100%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #a8cda1), color-stop(100%, #dddddd));
-  background: -webkit-linear-gradient(top, #a8cda1 0%, #dddddd 100%);
-  background: -o-linear-gradient(top, #a8cda1 0%, #dddddd 100%);
-  background: -ms-linear-gradient(top, #a8cda1 0%, #dddddd 100%);
-  background: linear-gradient(to bottom, #a8cda1 0%, #dddddd 100%);
+  background: #95cd83;
+  background: -moz-linear-gradient(top, #a8cda1 0%, #95cd83 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #a8cda1), color-stop(100%, #95cd83));
+  background: -webkit-linear-gradient(top, #a8cda1 0%, #95cd83 100%);
+  background: -o-linear-gradient(top, #a8cda1 0%, #95cd83 100%);
+  background: -ms-linear-gradient(top, #a8cda1 0%, #95cd83 100%);
+  background: linear-gradient(to bottom, #a8cda1 0%, #95cd83 100%);
 }
 body.in-maintenance .body-wrapper .page-outer {
   background: transparent url("../images/installation-bg.png") repeat 0 0;
@@ -79,7 +79,7 @@ body.in-maintenance #branding {
   background: #f4f4f4;
   border: 1px solid #edebeb;
   margin: 0;
-  padding: 30px 40px;
+  padding: 20px 40px;
   width: 960px;
 }
 body.in-maintenance #branding h1.page-title {
