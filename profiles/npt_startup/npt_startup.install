@@ -70,17 +70,17 @@ function _npt_startup_set_theme($target_theme) {
 function install_welcome($form, &$form_state, &$install_state) {
   drupal_set_title(st('Nodes Portal Toolkit Startup'));
   $message = '<p>' . st('Thank you for choosing Nodes Portal Toolkit Startup, a product that sets up biodiversity web presence for GBIF Participants.') . '</p>';
-  $eula = '<p>' . st('While we have a rather long, boring Privacy Policy just like any other technology company, here is a short summary of some key items we feel are important:') . '</p>';
+  $eula = '<p>' . st('While we strive to make this product as stable, feature-rich as possible, just like any other software development in the biodiversity informatics community, we  need your understanding and active contribution to allow a product like this to serve your need. Here are some points we would like to highlight:') . '</p>';
   $items = array();
-  $dfp_link = l("Google's DoubleClick for Publishers (\"DFP\")", "http://www.google.com/dfp/info/sb/index.html", array('attributes' => array('target' => '_blank')));
-  $items[] = st("Commerce Kickstart makes use of !dfp;", array('!dfp' => $dfp_link));
-  $items[] = st('We use DFP to show you content relevant to Drupal Commerce at various points and places in Commerce Kickstart, including during installation;');
-  $items[] = st('DFP is a third-party technology. It uses audience management tags which collect and use certain data;');
-  $items[] = st('Commerce Guys does not collect any personally identifiable information;');
-  $items[] = st('If at any time after installation you do not want us to utilize DFP through Commerce Kickstart, you can easily opt out of it;');
+  $items[] = st('NPT Startup targets GBIF Nodes that have limited web presence, against which the current processing capacity is specified. We need your contribution to enhance it if you demand better performance for some features you like;');
+  $scratchpads_link = l("Scratchpads", "http://scratchpads.eu", array('attributes' => array('target' => '_blank')));
+  $scratchpadswiki_link = l("Scratchpads Documentation Wiki", "http://help.scratchpads.eu/w/Main_Page", array('attributes' => array('target' => '_blank')));
+  $nptwiki_link = l("NPT Startup Documentation Wiki", "https://github.com/gbif/gbif-npt-startup/wiki", array('attributes' => array('target' => '_blank')));
+  $items[] = st("NPT Startup is based on !scratchpads, from which are many biodiversity content management features in NPT Startup. Please checkout !scratchpadswiki for generic usage guides. For NPT Startup specific usage, please checkout !wiki;", array('!scratchpads' => $scratchpads_link, '!scratchpadswiki' => $scratchpadswiki_link, '!wiki' => $nptwiki_link));
+  $items[] = st('NPT Startup is built by using Drupal/PHP. However, there are components written in other languages nicely integrated, i.e. Apache Solr for indexing. GBIF promotes reusable software components, therefore we are keen to integrate your new developements that provide APIs. This will benefit all users of NPT Startup. Please express your interest by writing to nodes@gbif.org;');
   $eula .= theme('item_list', array('items' => $items));
-  $eula_link = l('Privacy Policy and User Agreement', 'https://marketplace.commerceguys.com/privacy/commerce-kickstart', array('attributes' => array('target' => '_blank')));
-  $eula .= '<p>' . st('That is it for the main points. The full !policy can be viewed on our website.  Thank you again for choosing Commerce Kickstart!', array('!policy' => $eula_link)) . '</p>';
+  $nptgroup_link = l('NPT discussion group', 'http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/', array('attributes' => array('target' => '_blank')));
+  $eula .= '<p>' . st('That is it for the main points. We would like to encourage you raise any discussion around portal development on !nptgroup.  Thank you again for choosing NPT Startup to start developing your portal!', array('!nptgroup' => $nptgroup_link)) . '</p>';
   $form = array();
   $form['welcome_message'] = array(
     '#markup' => $message,
