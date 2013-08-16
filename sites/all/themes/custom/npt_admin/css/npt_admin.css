@@ -30,7 +30,7 @@ body.in-maintenance #credit {
 
 /* CG Logo on White */
 #credit .logo a {
-  background: transparent url("../images/logo-cg2.png") no-repeat 0 0;
+  background: transparent url("../images/vibrant_logo_142.png") no-repeat 0 0;
   clear: right;
   /* LTR */
   float: right;
@@ -49,7 +49,7 @@ body.in-maintenance #credit .logo a {
 
 /* CG Logo on Black */
 #overlay #overlay-content #credit .logo a {
-  background: transparent url("../images/logo-cg.png") no-repeat 0 0;
+  background: transparent url("../images/vibrant_logo_142.png") no-repeat 0 0;
 }
 
 /* Installation/Maintenance Page */

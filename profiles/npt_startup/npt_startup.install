@@ -119,13 +119,6 @@ function install_welcome_submit($form, &$form_state) {
   $install_state['parameters']['locale'] = 'en';
 }
                        
-/**
- * Preprocess the install page variables to add our logo.
- */
-function npt_startup_process_maintenance_page(&$variables) {
-  $variables['logo'] = drupal_get_path('profile', 'npt_startup') . '/logo.png';
-}
-
 function node_definition_form() {
   drupal_set_title(t('NPT Startup settings'));
 
