@@ -77,10 +77,12 @@ function install_welcome($form, &$form_state, &$install_state) {
   $scratchpadswiki_link = l("Scratchpads Documentation Wiki", "http://help.scratchpads.eu/w/Main_Page", array('attributes' => array('target' => '_blank')));
   $nptwiki_link = l("NPT Startup Documentation Wiki", "https://github.com/gbif/gbif-npt-startup/wiki", array('attributes' => array('target' => '_blank')));
   $items[] = st("NPT Startup is based on !scratchpads, from which are many biodiversity content management features in NPT Startup. Please checkout !scratchpadswiki for generic usage guides. For NPT Startup specific usage, please checkout !wiki;", array('!scratchpads' => $scratchpads_link, '!scratchpadswiki' => $scratchpadswiki_link, '!wiki' => $nptwiki_link));
-  $items[] = st('NPT Startup is built by using Drupal/PHP. However, there are components written in other languages nicely integrated, i.e. Apache Solr for indexing. GBIF promotes reusable software components, therefore we are keen to integrate your new developements that provide APIs. This will benefit all users of NPT Startup. Please express your interest by writing to nodes@gbif.org;');
+  $items[] = st('NPT Startup is built by using Drupal/PHP with components written in other languages nicely integrated, i.e. Apache Solr for indexing. GBIF promotes reusable software components, therefore we are keen to integrate your new developements that provide APIs. This will benefit all users of NPT Startup. Please express your interest by writing to nodes@gbif.org;');
   $eula .= theme('item_list', array('items' => $items));
-  $nptgroup_link = l('NPT discussion group', 'http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/', array('attributes' => array('target' => '_blank')));
-  $eula .= '<p>' . st('That is it for the main points. We would like to encourage you raise any discussion around portal development on !nptgroup.  Thank you again for choosing NPT Startup to start developing your portal!', array('!nptgroup' => $nptgroup_link)) . '</p>';
+  $nptgroup_link = l('the NPT discussion group', 'http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/', array('attributes' => array('target' => '_blank')));
+  $nptcode_link = l('the source code', 'https://github.com/gbif/gbif-npt-startup', array('attributes' => array('target' => '_blank')));
+  $eula .= '<p>' . st('That is it for the main points. We would like to encourage you to initiate discussions around portal development on !nptgroup. We are also looking forward to your contribution to !code, as issue reports, bug fixes, or new exciting features.', array('!nptgroup' => $nptgroup_link, '!code' => $nptcode_link)) . '</p>';
+  $eula .= '<p>' . st('Thank you again for choosing NPT Startup to start developing your biodiversity information portal!') . '</p>';
   $form = array();
   $form['welcome_message'] = array(
     '#markup' => $message,
