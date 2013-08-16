@@ -59,7 +59,6 @@ dependencies[] = scratchpads_backend
 dependencies[] = scratchpads_biblio
 dependencies[] = scratchpads_biblio_autocomplete_tweak
 dependencies[] = scratchpads_biblio_search
-dependencies[] = scratchpads_blocks
 dependencies[] = scratchpads_cleanup
 ;dependencies[] = scratchpads_colour
 dependencies[] = scratchpads_contact
