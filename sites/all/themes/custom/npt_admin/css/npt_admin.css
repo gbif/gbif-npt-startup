@@ -88,8 +88,7 @@ body.in-maintenance #branding h1.page-title {
   /* LTR */
   font-size: 32px;
   font-weight: 100;
-  line-height: 1em;
-  padding: 10px 0;
+  line-height: 80px;
   width: 550px;
 }
 body.in-maintenance #page {

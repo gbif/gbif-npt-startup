@@ -13,4 +13,7 @@ regions[page_top] = Page top
 regions[page_bottom] = Page bottom
 regions[sidebar_first] = First sidebar
 regions[footer] = Footer
+regions[sidebar_second] = Sidebar second 
+regions[credit_second] = Credit second
+regions[credit_stretch] = Credit stretch
 regions_hidden[] = sidebar_first
