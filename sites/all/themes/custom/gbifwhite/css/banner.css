@@ -28,17 +28,6 @@ div#edit-facet {
   background-color: rgba(50, 50, 50, 0.5);
 }
 
-#secondary-menu {
-  position: absolute;
-  top: 70px;
-  z-index: 1000;
-  opacity: .4;
-}
-
-#secondary-menu li {
-  display: block;
-}
-
 .region-menu-inner {
   margin-top: 3px;
 }
@@ -60,14 +49,6 @@ div#edit-facet {
 
 #region-menu {
   height: 30px;
-}
-
-h1, h2, h3 {
-  font-family: DINOT-Medium;
-}
-
-h4, h5, h6 {
-  font-family: DINOT-Regular;
 }
 
 h1.site-name {
@@ -107,37 +88,6 @@ img#logo {
   position: relative;
   margin: 95px 10px 0 0;
   float: right;
-}
-
-#search-block-form div.container-inline {
-  width: 139px;
-  height: 33px;
-  float: right;
-  padding: 0px 12px 0px 28px;
-  background: url("../images/input_bkg.png") no-repeat scroll left 3px;
-}
-
-#search-block-form div.container-inline input#edit-search-block-form--2.form-text {
-  color: #333;
-  padding-left: 28px;
-  margin-top: 4px;
-  margin-left: -25px;
-  height: 26px;
-  width: 172px;
-  background: none;
-  border-radius: 11px;
-  border: none;
-}
-
-#search-block-form div.container-inline input#edit-search-block-form--2.form-text:focus {
-  border: 1px solid #ccc;
-  box-shadow: 0 0 5px rgba(72, 154, 59, 1);
-  -webkit-box-shadow: 0 0 5px rgba(72, 154, 59, 1); 
-  -moz-box-shadow: 0 0 5px rgba(72, 154, 59, 1);
-}
-
-#search-block-form input.form-submit {
-  display: none;
 }
 
 Header {
