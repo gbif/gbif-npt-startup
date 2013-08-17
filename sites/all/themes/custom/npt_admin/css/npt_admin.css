@@ -1,4 +1,16 @@
 /* Import Mixins and Variables */
+
+ul.admin-list li {
+  position: relative;
+  padding-left: 30px; /* LTR */
+  padding-top: 9px;
+  margin-left: 0; /* LTR */
+  margin-bottom: 10px;
+  background: url("../images/list-item.png") no-repeat 0 11px; /* LTR */
+  list-style-type: none;
+  list-style-image: none;
+}
+
 /* CG Credits in footer */
 #credit {
   float: right;
