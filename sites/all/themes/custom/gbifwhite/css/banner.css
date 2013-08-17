@@ -95,3 +95,18 @@ Header {
   height: 200px;
   background: url("../images/banner_1920x200.jpg") center;
 }
+
+#block-views-eol-images-banner-block {
+  position: relative;
+  float: right;
+  margin-top: -140px;
+  margin-right: -200px;
+}
+
+#block-views-eol-images-banner-block div.views-row {
+  display: inline-block;
+}
+
+#block-views-eol-images-banner-block img {
+  border: 1px solid white;
+}
