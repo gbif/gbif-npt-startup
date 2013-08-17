@@ -10,3 +10,10 @@
  * for your subtheme grows. Please read the README.txt in the /preprocess and /process subfolders
  * for more information on this topic.
  */
+
+function gbifwhite_preprocess_html(&$vars) {
+  if (theme_get_setting('toggle_banner')) {
+    drupal_add_css(drupal_get_path('theme', 'gbifwhite') . '/css/banner.css', array('group' => CSS_THEME));
+  }  
+}
+
