@@ -12,7 +12,7 @@ function npt_blocks_views_default_views() {
   
   // EOL Images for the banner.
   
-  $view = new view();
+  $view = new view;
   $view->name = 'eol_images_banner';
   $view->description = '';
   $view->tag = 'default';
@@ -24,7 +24,6 @@ function npt_blocks_views_default_views() {
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
-  $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
@@ -40,8 +39,10 @@ function npt_blocks_views_default_views() {
   $handler->display->display_options['empty']['area']['id'] = 'area';
   $handler->display->display_options['empty']['area']['table'] = 'views';
   $handler->display->display_options['empty']['area']['field'] = 'area';
+  $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'This block is designed to show cached images from EOL. This site retrieves EOL contents according to species information that has been imported. All cached images will come with IPR statements attached.';
   $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
+  $handler->display->display_options['empty']['area']['tokenize'] = 0;
   /* Field: Encyclopaedia of Life data: Encyclopaedia of life data ID */
   $handler->display->display_options['fields']['eid']['id'] = 'eid';
   $handler->display->display_options['fields']['eid']['table'] = 'eolapi';
@@ -55,9 +56,12 @@ function npt_blocks_views_default_views() {
   $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['table'] = 'field_data_eolapi_taxonomy';
   $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['field'] = 'eolapi_taxonomy_tid';
   $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['default_argument_skip_url'] = 0;
   $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['eolapi_taxonomy_tid']['not'] = 0;
   /* Filter criterion: Encyclopaedia of Life data: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'eolapi';
@@ -68,25 +72,9 @@ function npt_blocks_views_default_views() {
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block');
-  $handler->display->display_options['defaults']['css_class'] = FALSE;
-  $handler->display->display_options['css_class'] = 'banner-icons';
   $handler->display->display_options['block_description'] = 'EOL images for the banner.';
-  $translatables['eol_images_banner'] = array(
-    t('Master'),
-    t('more'),
-    t('Apply'),
-    t('Reset'),
-    t('Sort by'),
-    t('Asc'),
-    t('Desc'),
-    t('This block is designed to show cached images from EOL. This site retrieves EOL contents according to species information that has been imported. All cached images will come with IPR statements attached.'),
-    t('Encyclopaedia of life data ID'),
-    t('.'),
-    t(','),
-    t('All'),
-    t('Block'),
-    t('EOL images for the front page.'),
-  );
+
+  $views[$view->name] = $view;
   
   // EOL Images for the front page.
   
