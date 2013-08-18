@@ -12,8 +12,28 @@
  */
 
 function gbifwhite_preprocess_html(&$vars) {
-  if (theme_get_setting('toggle_banner')) {
+  // Bringing in styles for banner.
+  if (theme_get_setting('toggle_banner') == 1 ) {
     drupal_add_css(drupal_get_path('theme', 'gbifwhite') . '/css/banner.css', array('group' => CSS_THEME));
+  }
+  if (theme_get_setting('toggle_banner') == 1 ) {
+    db_update('block')
+      ->fields(array(
+        'status' => 1,
+        'region' => 'branding',
+      ))
+      ->condition('delta', 'eol_images_banner-block', '=')
+      ->condition('theme', 'gbifwhite', '=')
+      ->execute();
+  }
+  elseif (theme_get_setting('toggle_banner') == 0 ) {
+    db_update('block')
+      ->fields(array(
+        'status' => 0,
+        'region' => -1,
+      ))
+      ->condition('delta', 'eol_images_banner-block', '=')
+      ->condition('theme', 'gbifwhite', '=')
+      ->execute();
   }  
 }
-
