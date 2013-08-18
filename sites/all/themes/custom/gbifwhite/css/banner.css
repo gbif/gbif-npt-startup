@@ -96,17 +96,17 @@ Header {
   background: url("../images/banner_1920x200.jpg") center;
 }
 
-#block-views-eol-images-banner-block {
+#block-views-eol-images-front-block-banner {
   position: relative;
   float: right;
   margin-top: -140px;
   margin-right: -200px;
 }
 
-#block-views-eol-images-banner-block div.views-row {
+#block-views-eol-images-front-block-banner div.views-row {
   display: inline-block;
 }
 
-#block-views-eol-images-banner-block img {
+#block-views-eol-images-front-block-banner img {
   border: 1px solid white;
 }

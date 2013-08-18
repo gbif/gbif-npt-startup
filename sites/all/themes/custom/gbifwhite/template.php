@@ -22,7 +22,7 @@ function gbifwhite_preprocess_html(&$vars) {
         'status' => 1,
         'region' => 'branding',
       ))
-      ->condition('delta', 'eol_images_banner-block', '=')
+      ->condition('delta', 'eol_images_front-block_banner', '=')
       ->condition('theme', 'gbifwhite', '=')
       ->execute();
   }
@@ -32,7 +32,7 @@ function gbifwhite_preprocess_html(&$vars) {
         'status' => 0,
         'region' => -1,
       ))
-      ->condition('delta', 'eol_images_banner-block', '=')
+      ->condition('delta', 'eol_images_front-block_banner', '=')
       ->condition('theme', 'gbifwhite', '=')
       ->execute();
   }  
