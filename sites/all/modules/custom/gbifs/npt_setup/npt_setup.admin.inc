@@ -52,16 +52,16 @@ function npt_setup_settings($form, &$form_state) {
     '#title' => t('Node short name:'),
     '#required' => FALSE,
     '#description' => t('Some nodes have short names like "NLBIF", "TaiBIF". With this field provided, some menu items will use the short name.'),
-    '#default_value' => $gbif_participant_settings['node_shortname'],
+    '#default_value' => isset($gbif_participant_settings['node_shortname']) ? $gbif_participant_settings['node_shortname'] : '',
   );
 
-  $site_slogan = variable_get('site_slogan', $values['site_slogan']);
+  $site_slogan = variable_get('site_slogan');
   $form['node_info']['site_slogan'] = array(
     '#type' => 'textfield',
     '#title' => t('Site slogan:'),
     '#required' => FALSE,
     '#description' => t('Please provide a short text that you would like to show under the site name.'),
-    '#default_value' => $site_slogan,
+    '#default_value' => isset($site_slogan) ? $site_slogan : '',
   );
 
   // Get the centre coordinate of the country.
