@@ -10,13 +10,13 @@ define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 /**
 * Implements hook_install_tasks()
 */
-function npt_startup_install_tasks() {
+function npt_startup_install_tasks(&$install_state) {
 
   // Remove any status messages that might have been set. They are unneeded.
   drupal_get_messages('status', TRUE);
 
   $tasks = array(
-    'node_definition_form' => array(
+    'npt_startup_settings' => array(
       'display_name' => st('NPT Startup settings'),
       'type' => 'form',
     ),
@@ -118,18 +118,166 @@ function install_welcome_submit($form, &$form_state) {
   $install_state['parameters']['welcome'] = 'done';
   $install_state['parameters']['locale'] = 'en';
 }
-                       
-function node_definition_form() {
-  drupal_set_title(t('NPT Startup settings'));
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * Allows the profile to alter the site configuration form.
+ */
+function npt_startup_form_install_configure_form_alter(&$form, $form_state){
+// Pre-populate the site name with the server name.
+  $form['update_notifications']['update_status_module']['#default_value'] = array();
+}
+                       
+function npt_startup_settings($form, &$form_state, &$install_state) {
+  drupal_set_title(st('NPT Startup settings'));
+
+  // Prepare form.
+  $form = array();
+  $form['node_info'] = array(
+    '#type' => 'fieldset',
+    '#title' => st('Node information'),
+    '#description' => st('Please provide information to indicate the GBIF node with which this site associates.'),
+  );
+
+  // Providing a drop-down list of GBIF Participant Nodes.
+  $gbif_participant_settings = variable_get('gbif_participant_settings');
+  $participant_type_options = _npt_startup_participant_type_options();
+  if (isset($gbif_participant_settings)) {
+    $default_type = $gbif_participant_settings['participant_type'];
+  }
+  else {
+    $default_type = key($participant_type_options);
+  }
+  $selected = isset($form_state['values']['participant_type']) ? $form_state['values']['participant_type'] : $default_type;
+
+  $form['node_info']['participant_type'] = array(
+    '#type' => 'select',
+    '#title' => st('Participant type'),
+    '#options' => $participant_type_options,
+    '#default_value' => $selected,
+    '#ajax' => array(
+      'callback' => '_npt_startup_participant_dropdown_callback',
+      'wrapper' => 'participant-list-replace',
+    ),
+  );
+  $form['node_info']['node_uuid'] = array(
+    '#type' => 'select',
+    '#title' => st('GBIF') . ' ' . $participant_type_options[$selected],
+    '#prefix' => '<div id="participant-list-replace">',
+    '#suffix' => '</div>',
+    '#options' => _npt_startup_get_participant_list($selected),
+    '#default_value' => isset($gbif_participant_settings['node_uuid']) ? $gbif_participant_settings['node_uuid'] : '',
+    '#description' => st('The list is sorted by the membership status of GBIF Participant. If you cannot find your node on the list, it may be that you are not yet a GBIF member. In this case, please leave it unselected.'),
+    '#required' => FALSE,
+  );
+
+  $form['node_info']['node_shortname'] = array(
+    '#type' => 'textfield',
+    '#title' => st('Node short name:'),
+    '#required' => FALSE,
+    '#description' => st('Some nodes have short names like "NLBIF", "TaiBIF". With this field provided, some menu items will use the short name.'),
+    '#default_value' => isset($gbif_participant_settings['node_shortname']) ? $gbif_participant_settings['node_shortname'] : '',
+  );
+
+  $form['node_info']['site_slogan'] = array(
+    '#type' => 'textfield',
+    '#title' => st('Site slogan:'),
+    '#required' => FALSE,
+    '#description' => st('Please provide a short text that you would like to show under the site name.'),
+  );
+
+  // Get the centre coordinate of the country.
+  if ($centre_crd = variable_get('centre_crd')) {
+    $lat = $centre_crd['lat'];
+    $lng = $centre_crd['lng'];
+  } else {
+    // Use Geonames.org API
+    $countries = country_get_list();
+    $site_default_country_code = variable_get('site_default_country');
+    $site_default_country_name = $countries[$site_default_country_code];
+
+    $url = "http://api.geonames.org/searchJSON?country=" . $site_default_country_code . "&name=" . $site_default_country_name . "&maxRows=1&username=nptstartup";
+
+    $coordinate_json = json_decode(file_get_contents($url));
+
+    $lat = $coordinate_json->geonames[0]->lat;
+    $lng = $coordinate_json->geonames[0]->lng;
+  }
+
+  $form['node_location'] = array(
+    '#type' => 'fieldset',
+    '#title' => st('Node location'),
+    '#description' => st('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.'),
+  );
+  $form['node_location']['node_coordinate_lat'] = array(
+    '#type' => 'textfield',
+    '#title' => st('Latitude:'),
+    '#required' => FALSE,
+    '#description' => st('Please provide the latitude.'),
+    '#default_value' => (isset($lat)) ? $lat : 0,
+  );
+  $form['node_location']['node_coordinate_lng'] = array(
+    '#type' => 'textfield',
+    '#title' => st('Longitude:'),
+    '#required' => FALSE,
+    '#description' => st('Please provide the longitude.'),
+    '#default_value' => (isset($lng)) ? $lng : 0,
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => st('Save and continue'),
+    '#weight' => 15,
+  );
+  return $form;
+}
+
+function npt_startup_settings_validate($form, &$form_state) {
+}
+
+function npt_startup_settings_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  
+  $gbif_participant_settings = array();
+  
+  if (isset($values['participant_type'])) $gbif_participant_settings['participant_type'] = $values['participant_type'];
+  if (isset($values['node_uuid'])) $gbif_participant_settings['node_uuid'] = $values['node_uuid'];
+  if (isset($values['node_shortname'])) $gbif_participant_settings['node_shortname'] = $values['node_shortname'];
+
+  variable_sest('gbif_participant_settings', $gbif_participant_settings);
+
+  // Setting site slogan
+  if (isset($values['site_slogan'])) variable_sest('site_slogan', $values['site_slogan']);
+
+  // Setting centre coordinates
+  $centre_crd = array(
+      'lat' => (isset($values['node_coordinate_lat'])) ? $values['node_coordinate_lat'] : 0,
+      'lng' => (isset($values['node_coordinate_lng'])) ? $values['node_coordinate_lng'] : 0,
+  );
+  variable_sest('centre_crd', $centre_crd);
+  
+  module_enable(array('npt_feeds'), TRUE);
+}
+
+function _npt_startup_participant_type_options() {
+  return array(
+    'VOTING' => st('Voting Participants'),
+    'ASSOCIATE' => st('Associate Country Participants'),
+    'OTHER' => st('Other Associate Participants'),
+  );
+}
+
+function _npt_startup_participant_dropdown_callback($form, $form_state) {
+  return $form['node_info']['node_uuid'];
+}
+
+function _npt_startup_get_participant_list($key = '') {
   // Get the list of GBIF Participant Nodes from GBIF API.
   $json_url = GBIF_REGISTRY_API_NODE . "?limit=200"; // To get all nodes at once.
   $gbif_registry_node_api_response = json_decode(file_get_contents($json_url));
   $gbif_registry_node_api_results = $gbif_registry_node_api_response->results;
   unset($gbif_registry_node_api_response);
-  $node_list = array();
-  $node_country_voting = array();
-  $node_country_associate = array();
+  $node_voting = array();
+  $node_associate = array();
   $node_other = array();
 
   // Only to keep the title, type and UUID
@@ -138,11 +286,11 @@ function node_definition_form() {
     switch ($result->type) {
       case 'COUNTRY':
         if ($result->participationStatus == 'VOTING') {
-          $node_country_voting[$result->key] = $result->title;
-          asort($node_country_voting);
+          $node_voting[$result->key] = $result->title;
+          asort($node_voting);
         } elseif ($result->participationStatus == 'ASSOCIATE') {
-          $node_country_associate[$result->key] = $result->title;
-          asort($node_country_associate);
+          $node_associate[$result->key] = $result->title;
+          asort($node_associate);
         }
         break;
       case 'OTHER':
@@ -154,117 +302,13 @@ function node_definition_form() {
     }
 
   }
-  
-  // Assemble the option list
-  $node_list['country-voting'] = '= ' . t('VOTING COUNTRY PARTICIPANT') . ' =';
-  $node_list = array_merge($node_list, $node_country_voting);
-  $node_list['country-associate'] = '= ' . t('ASSOCIATE COUNTRY PARTICIPANT') . ' =';
-  $node_list = array_merge($node_list, $node_country_associate);
-  $node_list['other-associate'] = '= ' . t('OTHER ASSOCIATE PARTICIPANT') . ' =';
-  $node_list = array_merge($node_list, $node_other);
-  unset($node_country_voting, $node_country_associate, $node_other);
-  
-  // Get the centre coordinate of the country by using Geonames API.
-  $countries = country_get_list();
-  $site_default_country_code = variable_get('site_default_country');
-  $site_default_country_name = $countries[$site_default_country_code];
 
-  $url = "http://api.geonames.org/searchJSON?country=" . $site_default_country_code . "&name=" . $site_default_country_name . "&maxRows=1&username=nptstartup";
-
-  $coordinate_json = json_decode(file_get_contents($url));
-
-  $lat = $coordinate_json->geonames[0]->lat;
-  $lng = $coordinate_json->geonames[0]->lng;
-
-  // Prepare form.
-  $form = array();
-  $form['node_info'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Node information'),
-    '#description' => t('Please provide information to indicate the GBIF node with which this site will associate. The information can be changed later in the system configuration.'),
-  );
-  // Providing a drop-down list of GBIF Participant Nodes.
-  $form['node_info']['node_uuid'] = array(
-    '#type' => 'select',
-    '#title' => t('GBIF Participant:'),
-    '#required' => FALSE,
-    '#options' => $node_list,
-    '#description' => t('The list is sorted by the membership status of GBIF Participant. If you cannot find your node on the list, it may be that you are not yet a GBIF member. In this case, please leave it unselected.'),
-  );
-  $form['node_info']['node_shortname'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Node short name:'),
-    '#required' => FALSE,
-    '#description' => t('Some nodes have short names like "NLBIF", "TaiBIF". With this field provided, some menu items will use the short name.'),
-  );
-  $form['node_info']['site_slogan'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Site slogan:'),
-    '#required' => FALSE,
-    '#description' => t('Please provide a short text that you would like to show under the site name.'),
-  );
-  $form['node_location'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Node location'),
-    '#description' => t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.'),
-  );
-  $form['node_location']['node_coordinate_lat'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Latitude:'),
-    '#required' => FALSE,
-    '#description' => t('Please provide the latitude.'),
-    '#default_value' => (isset($lat)) ? $lat : 0,
-  );
-  $form['node_location']['node_coordinate_lng'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Longitude:'),
-    '#required' => FALSE,
-    '#description' => t('Please provide the longitude.'),
-    '#default_value' => (isset($lng)) ? $lng : 0,
-  );
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save and continue'),
-  );
-  return $form;
-}
-
-function node_definition_form_validate($form, &$form_state) {
-}
-
-function node_definition_form_submit($form, &$form_state) {
-  $values = $form_state['values'];
-  
-  // Assigning this site to a GBIF Participant
-  if ($values['node_uuid'] == 'country-voting' || $values['node_uuid'] == 'country-associate' || $values['node_uuid'] == 'other-associate' ) {
-    // If no node is selected, then use 'none' to indicate.
-    variable_set('gbif_participant_node_uuid', 'none');
-  } else {
-    variable_set('gbif_participant_node_uuid', $values['node_uuid']);
+  switch ($key) {
+    case 'VOTING':
+      return $node_voting;
+    case 'ASSOCIATE':
+      return $node_associate;
+    case 'OTHER':
+      return $node_other;
   }
-
-  // Registering short name
-  variable_set('gbif_participant_shortname', $values['node_shortname']);
-
-  // Setting site slogan
-  if (isset($values['site_slogan'])) variable_set('site_slogan', $values['site_slogan']);
-
-  // Setting centre coordinates
-  $centre_crd = array(
-      'lat' => (isset($values['node_coordinate_lat'])) ? $values['node_coordinate_lat'] : 0,
-      'lng' => (isset($values['node_coordinate_lng'])) ? $values['node_coordinate_lng'] : 0,
-  );
-  variable_set('centre_crd', $centre_crd);  
-  
-  module_enable(array('npt_feeds'), TRUE);
-}
-
-/**
-* Implements hook_form_FORM_ID_alter().
-*
-* Allows the profile to alter the site configuration form.
-*/
-function npt_startup_form_install_configure_form_alter(&$form, $form_state){
-// Pre-populate the site name with the server name.
-  $form['update_notifications']['update_status_module']['#default_value'] = array();
 }
