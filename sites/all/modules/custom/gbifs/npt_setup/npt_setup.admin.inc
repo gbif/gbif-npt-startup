@@ -18,7 +18,13 @@ function npt_setup_settings($form, &$form_state) {
   // Providing a drop-down list of GBIF Participant Nodes.
   $gbif_participant_settings = variable_get('gbif_participant_settings');
   $participant_type_options = _npt_setup_participant_type_options();
-  $selected = isset($form_state['values']['participant_type']) ? $form_state['values']['participant_type'] : $gbif_participant_settings['participant_type'];
+  if (isset($gbif_participant_settings)) {
+    $default_type = $gbif_participant_settings['participant_type'];
+  }
+  else {
+    $default_type = key($participant_type_options);
+  }
+  $selected = isset($form_state['values']['participant_type']) ? $form_state['values']['participant_type'] : $default_type;
 
   $form['node_info']['participant_type'] = array(
     '#type' => 'select',
