@@ -17,6 +17,7 @@ dependencies[] = translation
 dependencies[] = scratchpads_tweaks
 
 ; Contributed modules
+dependencies[] = chosen
 dependencies[] = delta
 dependencies[] = delta_ui
 dependencies[] = admin_menu

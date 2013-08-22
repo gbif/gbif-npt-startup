@@ -15,6 +15,7 @@ jQuery(document).ready(function() {
         text: node
       }));
     });
+    nodeSelect.trigger("chosen:updated");
   });
 
 });
