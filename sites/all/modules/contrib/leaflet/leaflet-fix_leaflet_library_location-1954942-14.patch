@@ -1,0 +1,105 @@
+From 267d3af08ea49790533bc6419ce15dd3661346fd Mon Sep 17 00:00:00 2001
+From: Mac_Weber <Mac_Weber@789986.no-reply.drupal.org>
+Date: Sat, 13 Jul 2013 16:28:46 -0300
+Subject: [PATCH] Issue #1954942 by Mac_Weber, LBen: fix leaflet library
+ location.
+
+---
+ README.txt           |   12 ++++++++----
+ leaflet.install      |    2 +-
+ leaflet.make.example |    6 ++----
+ leaflet.module       |    8 ++++----
+ 4 files changed, 15 insertions(+), 13 deletions(-)
+
+diff --git a/README.txt b/README.txt
+index 3e424b1..15396eb 100644
+--- a/README.txt
++++ b/README.txt
+@@ -1,9 +1,11 @@
+ This module provides integration with Leaflet map scripting library,
+ http://leaflet.cloudmade.com.
+ 
+-To use, you must download the leaflet library from
+-http://leaflet.cloudmade.com/download.html or Github,
+-http://github.com/CloudMade/Leaflet.
++To use, you must download the leaflet library from:
++http://leaflet.cloudmade.com/download.html
++
++Alternativelly, you can build the library from source. If so, follow the
++instructions at: http://leafletjs.com/download.html#leaflet-source-code
+ 
+ In its current state, maps can be rendered via the included field formatter for
+ Geofield or by using the API directly.
+@@ -15,7 +17,9 @@ Installation
+ 1. Normal Drupal module installation
+ 
+ 2. Download the Leaflet library from http://leafletjs.com/. Leaflet 0.5 or higher
+-   is recommended
++   is recommended. Extract it to your drupal root './sites/all/libraries/leaflet'.
++   The file 'leaflet.js' must be found at: './sites/all/libraries/leaflet/leaflet.js'.
++   All other files and folder(s) that come with the library are also needed there.
+ 
+ 3. Enable leaflet_views for using Views and Leaflet (see below), or use the display formatters
+    for fields display.
+diff --git a/leaflet.install b/leaflet.install
+index e97327e..40ba270 100644
+--- a/leaflet.install
++++ b/leaflet.install
+@@ -12,7 +12,7 @@ function leaflet_requirements($phase) {
+   $requirements = array();
+ 
+   // Ensure js library is available.
+-  if ($phase == 'runtime' && !file_exists(libraries_get_path('leaflet') . '/dist/leaflet.js')) {
++  if ($phase == 'runtime' && !file_exists(libraries_get_path('leaflet') . '/leaflet.js')) {
+     $requirements['leaflet'] = array(
+       'title' => t('Leaflet library not found'),
+       'value' => t('The !leaflet javascript library was not found. Please !download it into the libraries folder. Also ensure that the library is named leaflet with a lower case "l".',
+diff --git a/leaflet.make.example b/leaflet.make.example
+index 324155b..099da5d 100644
+--- a/leaflet.make.example
++++ b/leaflet.make.example
+@@ -4,7 +4,5 @@ core = 7.x
+ 
+ projects[libraries] = 1
+ 
+-libraries[leaflet][download][type] = "get"
+-libraries[leaflet][download][url] = "https://github.com/CloudMade/Leaflet/zipball/v0.5"
+-libraries[leaflet][directory_name] = "leaflet"
+-libraries[leaflet][destination] = "libraries"
++libraries[leaflet][download][type] = "file"
++libraries[leaflet][download][url] = "http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.6.2.zip"
+diff --git a/leaflet.module b/leaflet.module
+index 333ad0e..0d6b7f0 100644
+--- a/leaflet.module
++++ b/leaflet.module
+@@ -24,23 +24,23 @@ function leaflet_library() {
+     'js' => array(
+       array(
+         'type' => 'inline',
+-        'data' => 'L_ROOT_URL = "' . base_path() . libraries_get_path('leaflet') . '/dist/";',
++        'data' => 'L_ROOT_URL = "' . base_path() . libraries_get_path('leaflet') . '/";',
+         'group' => JS_LIBRARY,
+         'preprocess' => FALSE
+       ),
+       array(
+         'type' => 'file',
+-        'data' => libraries_get_path('leaflet') . '/dist/leaflet.js',
++        'data' => libraries_get_path('leaflet') . '/leaflet.js',
+         'group' => JS_LIBRARY,
+         'preprocess' => FALSE
+       ),
+     ),
+     'css' => array(
+-      libraries_get_path('leaflet') . '/dist/leaflet.css' => array(
++      libraries_get_path('leaflet') . '/leaflet.css' => array(
+         'type' => 'file',
+         'media' => 'screen',
+       ),
+-      libraries_get_path('leaflet') . '/dist/leaflet.ie.css' => array(
++      libraries_get_path('leaflet') . '/leaflet.ie.css' => array(
+         'browsers' => array(
+           'IE' => 'lte IE 8',
+           '!IE' => FALSE,
+-- 
+1.7.10.4
+
