@@ -12,12 +12,13 @@ define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
  * Implements hoot_install().
  */
 function npt_startup_install() {
-  npt_startup_install_chosen();
+  //npt_startup_install_chosen();
 }
 
 function npt_startup_install_chosen() {
   variable_set('chosen_minimum_width', 250);
-  variable_set('chosen_jquery_selector', 'select:visible, .filefield-source-attach select, .field-widget-addressfield-standard select');
+  variable_set('chosen_jquery_selector', 'select:visible');
+  variable_set('chosen_search_contains', TRUE);
 }
 
 /**

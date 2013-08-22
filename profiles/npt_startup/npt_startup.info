@@ -7,6 +7,4 @@ exclusive = 1
 
 files[] = npt_startup.profile
 
-;dependencies[] = npt_startup_tweak
-dependencies[] = locale
-dependencies[] = chosen
+dependencies[] = npt_startup_tweak
