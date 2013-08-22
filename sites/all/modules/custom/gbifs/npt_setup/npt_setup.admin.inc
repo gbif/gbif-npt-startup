@@ -76,21 +76,34 @@ function npt_setup_settings($form, &$form_state) {
   $form['node_location'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node location'),
-    '#description' => t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.'),
+  );
+  
+  $countries = country_get_list();
+  // Determine default country
+  $default_country = isset($gbif_participant_settings['node_country']) ? $gbif_participant_settings['node_country'] : variable_get('site_default_country');
+  
+  $form['node_location']['node_country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#description' => t('By default NPT will determine your country by, first, the type of GBIF membership, and then second, where the server location is (set in the previous page). Please choose if neither of the above applys.'),
+    '#options' => $countries,
+    '#default_value' => $default_country,
+    '#required' => FALSE,
   );
   $form['node_location']['node_coordinate_lat'] = array(
     '#type' => 'textfield',
     '#title' => t('Latitude:'),
-    '#required' => FALSE,
     '#description' => t('Please provide the latitude.'),
+    '#prefix' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
     '#default_value' => (isset($lat)) ? $lat : 0,
+    '#required' => FALSE,
   );
   $form['node_location']['node_coordinate_lng'] = array(
     '#type' => 'textfield',
     '#title' => t('Longitude:'),
-    '#required' => FALSE,
     '#description' => t('Please provide the longitude.'),
     '#default_value' => (isset($lng)) ? $lng : 0,
+    '#required' => FALSE,
   );
   $form['#submit'] = array('npt_setup_settings_submit');
 
@@ -105,8 +118,10 @@ function npt_setup_settings_submit($form, &$form_state) {
   if (isset($values['participant_type'])) $gbif_participant_settings['participant_type'] = $values['participant_type'];
   if (isset($values['node_uuid'])) $gbif_participant_settings['node_uuid'] = $values['node_uuid'];
   if (isset($values['node_shortname'])) $gbif_participant_settings['node_shortname'] = $values['node_shortname'];
+  if (isset($values['node_country'])) $gbif_participant_settings['node_country'] = $values['node_country'];
 
   variable_set('gbif_participant_settings', $gbif_participant_settings);
+  
 
   // Setting centre coordinates
   $centre_crd = array(
