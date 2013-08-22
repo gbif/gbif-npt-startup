@@ -9,6 +9,18 @@ define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 
 
 /**
+ * Implements hoot_install().
+ */
+function npt_startup_install() {
+  npt_startup_install_chosen();
+}
+
+function npt_startup_install_chosen() {
+  variable_set('chosen_minimum_width', 250);
+  variable_set('chosen_jquery_selector', 'select:visible, .filefield-source-attach select, .field-widget-addressfield-standard select');
+}
+
+/**
  * Implements hook_install_tasks()
  */
 function npt_startup_install_tasks(&$install_state) {
@@ -125,10 +137,25 @@ function install_welcome_submit($form, &$form_state) {
  * Allows the profile to alter the site configuration form.
  */
 function npt_startup_form_install_configure_form_alter(&$form, $form_state){
-// Pre-populate the site name with the server name.
-  $form['update_notifications']['update_status_module']['#default_value'] = array();
+
+  $form['site_information']['site_slogan'] = array(
+    '#type' => 'textfield',
+    '#title' => st('Site slogan:'),
+    '#description' => st('Please provide a short text that you would like to show under the site name.'),
+    '#required' => FALSE,
+  );
+  $form['#submit'][] = 'npt_startup_form_install_configure_form_submit';
 }
-                       
+
+function npt_startup_form_install_configure_form_submit(&$form, $form_state) {
+  $values = $form_state['values'];
+  
+  // Setting site slogan
+  if (isset($values['site_slogan'])) variable_set('site_slogan', $values['site_slogan']);
+  
+}
+
+
 function npt_startup_settings($form, &$form_state, &$install_state) {
   drupal_set_title(st('NPT Startup settings'));
   drupal_add_js(drupal_get_path('profile', 'npt_startup') . '/js/listParticipants.js');
@@ -164,13 +191,6 @@ function npt_startup_settings($form, &$form_state, &$install_state) {
     '#title' => st('Node short name:'),
     '#required' => FALSE,
     '#description' => st('Some nodes have short names like "NLBIF", "TaiBIF". With this field provided, some menu items will use the short name.'),
-  );
-
-  $form['node_info']['site_slogan'] = array(
-    '#type' => 'textfield',
-    '#title' => st('Site slogan:'),
-    '#required' => FALSE,
-    '#description' => st('Please provide a short text that you would like to show under the site name.'),
   );
 
   // Get the centre coordinate of the country.
@@ -231,9 +251,6 @@ function npt_startup_settings_submit($form, &$form_state) {
   if (isset($values['node_shortname'])) $gbif_participant_settings['node_shortname'] = $values['node_shortname'];
 
   variable_set('gbif_participant_settings', $gbif_participant_settings);
-
-  // Setting site slogan
-  if (isset($values['site_slogan'])) variable_set('site_slogan', $values['site_slogan']);
 
   // Setting centre coordinates
   $centre_crd = array(
