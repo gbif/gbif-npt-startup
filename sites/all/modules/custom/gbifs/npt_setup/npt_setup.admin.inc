@@ -55,15 +55,6 @@ function npt_setup_settings($form, &$form_state) {
     '#default_value' => isset($gbif_participant_settings['node_shortname']) ? $gbif_participant_settings['node_shortname'] : '',
   );
 
-  $site_slogan = variable_get('site_slogan');
-  $form['node_info']['site_slogan'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Site slogan:'),
-    '#required' => FALSE,
-    '#description' => t('Please provide a short text that you would like to show under the site name.'),
-    '#default_value' => isset($site_slogan) ? $site_slogan : '',
-  );
-
   // Get the centre coordinate of the country.
   if ($centre_crd = variable_get('centre_crd')) {
     $lat = $centre_crd['lat'];
@@ -116,9 +107,6 @@ function npt_setup_settings_submit($form, &$form_state) {
   if (isset($values['node_shortname'])) $gbif_participant_settings['node_shortname'] = $values['node_shortname'];
 
   variable_set('gbif_participant_settings', $gbif_participant_settings);
-
-  // Setting site slogan
-  if (isset($values['site_slogan'])) variable_set('site_slogan', $values['site_slogan']);
 
   // Setting centre coordinates
   $centre_crd = array(
