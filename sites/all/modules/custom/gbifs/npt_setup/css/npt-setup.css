@@ -45,3 +45,8 @@
 #edit-front-page-welcome-message-format div.fieldset-content { padding: 5px; }
 #edit-about-us-format div.fieldset-content { padding: 5px; }
 #edit-synopsis-text-format div.fieldset-content { padding: 5px; }
+
+#node_map {
+  width: 100%;
+  height: 300px;
+}

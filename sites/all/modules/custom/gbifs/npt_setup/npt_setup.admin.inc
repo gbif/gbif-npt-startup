@@ -7,6 +7,9 @@
 
 function npt_setup_settings($form, &$form_state) {
 
+  openlayers_include();
+  drupal_add_library('npt_setup', 'node_coordinate', FALSE);
+
   // Prepare form.
   $form = array();
   $form['node_info'] = array(
@@ -90,11 +93,15 @@ function npt_setup_settings($form, &$form_state) {
     '#default_value' => $default_country,
     '#required' => FALSE,
   );
+  $form['node_location']['node_coordinate'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
+    '#suffix' => '<div id="node_map"></div>',
+  );
   $form['node_location']['node_coordinate_lat'] = array(
     '#type' => 'textfield',
     '#title' => t('Latitude:'),
     '#description' => t('Please provide the latitude.'),
-    '#prefix' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
     '#default_value' => (isset($lat)) ? $lat : 0,
     '#required' => FALSE,
   );

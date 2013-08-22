@@ -110,6 +110,20 @@ function npt_setup_menu() {
 }
 
 /**
+ * Implements hook_libraries_info().
+ */
+function npt_setup_library() {
+  $libraries['node_coordinate'] = array(
+    'title' => 'Node Coordinate',
+    'js' => array(
+      drupal_get_path('module', 'npt_setup') . '/js/node_coordinate.js' => array(),
+    ),
+  );
+  return $libraries;
+}
+
+
+/**
  * Implements hook_module_implements_alter().
  */
 function npt_setup_module_implements_alter(&$implementations, $hook) {
