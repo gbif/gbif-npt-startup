@@ -158,7 +158,11 @@ function npt_startup_form_install_configure_form_submit(&$form, $form_state) {
 
 function npt_startup_settings($form, &$form_state, &$install_state) {
   drupal_set_title(st('NPT Startup settings'));
-  drupal_add_js(drupal_get_path('profile', 'npt_startup') . '/js/listParticipants.js');
+
+  drupal_add_js(libraries_get_path('leaflet') . '/leaflet.js');
+  drupal_add_css(libraries_get_path('leaflet') . '/leaflet.css');
+  drupal_add_js(drupal_get_path('profile', 'npt_startup') . '/js/nodeSettings.js');
+  drupal_add_css(drupal_get_path('module', 'npt_setup') . '/css/node_coordinate.css');
 
   // Prepare form.
   $form = array();
@@ -209,12 +213,42 @@ function npt_startup_settings($form, &$form_state, &$install_state) {
 
     $lat = $coordinate_json->geonames[0]->lat;
     $lng = $coordinate_json->geonames[0]->lng;
+
+    drupal_add_js(array(
+      'npt_startup' => array(
+        'lat' => $lat,
+        'lng' => $lng,
+      ),
+    ), 'setting');
+    
   }
 
   $form['node_location'] = array(
     '#type' => 'fieldset',
     '#title' => st('Node location'),
-    '#description' => st('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.'),
+  );
+
+  $countries = country_get_list();
+  // Determine default country
+  if ($gbif_participant_settings['participant_type'] == 'VOTING' || $gbif_participant_settings['participant_type'] == 'ASSOCIATE') {
+    $node_info = _npt_setup_get_participant_info($gbif_participant_settings['node_uuid']);
+    $default_country = _npt_setup_get_country_code_by_enum($node_info->country);
+  } else {
+    $default_country = isset($gbif_participant_settings['node_country']) ? $gbif_participant_settings['node_country'] : variable_get('site_default_country');
+  }
+  
+  $form['node_location']['node_country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#description' => t('By default NPT will determine your country by, first, the type of GBIF membership, and then second, where the server location is (set in the previous page). Please choose if neither of the above applys.'),
+    '#options' => $countries,
+    '#default_value' => $default_country,
+    '#required' => FALSE,
+  );
+  $form['node_location']['node_coordinate'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
+    '#suffix' => '<div id="node_map"></div>',
   );
   $form['node_location']['node_coordinate_lat'] = array(
     '#type' => 'textfield',
