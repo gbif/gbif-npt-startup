@@ -110,13 +110,39 @@ function npt_setup_menu() {
 }
 
 /**
- * Implements hook_libraries_info().
+ * Implements hook_library().
  */
 function npt_setup_library() {
   $libraries['node_coordinate'] = array(
     'title' => 'Node Coordinate',
     'js' => array(
-      drupal_get_path('module', 'npt_setup') . '/js/node_coordinate.js' => array(),
+      drupal_get_path('module', 'npt_setup') . '/js/node_coordinate.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'npt_setup') . '/css/node_coordinate.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+    ),
+  );
+  $libraries['leaflet'] = array(
+    'title' => 'leaflet',
+    'js' => array(
+      libraries_get_path('leaflet') . '/leaflet.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+    'css' => array(
+      libraries_get_path('leaflet') . '/leaflet.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
     ),
   );
   return $libraries;

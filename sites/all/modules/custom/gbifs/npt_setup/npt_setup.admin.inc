@@ -7,6 +7,9 @@
 
 function npt_setup_settings($form, &$form_state) {
 
+  drupal_add_library('npt_setup', 'leaflet', FALSE);
+  drupal_add_library('npt_setup', 'node_coordinate', FALSE);
+
   // Prepare form.
   $form = array();
   $form['node_info'] = array(
@@ -79,39 +82,35 @@ function npt_setup_settings($form, &$form_state) {
   );
 
   // Get the centre coordinate of the country.
-  if ($centre_crd = variable_get('centre_crd')) {
-    $lat = $centre_crd['lat'];
-    $lng = $centre_crd['lng'];
-  } else {
-    // Use Geonames.org API
-    $countries = country_get_list();
-    $site_default_country_code = variable_get('site_default_country');
-    $site_default_country_name = $countries[$site_default_country_code];
-
-    $url = "http://api.geonames.org/searchJSON?country=" . $site_default_country_code . "&name=" . $site_default_country_name . "&maxRows=1&username=nptstartup";
-
-    $coordinate_json = json_decode(file_get_contents($url));
-
-    $lat = $coordinate_json->geonames[0]->lat;
-    $lng = $coordinate_json->geonames[0]->lng;
+  $centre_crd = variable_get("centre_crd", NULL);
+  /*
+  if (isset($default_country)) {
+    $enum = _npt_setup_get_enum_by_country_code($default_country);
+    $centre_crd = _npt_setup_get_country_coordinate($default_country, $enum);
+    _npt_setup_set_map_centre($centre_crd['lat'], $centre_crd['lng']);
+  }
+  */
+  if ($centre_crd) {
+    _npt_setup_set_map_centre($centre_crd['lat'], $centre_crd['lng']);
   }
 
   $form['node_location']['node_coordinate'] = array(
     '#type' => 'item',
     '#markup' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
+    '#suffix' => '<div id="node_map"></div>',
   );
   $form['node_location']['node_coordinate_lat'] = array(
     '#type' => 'textfield',
     '#title' => t('Latitude:'),
     '#description' => t('Please provide the latitude.'),
-    '#default_value' => (isset($lat)) ? $lat : 0,
+    '#default_value' => (isset($centre_crd['lat'])) ? $centre_crd['lat'] : 0,
     '#required' => FALSE,
   );
   $form['node_location']['node_coordinate_lng'] = array(
     '#type' => 'textfield',
     '#title' => t('Longitude:'),
     '#description' => t('Please provide the longitude.'),
-    '#default_value' => (isset($lng)) ? $lng : 0,
+    '#default_value' => (isset($centre_crd['lng'])) ? $centre_crd['lng'] : 0,
     '#required' => FALSE,
   );
   $form['#submit'] = array('npt_setup_settings_submit');
@@ -165,6 +164,37 @@ function _npt_setup_get_country_code_by_enum($enum) {
     if ($country->enumName == $enum) $iso2 = $country->iso2;
   }
   return $iso2;
+}
+
+function _npt_setup_get_enum_by_country_code($iso) {
+  $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
+  $enum = '';
+  foreach ($countries as $country) {
+    if ($country->iso2 == $iso) $enum = $country->enumName;
+  }
+  return $enum;
+}
+
+function _npt_setup_get_country_coordinate($iso, $enum) {
+  $url = "http://api.geonames.org/searchJSON?country=" . $iso . "&name=" . $enum . "&maxRows=1&username=nptstartup";
+  $coordinate_json = json_decode(file_get_contents($url));
+  if ($coordinate_json->geonames) {
+    $lat = $coordinate_json->geonames[0]->lat;
+    $lng = $coordinate_json->geonames[0]->lng;
+    return $centre_crd = array(
+      'lat' => $lat,
+      'lng' => $lng,
+    );
+  }
+}
+
+function _npt_setup_set_map_centre($lat, $lng) {
+  drupal_add_js(array(
+    'npt_setup' => array(
+      'lat' => $lat,
+      'lng' => $lng,
+    ),
+  ), 'setting');
 }
 
 function _npt_setup_get_participant_list($key = '') {
