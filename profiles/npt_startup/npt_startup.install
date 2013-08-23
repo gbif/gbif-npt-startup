@@ -310,6 +310,7 @@ function _npt_startup_get_participant_list() {
   foreach ($node_types as $node) {
     $$node = array();
   }
+  $iso2 = array();
 
   // Get the list of GBIF Participant Nodes from GBIF API.
   $json_url = GBIF_REGISTRY_API_NODE . "?limit=200"; // To get all nodes at once.
@@ -329,6 +330,7 @@ function _npt_startup_get_participant_list() {
           $associate[$result->key] = $result->title;
           asort($associate);
         }
+        $iso2[$result->key] = $result->country;
         break;
       case 'OTHER':
         if ($result->participationStatus <> 'FORMER') {
@@ -344,12 +346,23 @@ function _npt_startup_get_participant_list() {
   foreach ($node_types as $node) {
     $$node = json_decode(json_encode($$node));
   }
-
+  
+  // Convert enumName into ISO2. To be deleted when API updated.
+  $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
+  foreach ($iso2 as $uuid => $enum) {
+    foreach ($countries as $country) {
+      if ($country->enumName == $enum) {
+        $iso2[$uuid] = $country->iso2;
+      }
+    }
+  }
+  
   drupal_add_js(array(
     'npt_startup' => array(
       'VOTING' => $voting,
       'ASSOCIATE' => $associate,
       'OTHER' => $other,
+      'ISO2' => $iso2,
     ),
   ), 'setting');
 

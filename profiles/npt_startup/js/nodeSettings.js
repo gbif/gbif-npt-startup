@@ -1,3 +1,7 @@
+/**
+  * @desc Dependent dropdown for NPT Startup settings
+  *
+*/
 (function ($) {
 
   Drupal.behaviors.npt_starup = {
@@ -11,7 +15,8 @@
           var list = Drupal.settings.npt_startup[nodeType];
           var typeLabel = $("#edit-participant-type option:selected").text();
           var nodeSelect = $('#edit-node-uuid');
-    
+          
+          // Update the Participant list according to the chosen type.
           $("label[for=edit-node-uuid]").text("GBIF " + typeLabel);
           nodeSelect.empty();
           $.each(list, function(uuid, node) {
@@ -21,6 +26,15 @@
             }));
           });
           nodeSelect.trigger("chosen:updated");
+          nodeSelect.trigger('change');
+          
+        });
+        
+        $("#edit-node-uuid").change(function() {
+          var iso2 = Drupal.settings.npt_startup.ISO2;
+          var currentUUID = $("#edit-node-uuid").val();
+          var currentISO = iso2[currentUUID];
+          $("#edit-node-country").val(currentISO).trigger("chosen:updated");
         });
 
         var lat = Drupal.settings.npt_startup.lat;
