@@ -3,6 +3,7 @@
  * @file
  * Providing administrative functions to update the necessary Node information.
  * @todo Determine the country according to the node UUID.
+ * @todo Decide a way to implement dependent mapping centering by default country.
  */
 
 function npt_setup_settings($form, &$form_state) {
