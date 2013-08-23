@@ -55,6 +55,29 @@ function npt_setup_settings($form, &$form_state) {
     '#default_value' => isset($gbif_participant_settings['node_shortname']) ? $gbif_participant_settings['node_shortname'] : '',
   );
 
+  $form['node_location'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Node location'),
+  );
+  
+  $countries = country_get_list();
+  // Determine default country
+  if ($gbif_participant_settings['participant_type'] == 'VOTING' || $gbif_participant_settings['participant_type'] == 'ASSOCIATE') {
+    $node_info = _npt_setup_get_participant_info($gbif_participant_settings['node_uuid']);
+    $default_country = _npt_setup_get_country_code_by_enum($node_info->country);
+  } else {
+    $default_country = isset($gbif_participant_settings['node_country']) ? $gbif_participant_settings['node_country'] : variable_get('site_default_country');
+  }
+  
+  $form['node_location']['node_country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#description' => t('By default NPT will determine your country by, first, the type of GBIF membership, and then second, where the server location is (set in the previous page). Please choose if neither of the above applys.'),
+    '#options' => $countries,
+    '#default_value' => $default_country,
+    '#required' => FALSE,
+  );
+
   // Get the centre coordinate of the country.
   if ($centre_crd = variable_get('centre_crd')) {
     $lat = $centre_crd['lat'];
@@ -73,23 +96,6 @@ function npt_setup_settings($form, &$form_state) {
     $lng = $coordinate_json->geonames[0]->lng;
   }
 
-  $form['node_location'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Node location'),
-  );
-  
-  $countries = country_get_list();
-  // Determine default country
-  $default_country = isset($gbif_participant_settings['node_country']) ? $gbif_participant_settings['node_country'] : variable_get('site_default_country');
-  
-  $form['node_location']['node_country'] = array(
-    '#type' => 'select',
-    '#title' => t('Country'),
-    '#description' => t('By default NPT will determine your country by, first, the type of GBIF membership, and then second, where the server location is (set in the previous page). Please choose if neither of the above applys.'),
-    '#options' => $countries,
-    '#default_value' => $default_country,
-    '#required' => FALSE,
-  );
   $form['node_location']['node_coordinate'] = array(
     '#type' => 'item',
     '#markup' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
@@ -144,6 +150,21 @@ function _npt_setup_participant_type_options() {
 
 function _npt_setup_participant_dropdown_callback($form, $form_state) {
   return $form['node_info']['node_uuid'];
+}
+
+function _npt_setup_get_participant_info($uuid) {
+  $url = GBIF_REGISTRY_API_NODE . '/' . $uuid;
+  $result = json_decode(file_get_contents($url));
+  return $result;
+}
+
+function _npt_setup_get_country_code_by_enum($enum) {
+  $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
+  $iso2 = '';
+  foreach ($countries as $country) {
+    if ($country->enumName == $enum) $iso2 = $country->iso2;
+  }
+  return $iso2;
 }
 
 function _npt_setup_get_participant_list($key = '') {
