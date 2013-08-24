@@ -7,3 +7,4 @@ core = 7.x
 #php = 5.3
 
 dependencies[] = npt_startup_tweak
+dependencies[] = scratchpads_blocks

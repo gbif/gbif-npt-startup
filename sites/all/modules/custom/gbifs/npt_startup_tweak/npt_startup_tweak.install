@@ -6,43 +6,31 @@
  */
 
 function npt_startup_tweak_install() {
-  // Set the default theme to "gbifwhite".
-  variable_set('theme_default', 'gbifwhite');
 
-  // Disable default theme and the Scratchpads theme.
+  // Enable NPT themes.
+  theme_enable(array(
+    'gbifwhite',
+    'npt_admin',
+  ));
+  variable_set('node_admin_theme', '1');
+
+  // Set the default theme.
+  variable_set('theme_default', 'gbifwhite');
+  variable_set('admin_theme', 'npt_admin');
+
+  // Disable unused themes and the Scratchpads themes.
   theme_disable(array(
     'bartik',
     'scratchpads',
     'scratchpads_admin',
   ));
 
-  // Enable NPT default theme.
-  theme_enable(array(
-    'gbifwhite',
-    'npt_admin',
-  ));
-  variable_set('admin_theme', 'npt_admin');
-  variable_set('node_admin_theme', '1');
-
-  // Default site name and slogan. To be replaced by values from setup form
-  variable_set('site_name', 'NPT Startup');
-  variable_set('site_slogan', 'Participating in Development');
-  
-  // Enable relevant modules
-  module_enable(array(
-    'npt_blocks',
-    'npt_news',
-    'npt_setup',
-    'npt_solr',
-    'image_allow_insecure_derivatives', // Temporary fix, see https://drupal.org/project/image_allow_insecure_derivatives
-  ), TRUE);
-  
   // Disable unnecessary modules
   module_disable(array(
     'overlay',
     'toolbar'
   ), TRUE);
-  
+
   variable_set('creative_commons_block_display_type', '80x15.png');
 
   // Set the comment form defaults.
@@ -51,36 +39,15 @@ function npt_startup_tweak_install() {
       variable_set('comment_form_location_' . $type, COMMENT_FORM_SEPARATE_PAGE);
     }
   }
-  
-  npt_startup_vocabularies();
 
-  // Insert default pre-defined node types
-  $types = array(
-    array(
-      'type' => 'article',
-      'name' => st('Article'),
-      'base' => 'node_content',
-      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
-      'custom' => 1,
-      'modified' => 1,
-      'locked' => 0,
-    ),
-  );
-  foreach ($types as $type) {
-    $type = node_type_set_defaults($type);
-    node_type_save($type);
-    scratchpads_tweaks_add_body_field($type);
-  }
-  
-  npt_startup_default_multilingual();
-
-  // Insert default pages
-  npt_startup_default_page();  
+  npt_startup_tweak_vocabularies();
+  npt_startup_tweak_default_node_type();
+  npt_startup_tweak_default_multilingual();
+  npt_startup_tweak_default_page(); // Insert default pages
   menu_rebuild();
-  
 }
 
-function npt_startup_vocabularies() {
+function npt_startup_tweak_vocabularies() {
   // Insert default pre-defined vocabularies
   $vocabularies = array(
     'article_type' => array(
@@ -182,11 +149,30 @@ function npt_startup_vocabularies() {
   itis_term_taxonomy_vocabulary_biological_classification($default_biological_vocabulary, '1');
 }
 
+function npt_startup_tweak_default_node_type() {
+  // Insert default pre-defined node types
+  $types = array(
+    array(
+      'type' => 'article',
+      'name' => st('Article'),
+      'base' => 'node_content',
+      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
+  );
+  foreach ($types as $type) {
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    scratchpads_tweaks_add_body_field($type);
+  }  
+}
 
 /**
  * Default how to publish data to GBIF page
  */
-function npt_startup_default_page() {
+function npt_startup_tweak_default_page() {
   $path = drupal_get_path('module', 'npt_startup_tweak');
   $initial_contents_path = $path . '/initial_contents';
   
@@ -226,7 +212,7 @@ function npt_startup_default_page() {
  * Please refer to function locale_languages_configure_form_submit (at line 675)
  * in modules/locale/locale.admin.inc
  */
-function npt_startup_default_multilingual() {
+function npt_startup_tweak_default_multilingual() {
   $negotiation = array(
     'locale-url' => array(
       'types' => array(

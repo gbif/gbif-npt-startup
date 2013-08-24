@@ -1,5 +1,5 @@
 name = NPT Startup Tweak
-description = Tweaks a Scratchpads/Drupal site into a NPT Startup instance
+description = Tweak a Scratchpads/Drupal site into a NPT Startup instance
 version = 7.x-0.9
 package = GBIFS
 project = Nodes Portal Toolkit
@@ -27,3 +27,10 @@ dependencies[] = module_filter
 ; Customised modules
 dependencies[] = eolapi
 dependencies[] = darwincore
+
+; NPT Startup modules
+dependencies[] = npt_news
+dependencies[] = npt_solr
+dependencies[] = npt_blocks
+dependencies[] = npt_setup
+dependencies[] = image_allow_insecure_derivatives

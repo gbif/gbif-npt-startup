@@ -36,6 +36,20 @@ function npt_blocks_block_info() {
 }
 
 /**
+ * Implements hook_block_info_alter().
+ */
+function npt_blocks_block_info_alter(&$block, $theme, $code_blocks) {
+  switch ($theme) {
+    case NPTSTARTUP_ADMIN_THEME:
+      $block['scratchpads_blocks']['footer_menu']['status'] = 0;
+      $block['scratchpads_blocks']['footer_menu']['region'] = -1;
+      $block['scratchpads_blocks']['footer_logos']['status'] = 0;
+      $block['scratchpads_blocks']['footer_logos']['region'] = -1;
+      break;
+  }
+}
+
+/**
  * Implements hook_block_view().
  */
 function npt_blocks_block_view($delta = '') {

@@ -186,15 +186,4 @@ function npt_blocks_install() {
       'title' => $block['title']
     ))->fields($block)->execute();
   }
-  
-  // Prevent Scratchpads blocks from showing in npt_admin
-  db_update('block')
-    ->fields(array(
-      'status' => 0,
-      'region' => -1,
-    ))
-    ->condition('module', 'scratchpads_blocks', '=')
-    ->condition('theme', 'npt_admin', '=')
-    ->execute();
-  
 }
