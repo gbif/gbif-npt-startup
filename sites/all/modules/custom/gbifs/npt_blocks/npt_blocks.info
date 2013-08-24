@@ -6,5 +6,6 @@ project = Nodes Portal Toolkit
 core = 7.x
 #php = 5.3
 
-dependencies[] = npt_startup_tweak
 dependencies[] = scratchpads_blocks
+dependencies[] = npt_startup_tweak
+dependencies[] = npt_constants

@@ -6,3 +6,5 @@ project = Nodes Portal Toolkit
 core = 7.x
 
 configure = admin/config/npt/mendeley_settings
+
+dependencies[] = npt_constants

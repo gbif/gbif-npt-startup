@@ -1,0 +1,13 @@
+<?php
+/**
+ * @file
+ * Get essential modules and configuration ready as part of the NPT Startup profile.
+ *
+ */
+
+// NPT Startup constants
+define('NPTSTARTUP_THEME', 'gbifwhite');
+define('NPTSTARTUP_ADMIN_THEME', 'npt_admin');
+define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/node');
+define('GBIF_COUNTRY_ENUM', 'http://apidev.gbif.org/enumeration/country');
+define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');

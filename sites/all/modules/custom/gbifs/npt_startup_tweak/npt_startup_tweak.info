@@ -29,6 +29,7 @@ dependencies[] = eolapi
 dependencies[] = darwincore
 
 ; NPT Startup modules
+dependencies[] = npt_constants
 dependencies[] = npt_news
 dependencies[] = npt_solr
 dependencies[] = npt_blocks

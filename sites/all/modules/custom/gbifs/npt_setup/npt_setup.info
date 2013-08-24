@@ -7,3 +7,4 @@ core = 7.x
 
 stylesheets[all][] = css/npt-setup.css
 dependencies[] = formflow
+dependencies[] = npt_constants
