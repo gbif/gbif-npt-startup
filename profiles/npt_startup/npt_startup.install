@@ -165,11 +165,11 @@ function npt_startup_settings($form, &$form_state, &$install_state) {
   drupal_add_js(drupal_get_path('profile', 'npt_startup') . '/js/nodeSettings.js');
   drupal_add_css(drupal_get_path('profile', 'npt_startup') . '/css/nodeSettings.css');
 
-  $form = _npt_startup_settings_get_form($form, &$form_state);
+  $form = _npt_startup_settings_get_form($form, $form_state);
 
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => $t('Save and continue'),
+    '#value' => st('Save and continue'),
     '#weight' => 15,
   );
 

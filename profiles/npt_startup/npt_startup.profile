@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Internal functions for assiting installation
+ * Internal functions for assisting installation
  */
 
-function _npt_startup_settings_get_form($form, &$form_state) {
+function _npt_startup_settings_get_form($form, $form_state) {
 
   // Prepare form.
   $t = get_t();
@@ -16,9 +16,8 @@ function _npt_startup_settings_get_form($form, &$form_state) {
   );
   $form['node_info']['intro'] = array(
     '#type' => 'item',
-    '#markup' => $t('Please indicate the GBIF Node with which this site associates. In case your country or organisation is not yet a member of GBIF, you can still set up NPT Startup without providing information here. This will however disable specific features.'),
+    '#markup' => $t('Please indicate the GBIF Node with which this site associates. In case your country or organisation is not yet a member of GBIF, you can still set up NPT Startup without providing information here. This will however disable some specific features.'),
   );
-
   // Provide a drop-down list of GBIF Participant Nodes.
   $participant_type_options = _npt_startup_participant_type_options();
 
@@ -40,10 +39,11 @@ function _npt_startup_settings_get_form($form, &$form_state) {
     '#options' => $participant_type_options,
     '#default_value' => $default_type,
   );
+  
   $form['node_info']['node_uuid'] = array(
     '#type' => 'select',
     '#title' => $t('GBIF Participants'),
-    '#options' => _npt_startup_get_participant_list($default_type),
+    '#options' => _npt_startup_get_participant_list(),
     '#default_value' => isset($gbif_participant_settings['node_uuid']) ? $gbif_participant_settings['node_uuid'] : NULL,
     '#description' => $t('Not a GBIF Participant? Please leave it unselected.'),
     '#required' => FALSE,
@@ -61,21 +61,24 @@ function _npt_startup_settings_get_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => $t('Node location'),
   );
-
   $countries = country_get_list();
   array_unshift($countries, '');
+
   // Determine default country
-  if ($gbif_participant_settings['participant_type'] == 'VOTING' || $gbif_participant_settings['participant_type'] == 'ASSOCIATE') {
+  if (isset($gbif_participant_settings['node_country'])) {
+    $default_country = $gbif_participant_settings['node_country'];
+  }
+  elseif ($gbif_participant_settings['participant_type'] == 'VOTING' || $gbif_participant_settings['participant_type'] == 'ASSOCIATE') {
     $node_info = _npt_startup_get_participant_info($gbif_participant_settings['node_uuid']);
-    $default_country = _npt_setup_get_country_code_by_enum($node_info->country);
+    $default_country = _npt_startup_get_country_code_by_enum($node_info->country);
   } else {
-    $default_country = isset($gbif_participant_settings['node_country']) ? $gbif_participant_settings['node_country'] : variable_get('site_default_country');
+    $default_country = variable_get('site_default_country');
   }
 
   $form['node_location']['node_country'] = array(
     '#type' => 'select',
     '#title' => $t('Country'),
-    '#description' => t('By default NPT will determine your country by, first, the type of GBIF membership, and then second, where the server location is (set in the previous page). Please choose if neither of the above applies.'),
+    '#description' => $t('By default NPT will determine your country by, first, the type of GBIF membership, and then second, where the server location is (set in the previous page). Please choose if neither of the above applies.'),
     '#options' => $countries,
     '#default_value' => $default_country,
     '#attributes' => array(
@@ -93,7 +96,7 @@ function _npt_startup_settings_get_form($form, &$form_state) {
 
   $form['node_location']['node_coordinate'] = array(
     '#type' => 'item',
-    '#markup' => '<p>' . t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
+    '#markup' => '<p>' . $t('For mapping features in NPT Startup, by default NPT Startup will centre the map according to where your node is located. Please confirm the coordinate that NPT Startup has determined by the default country you chose from the last page. You can of course provide your own to fit your situation better.') . '</p>',
     '#suffix' => '<div id="node_map"></div>',
   );
   $form['node_location']['node_coordinate_lat'] = array(
@@ -110,7 +113,7 @@ function _npt_startup_settings_get_form($form, &$form_state) {
     '#description' => $t('Please provide the longitude.'),
     '#default_value' => (isset($centre_crd['lng'])) ? $centre_crd['lng'] : 0,
   );
-  
+
   return $form; 
 }
 
@@ -123,11 +126,49 @@ function _npt_startup_participant_type_options() {
   );
 }
 
+/**
+ * @todo Draft function. To be completed for checking GBIF API availability.
+ */
+function _npt_startup_check_service($url) {
+  $mendeley_ch = curl_init(); // Create a cURL resource
+  curl_setopt($ch, CURLOPT_URL, $mendeley_gbif_url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_HEADER, true);
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+  $ch_result = curl_exec($ch);
+  $status = curl_getinfo($ch);
+  curl_close($ch);
+  unset($ch);
+  
+  // Debug step: checking service status
+  switch ($status['http_code']) {
+    case 200:
+      break; // Proceed! Success! This header is sent for GET requests together with a JSON object containing the data requested.
+    case 201:
+      break; // Another success header! This one is sent after a POST request has been successful.
+    case 204:
+      return t('No content.');
+    case 400:
+      return t('Bad Request.');
+    case 401:
+      return t('Unauthorized: Authentication credentials were missing or incorrect.');
+    case 403:
+      return t('Forbidden.');
+    case 404:
+      return t('Not found.');
+    case 429:
+      return t('Too many requests: Rate limit reached. Please try an hour later.');
+    case 503:
+      return t('Service Unavailable.');
+  }
+}
+
 function _npt_startup_get_participant_list() {
 
   $node_types = array('voting', 'associate', 'other');
-  foreach ($node_types as $node) {
-    $$node = array();
+  foreach ($node_types as $node_type) {
+    $$node_type = array();
   }
   $iso2 = array();
 
@@ -162,8 +203,8 @@ function _npt_startup_get_participant_list() {
   }
   $initial_list = array_merge($voting, $associate, $other);
 
-  foreach ($node_types as $node) {
-    $$node = json_decode(json_encode($$node));
+  foreach ($node_types as $node_type) {
+    $$node_type = json_decode(json_encode($$node_type));
   }
   
   // Convert enumName into ISO2. To be deleted when GBIF API updated.
@@ -192,6 +233,24 @@ function _npt_startup_get_participant_info($uuid) {
   $url = GBIF_REGISTRY_API_NODE . '/' . $uuid;
   $result = json_decode(file_get_contents($url));
   return $result;
+}
+
+function _npt_startup_get_country_code_by_enum($enum) {
+  $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
+  $iso2 = '';
+  foreach ($countries as $country) {
+    if ($country->enumName == $enum) $iso2 = $country->iso2;
+  }
+  return $iso2;
+}
+
+function _npt_startup_get_enum_by_country_code($iso) {
+  $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
+  $enum = '';
+  foreach ($countries as $country) {
+    if ($country->iso2 == $iso) $enum = $country->enumName;
+  }
+  return $enum;
 }
 
 function _npt_startup_get_country_coordinate($iso, $enum) {
