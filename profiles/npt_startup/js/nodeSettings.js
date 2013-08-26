@@ -1,7 +1,6 @@
-/**
-  * @desc Dependent dropdown for NPT Startup settings
-  *
-*/
+/*
+ * @desc Dependent dropdown for NPT Startup settings
+ */
 (function ($) {
 
   Drupal.behaviors.npt_starup = {
