@@ -33,6 +33,16 @@ function npt_stats_library() {
       ),
     ),
   );
+  $libraries['data_publishing_orgs'] = array(
+    'title' => 'Data publishers',
+    'js' => array(
+      drupal_get_path('module', 'npt_stats') . '/js/dataPublishers.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+  );
   return $libraries;
 }
 
@@ -50,7 +60,7 @@ function npt_stats_block_info() {
     'pages' => 'npt/*',
   );
   $blocks['data_publishing_orgs'] = array(
-    'info' => t('Data publisher'),
+    'info' => t('Data publishers'),
     'region' => 'content',
     'weight' => 2,
     'theme' => NPTSTARTUP_THEME,
@@ -59,7 +69,7 @@ function npt_stats_block_info() {
     'pages' => 'npt/*',
   );
   $blocks['data_publishing_tech'] = array(
-    'info' => t('Data publisher'),
+    'info' => t('Technical Installations'),
     'region' => 'content',
     'weight' => 3,
     'theme' => NPTSTARTUP_THEME,
@@ -67,8 +77,8 @@ function npt_stats_block_info() {
     'visibility' => BLOCK_VISIBILITY_LISTED,
     'pages' => 'npt/*',
   );
-  $blocks['data_publishing_record'] = array(
-    'info' => t('Data publisher'),
+  $blocks['data_publishing_status'] = array(
+    'info' => t('Data publishing status'),
     'region' => 'content',
     'weight' => 4,
     'theme' => NPTSTARTUP_THEME,
@@ -84,13 +94,35 @@ function npt_stats_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'gbif_participation':
-      npt_stats_js_settings();
-      drupal_add_library('npt_stats', 'participation', FALSE);
+
+
       $status_text = npt_stats_membership_status($node_info->participationStatus);
 
       $block['subject'] = t('GBIF Participation');
       $block['content'] = array(
         '#markup' => t('Membership status: ') . $status_text,
+      );
+      break;
+    case 'data_publishing_orgs':
+      npt_constants_js_settings();
+      npt_stats_js_settings();
+      drupal_add_library('npt_stats', 'data_publishing_orgs', FALSE);
+      
+      $block['subject'] = t('Endorsed Data Publishers');
+      $block['content'] = array(
+        '#markup' => ' ',
+      );
+      break;
+    case 'data_publishing_tech':
+      $block['subject'] = t('Technical Installations');
+      $block['content'] = array(
+        '#markup' => ' ',
+      );
+      break;
+    case 'data_publishing_status':
+      $block['subject'] = t('Data publishing status');
+      $block['content'] = array(
+        '#markup' => ' ',
       );
       break;
   }

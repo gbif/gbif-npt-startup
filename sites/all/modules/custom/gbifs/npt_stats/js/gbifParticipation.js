@@ -6,7 +6,8 @@
       $(document).ready(function() {
 
         var node_uuid = Drupal.settings.npt_stats.node_uuid;
-        var url = 'http://api.gbif.org/node/' + node_uuid + '?callback=npt_startup';
+        var registryWS = Drupal.settings.npt_constants.GBIF_REGISTRY_API_NODE;
+        var url = registryWS + '/' + node_uuid + '?callback=npt_startup';
         $.ajax({
           type: 'GET',
           url: url,
