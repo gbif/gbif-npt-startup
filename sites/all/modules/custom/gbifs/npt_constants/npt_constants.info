@@ -1,5 +1,5 @@
 name = NPT Constants
-description = Only define several API endpoints for NPT modules. This module together with some NPT modules provides better flexibility for NPT modules to be used indepentdly without NPT Startup profile.
+description = Only define several API endpoints for NPT modules.
 version = 7.x-0.1
 package = GBIFS
 project = Nodes Portal Toolkit

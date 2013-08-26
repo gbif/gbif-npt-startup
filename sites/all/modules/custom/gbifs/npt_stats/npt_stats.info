@@ -1,0 +1,10 @@
+name = NPT Statistics
+description = Digest Nodes information from GBIF API and turn it into blocks.
+version = 7.x-0.1
+package = GBIFS
+project = Nodes Portal Toolkit
+core = 7.x
+
+configure = admin/config/npt/stats_settings
+
+dependencies[] = npt_constants

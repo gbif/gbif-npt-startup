@@ -1,0 +1,107 @@
+<?php
+/**
+ * @file
+ *  Essential functions to produce Nodes information blocks.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function npt_stats_menu() {
+  $gbif_participant_settings = variable_get('gbif_participant_settings');
+  $node = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/' . $gbif_participant_settings['node_uuid']));
+  $name = isset($gbif_participant_settings['node_shortname']) ? $gbif_participant_settings['node_shortname'] : $node->title;
+  $items['npt/stats'] = array(
+    'title' => t('Facts'),
+    'description' => t('Statistics about !name', array('!name' => $name)),
+    'page callback' => 'npt_stats_page_view',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
+    'weight' => 19
+  );
+  return $items;
+}
+
+function npt_stats_library() {
+  $libraries['gbif_participation'] = array(
+    'title' => 'GBIF Participation',
+    'js' => array(
+      drupal_get_path('module', 'npt_stats') . '/js/gbifParticipation.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function npt_stats_block_info() {
+  $blocks['gbif_participation'] = array(
+    'info' => t('GBIF Participation'),
+    'region' => 'content',
+    'weight' => 1,
+    'theme' => NPTSTARTUP_THEME,
+    'status' => 1,
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'npt/*',
+  );
+  $blocks['data_publishing_orgs'] = array(
+    'info' => t('Data publisher'),
+    'region' => 'content',
+    'weight' => 2,
+    'theme' => NPTSTARTUP_THEME,
+    'status' => 1,
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'npt/*',
+  );
+  $blocks['data_publishing_tech'] = array(
+    'info' => t('Data publisher'),
+    'region' => 'content',
+    'weight' => 3,
+    'theme' => NPTSTARTUP_THEME,
+    'status' => 1,
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'npt/*',
+  );
+  $blocks['data_publishing_record'] = array(
+    'info' => t('Data publisher'),
+    'region' => 'content',
+    'weight' => 4,
+    'theme' => NPTSTARTUP_THEME,
+    'status' => 1,
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'npt/*',
+  );
+  return $blocks;
+}
+
+function npt_stats_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'gbif_participation':
+      npt_stats_js_settings();
+      drupal_add_library('npt_stats', 'gbif_participation', FALSE);
+      $block['content'] = array(
+        '#markup' => ' '
+      );
+      break;
+  }
+  return $block;
+}
+
+function npt_stats_page_view() {
+  $content = ' ';
+  return $content;
+}
+
+function npt_stats_js_settings() {
+  $gbif_participant_settings = variable_get('gbif_participant_settings');
+  drupal_add_js(array(
+    'npt_stats' => $gbif_participant_settings,
+  ), 'setting');
+}

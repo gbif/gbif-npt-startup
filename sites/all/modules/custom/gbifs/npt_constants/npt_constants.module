@@ -1,8 +1,8 @@
 <?php
 /**
  * @file
- * Get essential modules and configuration ready as part of the NPT Startup profile.
- *
+ *  This module together with some NPT modules provides better flexibility
+ *  for NPT modules to be used indepentdly without NPT Startup profile.
  */
 
 // NPT Startup constants
