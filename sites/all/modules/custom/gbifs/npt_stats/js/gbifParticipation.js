@@ -4,10 +4,10 @@
 
     var node_uuid = Drupal.settings.npt_stats.node_uuid;
     var registryWS = Drupal.settings.npt_constants.GBIF_REGISTRY_API_NODE;
-    var apiUrl = registryWS + '/' + node_uuid + '?callback=npt_startup';
+    var url = registryWS + '/' + node_uuid + '?callback=npt_startup';
     $.ajax({
       type: 'GET',
-      url: apiUrl,
+      url: url,
       async: false,
       jsonpCallback: 'npt_startup',
       contentType: "application/json",

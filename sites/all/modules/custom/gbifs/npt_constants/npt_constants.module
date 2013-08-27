@@ -10,6 +10,7 @@ define('NPTSTARTUP_THEME', 'gbifwhite');
 define('NPTSTARTUP_ADMIN_THEME', 'npt_admin');
 define('GBIF_REGISTRY_API_NODE', 'http://staging.gbif.org:8080/registry2-ws/node');
 define('GBIF_REGISTRY_API_ORG', 'http://staging.gbif.org:8080/registry2-ws/organization');
+define('GBIF_API', 'http://api.gbif.org');
 define('GBIF_COUNTRY_ENUM', 'http://apidev.gbif.org/enumeration/country');
 define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 define('GBIF_PORTAL_PUBLISHER', 'http://staging.gbif.org:8080/portal/publisher');
@@ -21,6 +22,7 @@ function npt_constants_js_settings() {
     'GBIF_COUNTRY_ENUM' => GBIF_COUNTRY_ENUM,
     'GBRDS_AGENT_URL' => GBRDS_AGENT_URL,
     'GBIF_PORTAL_PUBLISHER' => GBIF_PORTAL_PUBLISHER,
+    'GBIF_API' => GBIF_API,
   );
   drupal_add_js(array(
     'npt_constants' => $npt_constants,

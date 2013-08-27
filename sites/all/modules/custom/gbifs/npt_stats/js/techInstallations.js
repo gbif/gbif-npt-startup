@@ -6,16 +6,9 @@
     var gbrdsAgent = Drupal.settings.npt_constants.GBRDS_AGENT_URL;
     var url = registryNode + '/' + node_uuid + '/installation';
 
-    $.ajax({
-      type: 'GET',
-      url: url,
-      async: false,
-      jsonpCallback: 'npt_startup',
-      contentType: "application/json",
-      dataType: 'jsonp',
-      success: function(json) {
+    $.getJSON(url + '?callback=?', function(data) {
 
-        var results = json.results;
+        var results = data.results;
         var techList = $('<ul/>', {
                         id: 'list-tech-installation',
                       }).appendTo('#block-npt-stats-data-publishing-tech div.content');
@@ -30,11 +23,7 @@
             .appendTo('#list-tech-installation');
         });
 
-      },
-      error: function(e) {
-        console.log(e.message);
-      }
-    });
+      });
 
   });
 
