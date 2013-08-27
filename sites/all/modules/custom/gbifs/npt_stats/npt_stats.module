@@ -43,6 +43,16 @@ function npt_stats_library() {
       ),
     ),
   );
+  $libraries['data_publishing_tech'] = array(
+    'title' => 'Technical installations',
+    'js' => array(
+      drupal_get_path('module', 'npt_stats') . '/js/techInstallations.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => 20,
+      ),
+    ),
+  );
   return $libraries;
 }
 
@@ -94,8 +104,6 @@ function npt_stats_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'gbif_participation':
-
-
       $status_text = npt_stats_membership_status($node_info->participationStatus);
 
       $block['subject'] = t('GBIF Participation');
@@ -114,6 +122,10 @@ function npt_stats_block_view($delta = '') {
       );
       break;
     case 'data_publishing_tech':
+      npt_constants_js_settings();
+      npt_stats_js_settings();
+      drupal_add_library('npt_stats', 'data_publishing_tech', FALSE);
+
       $block['subject'] = t('Technical Installations');
       $block['content'] = array(
         '#markup' => ' ',
