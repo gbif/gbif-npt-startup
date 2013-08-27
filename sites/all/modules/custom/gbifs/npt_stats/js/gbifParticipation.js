@@ -1,52 +1,27 @@
 (function ($) {
 
-  Drupal.behaviors.npt_stats = {
-    attach: function (context, settings) {
-      
-      $(document).ready(function() {
+  $(document).ready(function() {
 
-        var node_uuid = Drupal.settings.npt_stats.node_uuid;
-        var registryWS = Drupal.settings.npt_constants.GBIF_REGISTRY_API_NODE;
-        var url = registryWS + '/' + node_uuid + '?callback=npt_startup';
-        $.ajax({
-          type: 'GET',
-          url: url,
-          async: false,
-          jsonpCallback: 'npt_startup',
-          contentType: "application/json",
-          dataType: 'jsonp',
-          success: function(json) {
-            
-            /*
-            if (typeof json.participationStatus != 'undefined') {
-              switch (json.participationStatus) {
-                case 'VOTING':
-                  var pageTitle = json.title + ' ' + Drupal.t('as a GBIF Voting Country Participant'); 
-                  $("#page-title").text(pageTitle);
-                  break;
-                case 'ASSOCIATE':
-                  var pageTitle = json.title + ' ' + Drupal.t('as a GBIF Associate Countrt Participant'); 
-                  $("#page-title").text(pageTitle);
-                  break;
-                case 'Other':
-                  var pageTitle = json.title + ' ' + Drupal.t('as a GBIF Associate Participant'); 
-                  $("#page-title").text(pageTitle);
-                  break;
-              }
-            }
-            */
-              $("#block-npt-stats-gbif-participation").html(json.title);
-            
-          },
-          error: function(e) {
-            console.log(e.message);
-          }
-        });
+    var node_uuid = Drupal.settings.npt_stats.node_uuid;
+    var registryWS = Drupal.settings.npt_constants.GBIF_REGISTRY_API_NODE;
+    var apiUrl = registryWS + '/' + node_uuid + '?callback=npt_startup';
+    $.ajax({
+      type: 'GET',
+      url: apiUrl,
+      async: false,
+      jsonpCallback: 'npt_startup',
+      contentType: "application/json",
+      dataType: 'jsonp',
+      success: function(json) {
+        
+        $("#block-npt-stats-gbif-participation").html(json.title);
+        
+      },
+      error: function(e) {
+        console.log(e.message);
+      }
+    });
 
-      });
-      
-
-    }
-  };
+  });
 
 })(jQuery);

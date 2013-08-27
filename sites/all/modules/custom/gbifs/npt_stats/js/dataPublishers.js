@@ -2,9 +2,9 @@
 
   $(document).ready(function() {
     var node_uuid = Drupal.settings.npt_stats.node_uuid;
-    var registryWS = Drupal.settings.npt_constants.GBIF_REGISTRY_API_NODE;
+    var registryNode = Drupal.settings.npt_constants.GBIF_REGISTRY_API_NODE;
     var publisherPrefix = Drupal.settings.npt_constants.GBIF_PORTAL_PUBLISHER;
-    var url = registryWS + '/' + node_uuid + '/organization';
+    var url = registryNode + '/' + node_uuid + '/organization';
 
     $.ajax({
       type: 'GET',
@@ -19,15 +19,16 @@
         var orgList = $('<ul/>', {
                         id: 'list-data-publisher',
                       }).appendTo('#block-npt-stats-data-publishing-orgs');
-        for (i = 0; i < results.length; i++) {
-          var link = $('<a>', {
+        $.each(results, function(i,d) {
+          var link = $('<a/>', {
             href: publisherPrefix + '/' + results[i].key,
             text: results[i].title,
           });
+          
           $('<li/>')
             .append(link)
             .appendTo('#list-data-publisher');
-        }
+        });
 
       },
       error: function(e) {
