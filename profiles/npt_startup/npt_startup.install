@@ -190,6 +190,7 @@ function npt_startup_settings_submit($form, &$form_state) {
   if (isset($values['node_country'])) {
     $gbif_participant_settings['node_country'] = $values['node_country'];
     $gbif_participant_settings['node_country_enum'] = _npt_startup_get_enum_by_country_code($values['node_country']);
+    $gbif_participant_settings['node_country_title'] = _npt_startup_get_participant_title($values['node_uuid']);
   }
 
   variable_set('gbif_participant_settings', $gbif_participant_settings);

@@ -62,16 +62,13 @@ function npt_blocks_block_view($delta = '') {
       );
       break;
     case 'how_to_publish':
-      $participant_shortname = variable_get('gbif_participant_shortname');
-      $participant_node = variable_get('gbif_participant_node');
-      $node_value = explode('-', $participant_node);
-      $iso_a2 = $node_value[0];
-      $country = $node_value[1];
-
+      $node_settings = variable_get('gbif_participant_settings');
+      $country = isset($node_settings['node_shortname']) ? $node_settings['node_shortname'] : $node_settings['node_country_title'];
+      
       $howto_publish_text = l(t('How to publish data through the GBIF network?'), variable_get('howto_publish_page'));
       $country_page = t('@country on the !portal_link.', array(
         '@country' => $country,
-        '!portal_link' => l(t('GBIF Data Portal'), 'http://data.gbif.org/countries/' . strtoupper($iso_a2))
+        '!portal_link' => l(t('GBIF Portal'), GBIF_PORTAL . '/country/' . $node_settings['node_country']),
       ));
       
       $links_for_intro = array(

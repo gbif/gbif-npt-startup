@@ -235,6 +235,13 @@ function _npt_startup_get_participant_info($uuid) {
   return $result;
 }
 
+function _npt_startup_get_participant_title($uuid) {
+  $url = GBIF_REGISTRY_API_NODE . '/' . $uuid;
+  $result = json_decode(file_get_contents($url));
+  $title = $result->title;
+  return $title;
+}
+
 function _npt_startup_get_country_code_by_enum($enum) {
   $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
   $iso2 = '';
