@@ -75,6 +75,13 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to species distributions, including biogeography and ecology'),
     'tags' => array('GBIF_used', 'species distribution'),
   );
+  $tag_sets[] = array(
+    'name' => t('GBIF use cases'),
+    'machine_name' => 'gbif_used',
+    'type' => 'generic',
+    'desc' => t('Peer-reviewed research citing use of biodiversity data accessed through GBIF'),
+    'tags' => array('GBIF_used'),
+  );
 
   // Prepare tag sets for countries
   $gbif_countries = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/country'));
@@ -82,21 +89,21 @@ function npt_mendeley_default_tag_sets() {
   
   foreach ($gbif_countries as $gbif_country) {
     foreach ($gbif_enum_countries as $gbif_enum_country) {
-      if ($gbif_enum_country->enumName == $gbif_country) $iso_name = $gbif_enum_country;
+      if ($gbif_enum_country->iso2 == $gbif_country) $title = $gbif_enum_country->title;
     }
     $tag_sets[] = array(
-      'name' => $iso_name->title,
-      'machine_name' => strtolower($iso_name->enumName),
+      'name' => $title,
+      'machine_name' => $gbif_country,
       'type' => 'country',
       'desc' => t('Peer-reviewed publications using GBIF-mediated data authored by researchers based in @country', array('@country' => $iso_name->title)),
-      'tags' => array('GBIF_used', ucwords(strtolower($iso_name->enumName))),
+      'tags' => array('GBIF_used', $gbif_country),
     );
     $tag_sets[] = array(
-      'name' => $iso_name->title . ' biodiversity',
-      'machine_name' => strtolower($iso_name->enumName) . '_bio',
+      'name' => $title . ' biodiversity',
+      'machine_name' => $gbif_country . '_bio',
       'type' => 'country',
       'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to biodiversity in @country', array('@country' => $iso_name->title)),
-      'tags' => array('GBIF_used', ucwords(strtolower($iso_name->enumName)) . '_biodiversity'),
+      'tags' => array('GBIF_used', $gbif_country . '_biodiversity'),
     );
 
   }

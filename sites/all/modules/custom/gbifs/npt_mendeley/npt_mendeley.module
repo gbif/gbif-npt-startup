@@ -14,7 +14,6 @@ define('MENDELEY_GBIF_PUBLIC_GROUP_ID', '1068301');
 define('MENDELEY_PUBLIC_GROUPS_DOCUMENTS', 'http://api.mendeley.com/oapi/documents/groups');
 define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details');
 define('GBIF_ENUMERATION_COUNTRY', 'http://apidev.gbif.org/enumeration/country');
-define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/node');
 
 /**
  * Implements hook_menu().
