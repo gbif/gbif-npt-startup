@@ -14,15 +14,17 @@ define('GBIF_API', 'http://api.gbif.org');
 define('GBIF_COUNTRY_ENUM', 'http://apidev.gbif.org/enumeration/country');
 define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
 define('GBIF_PORTAL_PUBLISHER', 'http://staging.gbif.org:8080/portal/publisher');
+define('GBIF_PORTAL', 'http://uat.gbif.org');
 
 function npt_constants_js_settings() {
   $npt_constants = array(
     'GBIF_REGISTRY_API_NODE' => GBIF_REGISTRY_API_NODE,
     'GBIF_REGISTRY_API_ORG' => GBIF_REGISTRY_API_ORG,
     'GBIF_COUNTRY_ENUM' => GBIF_COUNTRY_ENUM,
-    'GBRDS_AGENT_URL' => GBRDS_AGENT_URL,
     'GBIF_PORTAL_PUBLISHER' => GBIF_PORTAL_PUBLISHER,
     'GBIF_API' => GBIF_API,
+    'GBIF_PORTAL' => GBIF_PORTAL,
+    'GBRDS_AGENT_URL' => GBRDS_AGENT_URL,
   );
   drupal_add_js(array(
     'npt_constants' => $npt_constants,
