@@ -79,10 +79,10 @@ function npt_blocks_install() {
     array(
       'module' => 'user',
       'delta' => 'login',
-      'theme' => 'npt_admin',
+      'theme' => 'gbifwhite',
       'status' => 1,
       'weight' => 10,
-      'region' => 'content',
+      'region' => -1,
       'pages' => '',
       'title' => '',
       'cache' => -1
