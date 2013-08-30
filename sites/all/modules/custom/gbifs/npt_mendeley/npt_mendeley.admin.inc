@@ -25,7 +25,7 @@ function npt_mendeley_settings_form() {
       'progress' => array(
         'type' => 'bar',
         'message' => t('Loading...'),
-        'url' => '/npt_mendeley/retrieval_progress',
+        'url' => '/mendeley/retrieval_progress',
         'interval' => '10',
       ),
     ),

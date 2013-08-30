@@ -8,8 +8,8 @@
  * Implementation of hook_menu().
  */
 function npt_stats_menu() {
-  $node = npt_stats_node_info();
-  $name = isset($gbif_participant_settings['node_shortname']) ? $gbif_participant_settings['node_shortname'] : $node->title;
+  $node_info = variable_get('gbif_participant_settings');
+  $name = isset($node_info['node_shortname']) ? $node_info['node_shortname'] : $node_info['node_title'];
   $items['npt/stats'] = array(
     'title' => t('Facts'),
     'description' => t('Statistics about !name', array('!name' => $name)),
@@ -110,11 +110,11 @@ function npt_stats_block_info() {
 }
 
 function npt_stats_block_view($delta = '') {
-  $node_info = npt_stats_node_info();
+  $node_info = variable_get('gbif_participant_settings');
   $block = array();
   switch ($delta) {
     case 'gbif_participation':
-      $status_text = npt_stats_membership_status($node_info->participationStatus);
+      $status_text = npt_stats_membership_status($node_info['participant_type']);
 
       $block['subject'] = t('GBIF Participation');
       $block['content'] = array(
@@ -156,23 +156,36 @@ function npt_stats_block_view($delta = '') {
 }
 
 function npt_stats_page_view() {
-  $node_info = npt_stats_node_info();
-  $page_title = $node_info->title . t(' as a GBIF Participant');
+  $node_info = variable_get('gbif_participant_settings');
+  $title = isset($node_info['node_shortname']) ? $node_info['node_shortname'] : $node_info['node_title'];
+  $page_title = $title . t(' as a GBIF Participant');
   drupal_set_title($page_title);
   $content = ' ';
   return $content;
 }
 
 function npt_stats_js_settings() {
-  $gbif_participant_settings = variable_get('gbif_participant_settings');
+  $node_info = variable_get('gbif_participant_settings');
   drupal_add_js(array(
-    'npt_stats' => $gbif_participant_settings,
+    'npt_stats' => $node_info,
   ), 'setting');
 }
 
-function npt_stats_node_info() {
+function npt_stats_node_settings() {
   $gbif_participant_settings = variable_get('gbif_participant_settings');
-  $node_info = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/' . $gbif_participant_settings['node_uuid']));
+  
+  // create stream context, set timeout for the API call
+  $opts = array(
+    'http' => array(
+      'method' => 'GET',
+      'timeout' => '3',
+    ),
+  );
+  $context = stream_context_create($opts);
+  $url = GBIF_REGISTRY_API_NODE . '/' . $gbif_participant_settings['node_uuid'];
+  
+  // Call the API
+  $node_info = json_decode(file_get_contents($url, false, $context));
   return $node_info;
 }
 

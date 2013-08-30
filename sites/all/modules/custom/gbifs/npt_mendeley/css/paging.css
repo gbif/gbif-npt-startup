@@ -1,0 +1,27 @@
+.pagination {
+	float: right;
+	border: 1px solid #CDCDCD;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+.pagination a {
+  height: 28px;
+  width: 28px;
+}
+
+.pagination a:link {
+  text-decoration: none;
+  font-size: 1.5em;
+}
+
+.pagination input.jquery-once-1-processed {
+  height: 28px;
+  font-size: 1.2em;
+}
+
+#mendeley-citation {
+  margin-top: 20px;
+  padding-top: 30px;
+}

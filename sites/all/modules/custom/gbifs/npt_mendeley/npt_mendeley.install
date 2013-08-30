@@ -5,9 +5,9 @@
  */
 
 /**
- * Implementation of hook_enable()
+ * Implementation of hook_install()
  */
-function npt_mendeley_enable() {
+function npt_mendeley_install() {
   // Create a directory for storing generated data files
   $uris = array('public://npt_mendeley', 'public://npt_mendeley/countries');
   foreach ($uris as $uri) {
@@ -16,8 +16,15 @@ function npt_mendeley_enable() {
       drupal_mkdir($uri);
     }
   }
-
   npt_mendeley_default_tag_sets();
+}
+
+/**
+ * Implementation of hook_enable()
+ */
+function npt_mendeley_enable() {
+  npt_mendeley_retrieve();
+  npt_mendeley_analyse();
 }
 
 function npt_mendeley_default_tag_sets() {
@@ -26,61 +33,77 @@ function npt_mendeley_default_tag_sets() {
   
   // Generic tag sets on data use
   $tag_sets[] = array(
+    'name' => t('GBIF use cases'),
+    'tab_name' => t('All'),
+    'machine_name' => 'usecases',
+    'type' => 'gbif_used',
+    'desc' => t('Peer-reviewed research citing use of biodiversity data accessed through GBIF'),
+    'tags' => array('GBIF_used'),
+    'weight' => 1,
+  );
+  $tag_sets[] = array(
     'name' => t('Data papers'),
+    'tab_name' => t('Data papers'),
     'machine_name' => 'datapaper',
-    'type' => 'generic',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed data papers describing biodiversity datasets published through the GBIF network'),
     'tags' => array('datapaper'),
+    'weight' => 2,
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Invasive alien species'),
-    'machine_name' => 'invasive_alien_species',
-    'type' => 'generic',
+    'tab_name' => t('Invasive alien species'),
+    'machine_name' => 'invasive',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on invasive alien species'),
     'tags' => array('GBIF_used', 'invasive'),
+    'weight' => 3,
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Climate change'),
-    'machine_name' => 'climate_change',
-    'type' => 'generic',
+    'tab_name' => t('Climate change'),
+    'machine_name' => 'climate',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on impacts of climate change on biodiversity'),
     'tags' => array('GBIF_used', 'climate'),
+    'weight' => 4,
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Conservation'),
+    'tab_name' => t('Conservation'),
     'machine_name' => 'conservation',
-    'type' => 'generic',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on conservation, including threatened species and protected areas'),
     'tags' => array('GBIF_used', 'conservation'),
+    'weight' => 5,
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Human health'),
-    'machine_name' => 'human_health',
-    'type' => 'generic',
+    'tab_name' => t('Human health'),
+    'machine_name' => 'humanhealth',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to human health and biodiversity, including disease vectors and medicines'),
     'tags' => array('GBIF_used', 'human health'),
+    'weight' => 6,
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Food and farming'),
-    'machine_name' => 'food_and_farming',
-    'type' => 'generic',
+    'tab_name' => t('Agriculture'),
+    'machine_name' => 'agriculture',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to agriculture, biofuels, aquaculture and wild fisheries'),
     'tags' => array('GBIF_used', 'agriculture'),
+    'weight' => 7,
     'tags_alt' => array('GBIF_used', 'biofuel'),
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Species distributions'),
-    'machine_name' => 'species_distribution',
-    'type' => 'generic',
+    'tab_name' => t('Species distribution'),
+    'machine_name' => 'distribution',
+    'type' => 'gbif_used',
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to species distributions, including biogeography and ecology'),
     'tags' => array('GBIF_used', 'species distribution'),
-  );
-  $tag_sets[] = array(
-    'name' => t('GBIF use cases'),
-    'machine_name' => 'gbif_used',
-    'type' => 'generic',
-    'desc' => t('Peer-reviewed research citing use of biodiversity data accessed through GBIF'),
-    'tags' => array('GBIF_used'),
+    'weight' => 8,
   );
 
   // Prepare tag sets for countries
@@ -95,15 +118,15 @@ function npt_mendeley_default_tag_sets() {
       'name' => $title,
       'machine_name' => $gbif_country,
       'type' => 'country',
-      'desc' => t('Peer-reviewed publications using GBIF-mediated data authored by researchers based in @country', array('@country' => $iso_name->title)),
+      'desc' => t('Peer-reviewed publications using GBIF-mediated data authored by researchers based in @country', array('@country' => $title)),
       'tags' => array('GBIF_used', $gbif_country),
     );
     $tag_sets[] = array(
       'name' => $title . ' biodiversity',
       'machine_name' => $gbif_country . '_bio',
       'type' => 'country',
-      'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to biodiversity in @country', array('@country' => $iso_name->title)),
-      'tags' => array('GBIF_used', $gbif_country . '_biodiversity'),
+      'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to biodiversity in @country', array('@country' => $title)),
+      'tags' => array('GBIF_used', $title . '_biodiversity'),
     );
 
   }
