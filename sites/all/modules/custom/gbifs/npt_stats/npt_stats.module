@@ -157,7 +157,7 @@ function npt_stats_block_view($delta = '') {
 
 function npt_stats_page_view() {
   $node_info = variable_get('gbif_participant_settings');
-  $title = isset($node_info['node_shortname']) ? $node_info['node_shortname'] : $node_info['node_title'];
+  $title = ($node_info['node_shortname'] == '') ? $node_info['node_title'] : $node_info['node_shortname'];
   $page_title = $title . t(' as a GBIF Participant');
   drupal_set_title($page_title);
   $content = ' ';
