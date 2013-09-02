@@ -31,6 +31,11 @@ function npt_startup_tweak_install() {
     'toolbar'
   ), TRUE);
 
+  module_enable(array(
+    'npt_stats',
+    'npt_mendeley',
+  ));
+
   variable_set('creative_commons_block_display_type', '80x15.png');
 
   // Set the comment form defaults.

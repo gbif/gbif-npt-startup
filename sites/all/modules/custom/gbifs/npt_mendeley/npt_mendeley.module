@@ -12,7 +12,7 @@ define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf')
 define('MENDELEY_GBIF_PUBLIC_GROUP_ID', '1068301');
 define('MENDELEY_PUBLIC_GROUPS_DOCUMENTS', 'http://api.mendeley.com/oapi/documents/groups');
 define('MENDELEY_DOC_DETAIL_URL', 'http://api.mendeley.com/oapi/documents/details');
-define('GBIF_ENUMERATION_COUNTRY', 'http://apidev.gbif.org/enumeration/country');
+define('GBIF_ENUMERATION_COUNTRY', 'http://api.gbif.org/enumeration/country');
 
 /**
  * Implements hook_menu().
