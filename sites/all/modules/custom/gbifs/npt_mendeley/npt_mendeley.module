@@ -311,8 +311,10 @@ function _npt_mendeley_list_documents($gbif_cat_type, $machine_name, $render) {
         } else {
           $content .= format_plural($doc_count,
             '1 publication in this category:',
-            '@count publications in this category:');
+            '@count publications in this category:');          
+        }
 
+        if ($render == 'page') {
           // Add pagination.
           $pagination = '<div class="pagination">';
           $pagination .= '<a href="#" class="first" data-action="first">&laquo;</a>';
@@ -323,9 +325,8 @@ function _npt_mendeley_list_documents($gbif_cat_type, $machine_name, $render) {
           $pagination .= '</div>';
 
           $content .= $pagination;
-            
         }
-        
+
         // Start the list.
         $list_item = '<ul id="mendeley-citation">';
         foreach ($$machine_name as $k => $doc) {
