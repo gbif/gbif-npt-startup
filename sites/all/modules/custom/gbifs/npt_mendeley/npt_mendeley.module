@@ -140,14 +140,31 @@ function npt_mendeley_block_info() {
   $tag_sets = variable_get('npt_mendeley_tags');
   
   foreach ($tag_sets as $tag_set) {
-    $delta = $tag_set['machine_name'];
-    $info = ($tag_set['type'] == 'country') ? 'Country: ' . $tag_set['name'] : $tag_set['name'];
-    $blocks[$delta] = array(
-      'info' => $info,
-      'region' => 'content',
-      'weight' => 1,
-      'status' => 0,
-    );
+
+    switch ($tag_set['type']) {
+      case 'country':
+        $delta = $tag_set['machine_name'];
+        $blocks[$delta] = array(
+          'info' => 'Country: ' . $tag_set['name'],
+          'region' => 'content',
+          'weight' => 1,
+          'status' => 0,
+        );
+        break;
+
+      case 'gbif_used':
+        $delta = $tag_set['machine_name'];
+        $blocks[$delta] = array(
+          'info' => $tag_set['name'],
+          'region' => 'content',
+          'weight' => $tag_set['weight'],
+          'status' => 1,
+          'visibility' => BLOCK_VISIBILITY_LISTED,
+          'pages' => $tag_set['pages'],
+        );
+        break;
+    }
+
   }
   return $blocks;
 }

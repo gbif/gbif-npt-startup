@@ -25,10 +25,11 @@
       }
 
       //maxPages is the maximum amount of pages needed for pagination. (round up) 
-      var maxPages = Math.ceil(totalNumRecords/recordsPerPage);   
+      var maxPages = Math.ceil(totalNumRecords/recordsPerPage);
+      var pathname = window.location.pathname;   
 
       $('.pagination').jqPagination({
-        link_string : '/?page={page_number}',
+        link_string  : '/?page={page_number}',
         max_page     : maxPages,
         paged        : function(page) { 
 

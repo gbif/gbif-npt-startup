@@ -40,6 +40,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed research citing use of biodiversity data accessed through GBIF'),
     'tags' => array('GBIF_used'),
     'weight' => 1,
+    'pages' => "newsroom/uses\r\nusingdata/summary", 
   );
   $tag_sets[] = array(
     'name' => t('Data papers'),
@@ -49,6 +50,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed data papers describing biodiversity datasets published through the GBIF network'),
     'tags' => array('datapaper'),
     'weight' => 2,
+    'pages' => 'publishingdata/datapapers', 
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Invasive alien species'),
@@ -58,6 +60,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on invasive alien species'),
     'tags' => array('GBIF_used', 'invasive'),
     'weight' => 3,
+    'pages' => 'usingdata/sciencerelevance', 
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Climate change'),
@@ -67,6 +70,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on impacts of climate change on biodiversity'),
     'tags' => array('GBIF_used', 'climate'),
     'weight' => 4,
+    'pages' => 'usingdata/sciencerelevance', 
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Conservation'),
@@ -76,6 +80,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research on conservation, including threatened species and protected areas'),
     'tags' => array('GBIF_used', 'conservation'),
     'weight' => 5,
+    'pages' => 'usingdata/sciencerelevance', 
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Human health'),
@@ -85,6 +90,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to human health and biodiversity, including disease vectors and medicines'),
     'tags' => array('GBIF_used', 'human health'),
     'weight' => 6,
+    'pages' => 'usingdata/sciencerelevance', 
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Food and farming'),
@@ -95,6 +101,7 @@ function npt_mendeley_default_tag_sets() {
     'tags' => array('GBIF_used', 'agriculture'),
     'weight' => 7,
     'tags_alt' => array('GBIF_used', 'biofuel'),
+    'pages' => 'usingdata/sciencerelevance', 
   );
   $tag_sets[] = array(
     'name' => t('GBIF use cases: Species distributions'),
@@ -104,6 +111,7 @@ function npt_mendeley_default_tag_sets() {
     'desc' => t('Peer-reviewed publications using GBIF-mediated data to assist research relating to species distributions, including biogeography and ecology'),
     'tags' => array('GBIF_used', 'species distribution'),
     'weight' => 8,
+    'pages' => 'usingdata/sciencerelevance', 
   );
 
   // Prepare tag sets for countries
