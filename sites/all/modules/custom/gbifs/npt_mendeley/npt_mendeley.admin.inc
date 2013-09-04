@@ -24,6 +24,22 @@ function npt_mendeley_settings_form() {
       'effect' => 'fade',
     ),
   );
+  $form['npt_mendeley_detail'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Analyse retrieved documents from Mendeley'),
+    '#description' => '<p>' . t('Group retrieved documents according to prefined sets of tags and produce lists in configurable blocks.') . '</p>',
+  );
+  $form['npt_mendeley_detail']['detail_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update detail now'),
+    '#prefix' => '<div id="detail-div">',
+    '#suffix' => '<div id="detail-status-wrapper"></div></div>',
+    '#ajax' => array(
+      'callback' => 'npt_mendeley_fill_doc_detail',
+      'wrapper' => 'detail-status-wrapper',
+      'effect' => 'fade',
+    ),
+  );
   $form['npt_mendeley_analyse'] = array(
     '#type' => 'fieldset',
     '#title' => t('Analyse retrieved documents from Mendeley'),

@@ -567,6 +567,148 @@ function npt_mendeley_retrieve() {
 }
 
 /**
+ * @todo Find a better way to incorporate the trial accessing code
+ *       in npt_mendeley_retrieve().
+ */
+
+function npt_mendeley_fill_doc_detail() {
+  // Load local documents.json
+  $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
+  $file = drupal_realpath($documents_file_loc);
+  $file_exists = file_exists($file);
+
+  switch ($file_exists) {
+    case TRUE:
+      $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
+      
+      // Trial accessing Mendeley API.
+      $mendeley_gbif_url = MENDELEY_PUBLIC_GROUPS_DOCUMENTS . '/' . MENDELEY_GBIF_PUBLIC_GROUP_ID . '/docs/?details=true&items=40&consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $mendeley_ch = curl_init(); // Create a cURL resource
+      curl_setopt($mendeley_ch, CURLOPT_URL, $mendeley_gbif_url);
+      curl_setopt($mendeley_ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($mendeley_ch, CURLOPT_HEADER, true);
+      $mendeley_ch_result = curl_exec($mendeley_ch);
+      $mendeley_api_status = curl_getinfo($mendeley_ch);
+      curl_close($mendeley_ch);
+      unset($mendeley_ch);
+
+      // Debug step: checking Mendeley API status
+      // Refer to: http://apidocs.mendeley.com/home/responses-and-errors-1
+      switch ($mendeley_api_status['http_code']) {
+        case 200:
+          break; // Proceed! Success! This header is sent for GET requests together with a JSON object containing the data requested.
+        case 201:
+          break; // Another success header! This one is sent after a POST request has been successful.
+        case 204:
+          return t('No content from Mendeley.');
+        case 400:
+          return t('Bad Request to Mendeley.');
+        case 401:
+          return t('Unauthorized: Authentication credentials were missing or incorrect.');
+        case 403:
+          return t('Forbidden.');
+        case 404:
+          return t('Not found.');
+        case 429:
+          return t('Too many requests: Rate limit reached. Please try an hour later.');
+        case 503:
+          return t('Service Unavailable: Mendeley is up, but something went wrong, please try again later.');
+      }
+
+      // Get essential stats for determining the workflow
+      $headers = _npt_mendeley_get_headers($mendeley_ch_result);
+      $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
+      
+      // For available number of calls, update the publication_outlet
+      // and save those completed.
+      $url_to_retrieve = array();
+      $detailed_documents = array();
+      $detailed_documents_to_save = array();
+      
+      // Temporarily take some documents for filling details
+      for ($i = 0; $i < $mendeley_ratelimit_remaining; $i++) {
+        $uuid = $documents[$i]->uuid;
+        $url_to_retrieve[$i] = array(
+          'uuid' => $uuid,
+          'url' => MENDELEY_DOC_DETAIL_URL . '/' . $uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY,
+        );
+        $detailed_documents[$uuid] = $documents[$i];
+        unset($documents[$i]);
+      }
+      
+      // Prepare for the cUrl retrieval
+      $mendeley_ch = array();
+      $master_ch = curl_multi_init();
+      
+      foreach ($url_to_retrieve as $i => $url) {
+        $mendeley_ch[$i] = curl_init($url['url']);
+        curl_setopt($mendeley_ch[$i], CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($mendeley_ch[$i], CURLOPT_HEADER, true);
+        curl_multi_add_handle($master_ch, $mendeley_ch[$i]);
+      }
+      
+      do {
+        curl_multi_exec($master_ch, $running);
+      } while ($running > 0);
+      
+      // Insert retreived document details
+      foreach ($url_to_retrieve as $i => $url) {
+        $curl_result = curl_multi_getcontent($mendeley_ch[$i]);
+        $headers = _npt_mendeley_get_headers($curl_result, 'detail');
+        $uuid = $url['uuid'];
+        if (isset($headers['document_detail']->error) && $headers['document_detail']->error == 'Rate limit exceed.') {
+          break;
+        }
+        else {
+          $detailed_documents[$uuid]->publication_outlet = $headers['document_detail']->publication_outlet;
+          $detailed_documents_to_save[] = $detailed_documents[$uuid];
+          unset($detailed_documents[$uuid]);
+          curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
+          curl_close($mendeley_ch[$i]);
+        }
+      }
+      
+      curl_multi_close($master_ch);
+
+      // If for any reason there are any unprocessed documents, put them back to the $documents array.
+      if (count($detailed_documents) > 0) {
+        foreach ($detailed_documents as $detailed_document) {
+          $documents[] = $detailed_document;
+        }
+      } 
+
+      // Save remaining documents until next _fill_doc_detail call.
+      $file_save_success = file_save_data(json_encode($documents), $documents_file_loc, FILE_EXISTS_REPLACE);
+      if (is_object($file_save_success)) {
+        drupal_set_message(t('The downloaded document is updated.'), 'status');
+      } else {
+        drupal_set_message(t('The downloaded document is not updated. Please check.'), 'warning');
+      }      
+      
+      // Pickup and merge previously processed detailed documents, if any.
+      $detailed_doc_file_loc = file_build_uri('npt_mendeley/detailed_documents.json');
+      $previous_exist = file_exists(drupal_realpath($detailed_doc_file_loc));
+      if ($previous_exist == TRUE) {
+        $detailed_documents_previous = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/detailed_documents.json'))));
+        $detailed_documents_to_save = array_merge($detailed_documents_previous, $detailed_documents_to_save);
+      }
+      
+      $detailed_file = json_encode($detailed_documents_to_save);
+      $file_save_success = file_save_data($detailed_file, $detailed_doc_file_loc, FILE_EXISTS_REPLACE);
+      
+      if (is_object($file_save_success)) {
+        return t('Documents retrieved and inserted.');
+      } else {
+        return t('There is an error while attempting to save retreived document detaisl.');
+      }
+      break;
+    case FALSE:
+      return t('Please first update documents from Mendeley.');
+  }
+  
+}
+
+/**
  * Group retrieved documents into various defined categories.
  */
 function npt_mendeley_analyse() {
@@ -676,7 +818,7 @@ function npt_mendeley_make_comparer() {
  * Helper function to get headers variables in a mendeley call
  * from http headers and the top level of JSON output.
  */
-function _npt_mendeley_get_headers($curl_result) {
+function _npt_mendeley_get_headers($curl_result, $detail) {
   $headers = array();
   $ratelimit_remaining = 0;
   $result_by_line = explode("\r\n", $curl_result);
@@ -694,7 +836,13 @@ function _npt_mendeley_get_headers($curl_result) {
   $json_result = json_decode(end($result_by_line));
   
   $headers['ratelimit_remaining'] = $ratelimit_remaining;
-  $headers['documents'] = $json_result->documents;
+  
+  if (isset($detail) && $detail == 'detail') {
+    $headers['document_detail'] = $json_result;
+  }
+  else {
+    $headers['documents'] = $json_result->documents;
+  }
   $headers['total_results'] = $json_result->total_results;
   $headers['total_pages'] = $json_result->total_pages;
   
