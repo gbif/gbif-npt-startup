@@ -890,5 +890,20 @@ function _npt_mendeley_retrievel_progress() {
   header('Expires: Mon, 26 Jul 1991 05:00:00 GMT');  // disable IE caching
 
   drupal_json_output($progress);
+}
 
+/**
+ * Implementation of hook_cron().
+ */
+function npt_mendeley_cron() {
+  $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
+  $file = drupal_realpath($documents_file_loc);
+  $file_exists = file_exists($file);
+
+  if ($file_exists == TRUE) {
+    $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
+    if (count($documents) > 0) {
+      npt_mendeley_fill_doc_detail();
+    }
+  }
 }
