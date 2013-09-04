@@ -22,12 +22,6 @@ function npt_mendeley_settings_form() {
       'callback' => 'npt_mendeley_retrieve',
       'wrapper' => 'status-wrapper',
       'effect' => 'fade',
-      'progress' => array(
-        'type' => 'bar',
-        'message' => t('Loading...'),
-        'url' => '/mendeley/retrieval_progress',
-        'interval' => '10',
-      ),
     ),
   );
   $form['npt_mendeley_analyse'] = array(

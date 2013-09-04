@@ -454,24 +454,24 @@ function npt_mendeley_retrieve() {
   }
   
   // Get essential stats for determining the workflow
-  $essential = _npt_mendeley_get_essential($mendeley_ch_result);
-  $mendeley_ratelimit_remaining = $essential['ratelimit_remaining'];
-  $total_results = $essential['total_results'];
-  $total_pages = $essential['total_pages'];
+  $headers = _npt_mendeley_get_headers($mendeley_ch_result);
+  $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
+  $total_results = $headers['total_results'];
+  $total_pages = $headers['total_pages'];
 
   // For storing the progress for ajax callback
   $_SESSION['mendeley_progress'] = array(
     'percentage' => 0,
     'message' => t('Initialising...'),
-    'ratelimit_remaining' => $essential['ratelimit_remaining'],
+    'ratelimit_remaining' => $headers['ratelimit_remaining'],
     'page_retrieved' => 0,
-    'total_pages' => $essential['total_pages'],
+    'total_pages' => $headers['total_pages'],
     'documents_retrieved' => 0,
-    'total_results' => $essential['total_results'],
+    'total_results' => $headers['total_results'],
     'timestamp' => time(),
   );
   variable_set('npt_mendeley_retrieval_progress', $_SESSION['mendeley_progress']);
-  unset($essential);
+  unset($headers);
 
   // Prepare the uri for storing retrieved documents
   $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
@@ -531,10 +531,10 @@ function npt_mendeley_retrieve() {
     // Push results together
     foreach ($url_to_retrieve as $i => $url) {
       $curl_result = curl_multi_getcontent($mendeley_ch[$i]);
-      $essential = _npt_mendeley_get_essential($curl_result);
-      $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $essential['documents']);
+      $headers = _npt_mendeley_get_headers($curl_result);
+      $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $headers['documents']);
       
-      $_SESSION['mendeley_progress']['ratelimit_remaining'] = $essential['ratelimit_remaining'];
+      $_SESSION['mendeley_progress']['ratelimit_remaining'] = $headers['ratelimit_remaining'];
       $_SESSION['mendeley_progress']['page_retrieved'] = $i + 1;
       $_SESSION['mendeley_progress']['documents_retrieved'] = count($mendeley_gbif_documents);
       $_SESSION['mendeley_progress']['timestamp'] = time();
@@ -548,11 +548,7 @@ function npt_mendeley_retrieve() {
 
     curl_multi_close($master_ch);
     
-    // Interate through all documents to get their journal names
     foreach ($mendeley_gbif_documents as $doc) {
-      // $url = MENDELEY_DOC_DETAIL_URL . '/' . $adoc->id . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY; // It doesn't work now.
-      // $detail = json_decode(file_get_contents($url));
-      // $adoc->publication_outlet = $detail->publication_outlet;
       $doc->publication_outlet = '[Pending journal name]';
     }
 
@@ -561,7 +557,6 @@ function npt_mendeley_retrieve() {
     $file_save_success = file_save_data($json_file, $documents_file_loc, FILE_EXISTS_REPLACE);
     
     if (is_object($file_save_success)) {
-      //drupal_set_message(t('Mendeley documents retrieved and saved.'));
       return t('Mendeley documents retrieved and saved.');
     } else {
       return t('Mendeley documents not successfully saved.');
@@ -678,11 +673,11 @@ function npt_mendeley_make_comparer() {
 }
 
 /**
- * Helper function to get essential variables in a mendeley call
+ * Helper function to get headers variables in a mendeley call
  * from http headers and the top level of JSON output.
  */
-function _npt_mendeley_get_essential($curl_result) {
-  $essential = array();
+function _npt_mendeley_get_headers($curl_result) {
+  $headers = array();
   $ratelimit_remaining = 0;
   $result_by_line = explode("\r\n", $curl_result);
   
@@ -698,12 +693,12 @@ function _npt_mendeley_get_essential($curl_result) {
   // Get the documents in json format, convert it to array
   $json_result = json_decode(end($result_by_line));
   
-  $essential['ratelimit_remaining'] = $ratelimit_remaining;
-  $essential['documents'] = $json_result->documents;
-  $essential['total_results'] = $json_result->total_results;
-  $essential['total_pages'] = $json_result->total_pages;
+  $headers['ratelimit_remaining'] = $ratelimit_remaining;
+  $headers['documents'] = $json_result->documents;
+  $headers['total_results'] = $json_result->total_results;
+  $headers['total_pages'] = $json_result->total_pages;
   
-  return $essential;
+  return $headers;
 }
 
 /**
