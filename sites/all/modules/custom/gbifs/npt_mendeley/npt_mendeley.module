@@ -551,7 +551,26 @@ function npt_mendeley_retrieve() {
     foreach ($mendeley_gbif_documents as $doc) {
       $doc->publication_outlet = '[Pending journal name]';
     }
+    
+    // Take out those don't have uuid and save separately.
+    $documents_no_uuid = array();
+    foreach ($mendeley_gbif_documents as $k => $doc) {
+      if (isset($doc->uuid) == FALSE) {
+        $documents_no_uuid[] = $doc;
+        unset($mendeley_gbif_documents[$k]);
+      }
+    }
+    // Save a local copy of documents that don't have uuid.
+    $no_uuid_file_save_success = file_save_data(json_encode($documents_no_uuid), file_build_uri('npt_mendeley/documents_no_uuid.json') , FILE_EXISTS_REPLACE);
 
+    // Organise the mendeley documents
+    $docs = array();
+    foreach ($mendeley_gbif_documents as $doc) {
+      $docs[] = $doc;
+    }
+    $mendeley_gbif_documents = $docs;
+    unset($docs);
+    
     // Save a local copy for use when there is no network connection or the rate is exceeded for Mendeley API.
     $json_file = json_encode($mendeley_gbif_documents);
     $file_save_success = file_save_data($json_file, $documents_file_loc, FILE_EXISTS_REPLACE);
@@ -579,7 +598,8 @@ function npt_mendeley_fill_doc_detail() {
 
   switch ($file_exists) {
     case TRUE:
-      $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
+    	$documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))), TRUE);
+      $first_key = key($documents);
       
       // Trial accessing Mendeley API.
       $mendeley_gbif_url = MENDELEY_PUBLIC_GROUPS_DOCUMENTS . '/' . MENDELEY_GBIF_PUBLIC_GROUP_ID . '/docs/?details=true&items=40&consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
@@ -619,6 +639,10 @@ function npt_mendeley_fill_doc_detail() {
       $headers = _npt_mendeley_get_headers($mendeley_ch_result);
       $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
       
+      // Determine the starting key and the end key
+      $start_key = $first_key;
+      $end_key = $first_key + $mendeley_ratelimit_remaining - 1;
+      
       // For available number of calls, update the publication_outlet
       // and save those completed.
       $url_to_retrieve = array();
@@ -626,13 +650,13 @@ function npt_mendeley_fill_doc_detail() {
       $detailed_documents_to_save = array();
       
       // Temporarily take some documents for filling details
-      for ($i = 0; $i < $mendeley_ratelimit_remaining; $i++) {
-        $uuid = $documents[$i]->uuid;
+      for ($i = $start_key; $i <= $end_key; $i++) {
+        $uuid = $documents[$i]['uuid'];
         $url_to_retrieve[$i] = array(
           'uuid' => $uuid,
           'url' => MENDELEY_DOC_DETAIL_URL . '/' . $uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY,
         );
-        $detailed_documents[$uuid] = $documents[$i];
+        $detailed_documents[$i] = $documents[$i];
         unset($documents[$i]);
       }
       
@@ -660,9 +684,9 @@ function npt_mendeley_fill_doc_detail() {
           break;
         }
         else {
-          $detailed_documents[$uuid]->publication_outlet = $headers['document_detail']->publication_outlet;
-          $detailed_documents_to_save[] = $detailed_documents[$uuid];
-          unset($detailed_documents[$uuid]);
+          $detailed_documents[$i]['publication_outlet'] = $headers['document_detail']->publication_outlet;
+          $detailed_documents_to_save[] = $detailed_documents[$i];
+          unset($detailed_documents[$i]);
           curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
           curl_close($mendeley_ch[$i]);
         }

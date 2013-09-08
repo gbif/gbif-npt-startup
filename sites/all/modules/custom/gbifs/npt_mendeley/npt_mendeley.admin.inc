@@ -31,7 +31,7 @@ function npt_mendeley_settings_form() {
   );
   $form['npt_mendeley_detail']['detail_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update detail now'),
+    '#value' => t('Update journal names'),
     '#prefix' => '<div id="detail-div">',
     '#suffix' => '<div id="detail-status-wrapper"></div></div>',
     '#ajax' => array(
