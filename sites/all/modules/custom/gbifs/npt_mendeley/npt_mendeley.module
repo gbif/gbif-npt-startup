@@ -236,6 +236,21 @@ function npt_mendeley_block_view($delta = '') {
   return $block;
 }
 
+/**
+ * Implementation of hook_cron().
+ */
+function npt_mendeley_cron() {
+  $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
+  $file = drupal_realpath($documents_file_loc);
+  $file_exists = file_exists($file);
+
+  if ($file_exists == TRUE) {
+    $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
+    if (count($documents) > 0) {
+      npt_mendeley_fill_doc_detail();
+    }
+  }
+}
 
 /**
  * Produce citation list and export it
@@ -588,18 +603,19 @@ function npt_mendeley_retrieve() {
 /**
  * @todo Find a better way to incorporate the trial accessing code
  *       in npt_mendeley_retrieve().
+ * @todo rate limit of detail call is 500.
  */
 
 function npt_mendeley_fill_doc_detail() {
   // Load local documents.json
   $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
-  $file = drupal_realpath($documents_file_loc);
-  $file_exists = file_exists($file);
+  $file_exists = file_exists(drupal_realpath($documents_file_loc));
 
   switch ($file_exists) {
+    case FALSE:
+      return t('Please first update documents from Mendeley.');
     case TRUE:
-    	$documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))), TRUE);
-      $first_key = key($documents);
+    	$documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
       
       // Trial accessing Mendeley API.
       $mendeley_gbif_url = MENDELEY_PUBLIC_GROUPS_DOCUMENTS . '/' . MENDELEY_GBIF_PUBLIC_GROUP_ID . '/docs/?details=true&items=40&consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
@@ -639,24 +655,19 @@ function npt_mendeley_fill_doc_detail() {
       $headers = _npt_mendeley_get_headers($mendeley_ch_result);
       $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
       
-      // Determine the starting key and the end key
-      $start_key = $first_key;
-      $end_key = $first_key + $mendeley_ratelimit_remaining - 1;
-      
-      // For available number of calls, update the publication_outlet
-      // and save those completed.
+      // With available number of calls, update the publication_outlet
       $url_to_retrieve = array();
       $detailed_documents = array();
       $detailed_documents_to_save = array();
       
       // Temporarily take some documents for filling details
-      for ($i = $start_key; $i <= $end_key; $i++) {
-        $uuid = $documents[$i]['uuid'];
-        $url_to_retrieve[$i] = array(
+      for ($i = 0; $i < $mendeley_ratelimit_remaining; $i++) {
+        $uuid = $documents[$i]->uuid;
+        $url_to_retrieve[] = array(
           'uuid' => $uuid,
           'url' => MENDELEY_DOC_DETAIL_URL . '/' . $uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY,
         );
-        $detailed_documents[$i] = $documents[$i];
+        $detailed_documents[] = $documents[$i];
         unset($documents[$i]);
       }
       
@@ -684,7 +695,7 @@ function npt_mendeley_fill_doc_detail() {
           break;
         }
         else {
-          $detailed_documents[$i]['publication_outlet'] = $headers['document_detail']->publication_outlet;
+          $detailed_documents[$i]->publication_outlet = $headers['document_detail']->publication_outlet;
           $detailed_documents_to_save[] = $detailed_documents[$i];
           unset($detailed_documents[$i]);
           curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
@@ -700,6 +711,9 @@ function npt_mendeley_fill_doc_detail() {
           $documents[] = $detailed_document;
         }
       } 
+
+      // Organise $documents so the index starts from zero.
+      $documents = _npt_mendeley_document_reindex($documents);
 
       // Save remaining documents until next _fill_doc_detail call.
       $file_save_success = file_save_data(json_encode($documents), $documents_file_loc, FILE_EXISTS_REPLACE);
@@ -726,8 +740,6 @@ function npt_mendeley_fill_doc_detail() {
         return t('There is an error while attempting to save retreived document detaisl.');
       }
       break;
-    case FALSE:
-      return t('Please first update documents from Mendeley.');
   }
   
 }
@@ -737,14 +749,17 @@ function npt_mendeley_fill_doc_detail() {
  */
 function npt_mendeley_analyse() {
 
-  // Check if there is a local copy of Mendeley documents.
   $tag_sets = variable_get('npt_mendeley_tags');
-  $file = drupal_realpath(file_build_uri('npt_mendeley/documents.json'));
-  $file_exists = file_exists($file);
+   
+  // Check if there is a local copy of Mendeley documents.
+  $documents_file_loc = file_build_uri('npt_mendeley/detailed_documents.json');
+  $file_exists = file_exists(drupal_realpath($documents_file_loc));
 
   switch ($file_exists) {
+    case FALSE:
+      return t('Please first update documents from Mendeley.');
     case TRUE:
-      $documents = json_decode(file_get_contents(file_create_url(file_build_uri('npt_mendeley/documents.json'))));
+      $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
 
       $file_save_error = FALSE;
 
@@ -794,8 +809,6 @@ function npt_mendeley_analyse() {
         return t('All files successfully analysed and saved.');
       }
       break;
-    case FALSE:
-      return t('Please first update documents from Mendeley.');
   }
   
 }
@@ -917,17 +930,13 @@ function _npt_mendeley_retrievel_progress() {
 }
 
 /**
- * Implementation of hook_cron().
+ * Helper function for re-indexing documents
  */
-function npt_mendeley_cron() {
-  $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
-  $file = drupal_realpath($documents_file_loc);
-  $file_exists = file_exists($file);
-
-  if ($file_exists == TRUE) {
-    $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
-    if (count($documents) > 0) {
-      npt_mendeley_fill_doc_detail();
-    }
+function _npt_mendeley_document_reindex($documents) {
+  $docs = array();
+  foreach ($documents as $doc) {
+    $docs[] = $doc;
   }
+  $documents = $docs;
+  return $documents;
 }

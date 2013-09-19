@@ -26,8 +26,8 @@ function npt_mendeley_settings_form() {
   );
   $form['npt_mendeley_detail'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Analyse retrieved documents from Mendeley'),
-    '#description' => '<p>' . t('Group retrieved documents according to prefined sets of tags and produce lists in configurable blocks.') . '</p>',
+    '#title' => t('Get journal names for documents retrieved from Mendeley'),
+    '#description' => '<p>' . t('Journal names need separate calls to retrieve.') . '</p>',
   );
   $form['npt_mendeley_detail']['detail_submit'] = array(
     '#type' => 'submit',
