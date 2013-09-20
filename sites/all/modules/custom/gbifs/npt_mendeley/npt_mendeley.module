@@ -667,6 +667,13 @@ function npt_mendeley_fill_doc_detail() {
       // Get essential stats for determining the workflow
       $headers = _npt_mendeley_get_headers($mendeley_ch_result, FALSE);
       $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
+      $document_left_count = count($documents);
+      if ($document_left_count < $mendeley_ratelimit_remaining) {
+        $attempts = $document_left_count;
+      }
+      elseif ($document_left_count >= $mendeley_ratelimit_remaining) {
+        $attempts = $mendeley_ratelimit_remaining;
+      }
       
       // With available number of calls, update the publication_outlet
       $url_to_retrieve = array();
@@ -674,7 +681,7 @@ function npt_mendeley_fill_doc_detail() {
       $detailed_documents_to_save = array();
       
       // Temporarily take some documents for filling details
-      for ($i = 0; $i < $mendeley_ratelimit_remaining; $i++) {
+      for ($i = 0; $i < $attempts; $i++) {
         $uuid = $documents[$i]->uuid;
         $url_to_retrieve[] = array(
           'uuid' => $uuid,
@@ -708,7 +715,7 @@ function npt_mendeley_fill_doc_detail() {
           break;
         }
         else {
-          $detailed_documents[$i]->publication_outlet = $headers['document_detail']->publication_outlet;
+          if (isset($headers['document_detail']->publication_outlet)) $detailed_documents[$i]->publication_outlet = $headers['document_detail']->publication_outlet;
           $detailed_documents_to_save[] = $detailed_documents[$i];
           unset($detailed_documents[$i]);
           curl_multi_remove_handle($master_ch, $mendeley_ch[$i]);
@@ -768,10 +775,25 @@ function npt_mendeley_analyse() {
   // Check if there is a local copy of Mendeley documents.
   $documents_file_loc = file_build_uri('npt_mendeley/detailed_documents.json');
   $file_exists = file_exists(drupal_realpath($documents_file_loc));
+  
+  $total = variable_get('npt_mendeley_total');
+  $updated = variable_get('npt_mendeley_updated');
+  
+  if ($file_exists == TRUE && $total == $updated) {
+    $finished == TRUE;
+  }
+  else {
+    $finished == FALSE;
+  }
 
-  switch ($file_exists) {
+  switch ($finished) {
     case FALSE:
-      return t('Please first update documents from Mendeley.');
+      if ($file_exists == FALSE) {
+        return t('Please first update documents from Mendeley.'); 
+      }
+      elseif ($total <> $updated) {
+        return t('Please wait until all journal names are updated.'); 
+      }
     case TRUE:
       $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
 
@@ -892,10 +914,10 @@ function _npt_mendeley_get_headers($curl_result, $detail) {
     $headers['document_detail'] = $json_result;
   }
   else {
-    $headers['documents'] = $json_result->documents;
+    if (isset($json_result->documents)) $headers['documents'] = $json_result->documents;
   }
-  $headers['total_results'] = $json_result->total_results;
-  $headers['total_pages'] = $json_result->total_pages;
+  if (isset($json_result->total_results)) $headers['total_results'] = $json_result->total_results;
+  if (isset($json_result->total_pages)) $headers['total_pages'] = $json_result->total_pages;
   
   return $headers;
 }
