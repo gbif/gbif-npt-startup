@@ -795,7 +795,7 @@ function npt_mendeley_analyse() {
         return t('Please wait until all journal names are updated.'); 
       }
     case TRUE:
-      $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
+      $documents = json_decode(file_get_contents(drupal_realpath($documents_file_loc)));
 
       $file_save_error = FALSE;
 
