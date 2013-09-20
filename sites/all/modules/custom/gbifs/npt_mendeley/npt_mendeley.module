@@ -430,6 +430,7 @@ function _npt_mendeley_list_documents($gbif_cat_type, $machine_name, $render) {
 
 /**
  * Ensure a local digest of citations from the GBIF Public Library on Mendeley.
+ * @todo To figure out why size doesn't show in debug session.
  */
 function npt_mendeley_retrieve() {
 
@@ -531,8 +532,10 @@ function npt_mendeley_retrieve() {
       $mendeley_ch[$i] = curl_init($url);
       curl_setopt($mendeley_ch[$i], CURLOPT_RETURNTRANSFER, true);
       curl_setopt($mendeley_ch[$i], CURLOPT_HEADER, true);
-      curl_setopt($mendeley_ch[$i], CURLOPT_NOPROGRESS, false);
-      _npt_mendeley_curl_progress_callback($mendeley_ch[$i]); //@todo To figure out why size doesn't show in debug session
+      
+      // @todo To figure out why size doesn't show in debug session
+      // curl_setopt($mendeley_ch[$i], CURLOPT_NOPROGRESS, false);
+      // _npt_mendeley_curl_progress_callback($mendeley_ch[$i]);
       curl_multi_add_handle($master_ch, $mendeley_ch[$i]);
     }
 
