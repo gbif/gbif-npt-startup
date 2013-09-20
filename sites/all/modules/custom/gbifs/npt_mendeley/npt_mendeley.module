@@ -241,8 +241,7 @@ function npt_mendeley_block_view($delta = '') {
  */
 function npt_mendeley_cron() {
   $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
-  $file = drupal_realpath($documents_file_loc);
-  $file_exists = file_exists($file);
+  $file_exists = file_exists(drupal_realpath($documents_file_loc));
 
   if ($file_exists == TRUE) {
     $documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
@@ -469,7 +468,7 @@ function npt_mendeley_retrieve() {
   }
   
   // Get essential stats for determining the workflow
-  $headers = _npt_mendeley_get_headers($mendeley_ch_result);
+  $headers = _npt_mendeley_get_headers($mendeley_ch_result, FALSE);
   $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
   $total_results = $headers['total_results'];
   $total_pages = $headers['total_pages'];
@@ -546,7 +545,7 @@ function npt_mendeley_retrieve() {
     // Push results together
     foreach ($url_to_retrieve as $i => $url) {
       $curl_result = curl_multi_getcontent($mendeley_ch[$i]);
-      $headers = _npt_mendeley_get_headers($curl_result);
+      $headers = _npt_mendeley_get_headers($curl_result, FALSE);
       $mendeley_gbif_documents = array_merge($mendeley_gbif_documents, $headers['documents']);
       
       $_SESSION['mendeley_progress']['ratelimit_remaining'] = $headers['ratelimit_remaining'];
@@ -591,6 +590,13 @@ function npt_mendeley_retrieve() {
     $file_save_success = file_save_data($json_file, $documents_file_loc, FILE_EXISTS_REPLACE);
     
     if (is_object($file_save_success)) {
+      // reset detailed_documents
+      $documents_file_loc = file_build_uri('npt_mendeley/detailed_documents.json');
+      $file_exists = file_exists(drupal_realpath($documents_file_loc));
+      if ($file_exists == TRUE) {
+        file_unmanaged_delete(drupal_realpath($documents_file_loc));
+      }
+      variable_set('npt_mendeley_total', count($mendeley_gbif_documents));
       return t('Mendeley documents retrieved and saved.');
     } else {
       return t('Mendeley documents not successfully saved.');
@@ -618,7 +624,8 @@ function npt_mendeley_fill_doc_detail() {
     	$documents = json_decode(file_get_contents(file_create_url($documents_file_loc)));
       
       // Trial accessing Mendeley API.
-      $mendeley_gbif_url = MENDELEY_PUBLIC_GROUPS_DOCUMENTS . '/' . MENDELEY_GBIF_PUBLIC_GROUP_ID . '/docs/?details=true&items=40&consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
+      $uuid = $documents[0]->uuid;
+      $mendeley_gbif_url = MENDELEY_DOC_DETAIL_URL . '/' . $uuid . '/?consumer_key=' . NPT_MENDELEY_CONSUMER_KEY;
       $mendeley_ch = curl_init(); // Create a cURL resource
       curl_setopt($mendeley_ch, CURLOPT_URL, $mendeley_gbif_url);
       curl_setopt($mendeley_ch, CURLOPT_RETURNTRANSFER, true);
@@ -652,7 +659,7 @@ function npt_mendeley_fill_doc_detail() {
       }
 
       // Get essential stats for determining the workflow
-      $headers = _npt_mendeley_get_headers($mendeley_ch_result);
+      $headers = _npt_mendeley_get_headers($mendeley_ch_result, FALSE);
       $mendeley_ratelimit_remaining = $headers['ratelimit_remaining'];
       
       // With available number of calls, update the publication_outlet
@@ -689,7 +696,7 @@ function npt_mendeley_fill_doc_detail() {
       // Insert retreived document details
       foreach ($url_to_retrieve as $i => $url) {
         $curl_result = curl_multi_getcontent($mendeley_ch[$i]);
-        $headers = _npt_mendeley_get_headers($curl_result, 'detail');
+        $headers = _npt_mendeley_get_headers($curl_result, TRUE);
         $uuid = $url['uuid'];
         if (isset($headers['document_detail']->error) && $headers['document_detail']->error == 'Rate limit exceed.') {
           break;
@@ -735,9 +742,10 @@ function npt_mendeley_fill_doc_detail() {
       $file_save_success = file_save_data($detailed_file, $detailed_doc_file_loc, FILE_EXISTS_REPLACE);
       
       if (is_object($file_save_success)) {
+        variable_set('npt_mendeley_updated', count($detailed_documents_to_save));
         return t('Documents retrieved and inserted.');
       } else {
-        return t('There is an error while attempting to save retreived document detaisl.');
+        return t('There is an error while attempting to save retreived document detail.');
       }
       break;
   }
@@ -874,7 +882,7 @@ function _npt_mendeley_get_headers($curl_result, $detail) {
   
   $headers['ratelimit_remaining'] = $ratelimit_remaining;
   
-  if (isset($detail) && $detail == 'detail') {
+  if ($detail == TRUE) {
     $headers['document_detail'] = $json_result;
   }
   else {

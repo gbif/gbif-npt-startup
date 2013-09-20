@@ -24,6 +24,7 @@ function npt_mendeley_install() {
  */
 function npt_mendeley_enable() {
   npt_mendeley_retrieve();
+  npt_mendeley_fill_doc_detail();
   npt_mendeley_analyse();
 }
 
@@ -160,4 +161,6 @@ function npt_mendeley_uninstall() {
   variable_del('npt_mendeley_last_update');
   variable_del('npt_mendeley_tags');
   variable_del('npt_mendeley_retrieval_progress');
+  variable_del('npt_mendeley_total');
+  variable_del('npt_mendeley_updated');
 }

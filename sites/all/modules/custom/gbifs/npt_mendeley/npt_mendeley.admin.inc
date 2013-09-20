@@ -6,7 +6,6 @@
  */
  
 function npt_mendeley_settings_form() {
- 
   drupal_add_library('npt_mendeley', 'progress', false); 
   $form['npt_mendeley_update'] = array(
     '#type' => 'fieldset',
@@ -24,10 +23,20 @@ function npt_mendeley_settings_form() {
       'effect' => 'fade',
     ),
   );
+
+  $total_docs = variable_get('npt_mendeley_total');
+  $updated_docs = variable_get('npt_mendeley_updated', 0);
+  $hours = ceil(($total_docs - $updated_docs) / 499);
+  $description = t('Journal names need separate calls to retrieve. @updated_docs of total @total_docs documents updated. ', array(
+    '@updated_docs' => $updated_docs,
+    '@total_docs' => $total_docs,
+  ));
+  $description .= format_plural($hours, t('1 cron job left to complete.'), t('@count cron jobs left to complete.'));
+
   $form['npt_mendeley_detail'] = array(
     '#type' => 'fieldset',
     '#title' => t('Get journal names for documents retrieved from Mendeley'),
-    '#description' => '<p>' . t('Journal names need separate calls to retrieve.') . '</p>',
+    '#description' => '<p>' . $description . '</p>',
   );
   $form['npt_mendeley_detail']['detail_submit'] = array(
     '#type' => 'submit',
