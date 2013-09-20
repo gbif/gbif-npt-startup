@@ -492,9 +492,12 @@ function npt_mendeley_retrieve() {
   $documents_file_loc = file_build_uri('npt_mendeley/documents.json');
   $documents_file_path = drupal_realpath($documents_file_loc);
   $documents_exist = file_exists($documents_file_loc);
-  $documents_time = filemtime($documents_file_path)? filemtime($documents_file_path) : 0;
-  $time = time();
-  $documents_age = $time - $documents_time;
+
+  if ($document_exist == TRUE) {
+    $documents_time = filemtime($documents_file_path)? filemtime($documents_file_path) : 0;
+    $time = time();
+    $documents_age = $time - $documents_time;
+  }
 
   $interval = variable_get('npt_mendeley_update_interval', 3600);
   if ($documents_exist == TRUE && $documents_age < $interval) {
