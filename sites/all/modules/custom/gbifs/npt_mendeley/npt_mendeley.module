@@ -3,9 +3,6 @@
  * @file
  * This module retrieves relevant literature entries about a node from Mendeley API.
  * @todo More precise progress probing using CURLOPT_PROGRESSFUNCTION.
- * @todo JSON interface for country pages, accepting call by ISO country code.
- * @todo UUID not exist in the Mendeley documents as of 1 Aug 13.
- * @todo Country groups yet finished. To include _biodiversity or not in the same list?
  */
 
 define('NPT_MENDELEY_CONSUMER_KEY', '6d775b71aef1d3e93dbfabbd2653bfe1051e3ddaf');

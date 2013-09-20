@@ -1,6 +1,6 @@
 name = NPT Mendeley
 description = List professional publications of the GBIF Participant Node that is been associated with this Drupal site.
-version = 7.x-0.5
+version = 7.x-0.8
 package = GBIFS
 project = Nodes Portal Toolkit
 core = 7.x
