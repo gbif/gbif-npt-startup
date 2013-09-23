@@ -79,7 +79,7 @@ function npt_startup_tweak_vocabularies() {
       ),
     ),
     'species_list' => array(
-      'name' => 'Species',
+      'name' => 'Biodiversity Data',
       'machine_name' => 'species_list',
       'description' => 'A default site-wide biological classification',
       'hierarchy' => '0',
