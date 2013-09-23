@@ -45,7 +45,7 @@ function _npt_startup_settings_get_form($form, $form_state) {
     '#title' => $t('GBIF Participants'),
     '#options' => _npt_startup_get_participant_list(),
     '#default_value' => isset($gbif_participant_settings['node_uuid']) ? $gbif_participant_settings['node_uuid'] : NULL,
-    '#description' => $t('Not a GBIF Participant? Please leave it unselected.'),
+    '#description' => $t('Not a GBIF Participant? Please leave it unselected. In case the list is not populated properly, please reload the page until the list is available.'),
     '#required' => FALSE,
   );
 
