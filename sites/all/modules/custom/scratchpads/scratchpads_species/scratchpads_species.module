@@ -740,7 +740,7 @@ function scratchpads_species_get_default_tabs(){
     'media' => t('Media'),
     'literature' => t('Literature'),
     'maps' => t('Maps'),
-    'specimens' => t('Specimens')
+    'specimens' => t('Occurrences')
   );
   drupal_alter('scratchpads_species_tabs', $tabs);
   return $tabs;

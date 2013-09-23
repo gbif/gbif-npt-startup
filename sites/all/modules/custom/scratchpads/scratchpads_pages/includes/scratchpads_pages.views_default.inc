@@ -179,7 +179,7 @@ function scratchpads_pages_views_default_views(){
           $view->api_version = '3.0';
           $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
         /* Display: Master */
-                            $handler = $view->new_display('default', 'Master', 'default');
+          $handler = $view->new_display('default', 'Master', 'default');
           $handler->display->display_options['title'] = scratchpads_pages_pluralise_node_name($node_info->name);
           $handler->display->display_options['access']['type'] = 'perm';
           $handler->display->display_options['cache']['type'] = 'none';
