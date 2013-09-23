@@ -24,8 +24,8 @@ function npt_mendeley_install() {
  */
 function npt_mendeley_enable() {
   npt_mendeley_retrieve();
-  npt_mendeley_fill_doc_detail();
-  npt_mendeley_analyse();
+  //npt_mendeley_fill_doc_detail();
+  //npt_mendeley_analyse();
 }
 
 function npt_mendeley_default_tag_sets() {
