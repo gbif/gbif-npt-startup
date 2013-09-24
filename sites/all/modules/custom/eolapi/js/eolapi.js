@@ -9,12 +9,12 @@
         if(data.length) {
           $(original_this).parent().parent().parent().html(data);
         } else {
-          $(original_this).html('No results.');
+          $(original_this).html('No results from EOL yet. Visit Biodiversity Data to start to see EOL contents.');
         }
         $(original_this).removeClass('eolapi-empty');
         Drupal.eolapi.do_the_do();
       }, error: function(data, textStatus, jqXHR){
-        $(original_this).html('No results.');
+        $(original_this).html('No results from EOL yet. Visit Biodiversity Data to start to see EOL contents.');
         $(original_this).removeClass('eolapi-empty');
         Drupal.eolapi.do_the_do();
       }});
