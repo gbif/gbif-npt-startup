@@ -118,7 +118,7 @@ function npt_stats_block_view($delta = '') {
 
       $block['subject'] = t('GBIF Participation');
       $block['content'] = array(
-        '#markup' => t('Membership status: ') . $status_text,
+        '#markup' => '<p>' . t('Membership status: ') . $status_text . '</p>',
       );
       break;
     case 'data_publishing_orgs':
