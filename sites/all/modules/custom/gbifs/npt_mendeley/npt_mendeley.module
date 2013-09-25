@@ -267,7 +267,20 @@ function npt_mendeley_full_list($gbif_cat_type = 'usecases', $machine_name = '',
   // Generate output.
   // If the request is for JSON, stop processing and export right away.
   if ($gbif_cat_type == 'country' && $json == 'json') {
-    drupal_json_output($$machine_name);
+
+    // Determine whether this is a JSONP request
+    if (isset($_GET['callback'])) {
+      header('Content-Type: text/javascript; charset=utf8');
+      header('Access-Control-Max-Age: 3628800');
+      header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+
+      $callback = $_GET['callback'];
+      echo $callback . '(' . json_encode($$machine_name) . ')';
+      
+    }
+    else {
+      drupal_json_output($$machine_name);
+    }
   }
   else {
 
