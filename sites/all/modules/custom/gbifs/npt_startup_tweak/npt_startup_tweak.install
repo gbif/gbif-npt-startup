@@ -36,7 +36,9 @@ function npt_startup_tweak_install() {
     'npt_mendeley',
   ));
 
+  // Default variables
   variable_set('creative_commons_block_display_type', '80x15.png');
+  variable_set('standard_scratchpad', FALSE);
 
   // Set the comment form defaults.
   foreach (node_type_get_names() as $type => $name) {
