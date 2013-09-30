@@ -12,6 +12,23 @@ function scratchpads_roles_and_permissions_scratchpads_default_permissions_alter
   $permissions['contributor'] = array_merge($permissions['authenticated user'], $permissions['contributor']);
   $permissions['editor'] = array_merge($permissions['contributor'], $permissions['editor']);
   $permissions['maintainer'] = array_merge($permissions['editor'], $permissions['maintainer']);
+  // We also check for permissions that have been enabled for the subpermissions
+  // module.
+  $subperms = array_filter(variable_get('subpermissions_config', array()));
+  foreach($subperms as $subperm){
+    // Remove the permission from the default.
+    foreach($permissions as $role => $role_permissions){
+      foreach($role_permissions as $key => $role_permission){
+        if($subperm == $role_permission){
+          unset($permissions[$role][$key]);
+        }
+      }
+    }
+    // Add the current permissions back.
+    foreach(user_roles(FALSE, $subperm) as $role){
+      $permissions[$role][] = $subperm;
+    }
+  }
 }
 
 /**
@@ -37,6 +54,17 @@ function weight_scratchpads_default_permissions(){
     ),
     'maintainer' => array(
       'administer weight'
+    )
+  );
+}
+
+/**
+ * GM3 module
+ */
+function gm3_scratchpads_default_permissions(){
+  return array(
+    'maintainer' => array(
+      'administer gm3'
     )
   );
 }
@@ -241,21 +269,6 @@ function formflow_scratchpads_default_permissions(){
 }
 
 /**
- * Hashcash module
- *
- * Implements hook_scratchpads_default_permissions().
- */
-function hashcash_scratchpads_default_permissions(){
-  // Missing:
-  // administer hashcash
-  return array(
-    'authenticated user' => array(
-      'submit form without hashcash'
-    )
-  );
-}
-
-/**
  * Femail module
  *
  * Implements hook_scratchpads_default_permissions().
@@ -356,6 +369,22 @@ function taxonomy_scratchpads_default_permissions(){
     $permissions['editor'][] = 'delete terms in ' . $vocabulary->vid;
   }
   return $permissions;
+}
+
+/**
+ * Path module
+ * 
+ * Implements hook_scratchpads_default_permissions().
+ */
+function path_scratchpads_default_permissions(){
+  return array(
+    'maintainer' => array(
+      'administer url aliases'
+    ),
+    'contributor' => array(
+      'create url aliases'
+    )
+  );
 }
 
 /**
@@ -696,4 +725,18 @@ function node_scratchpads_default_permissions(){
     $permissions['editor'][] = "delete any $type content";
   }
   return $permissions;
+}
+
+/**
+ * Gravatar module
+ *
+ * Implements hook_scratchpads_default_permissions().
+ */
+function gravatar_scratchpads_default_permissions(){
+  return array(
+    'authenticated user' => array(
+      'use gravatar',
+      'disable own gravatar'
+    )
+  );
 }

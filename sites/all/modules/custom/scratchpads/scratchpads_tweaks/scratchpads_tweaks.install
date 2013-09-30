@@ -20,9 +20,11 @@ function scratchpads_tweaks_install(){
   // the minimal_install() function does not barf.
   $backtrace = debug_backtrace();
   if(count($backtrace) > 4){
-    $backtrace = explode('/', $backtrace[4]['file']);
-    file_put_contents('/tmp/drupal_debug.txt', print_r($backtrace, 1) . "\n", FILE_APPEND);
-    if(array_pop($backtrace) == 'scratchpads_tweaks.test'){return;}
+    if(isset($backtrace[4]['file'])){
+      $backtrace = explode('/', $backtrace[4]['file']);
+      file_put_contents('/tmp/drupal_debug.txt', print_r($backtrace, 1) . "\n", FILE_APPEND);
+      if(array_pop($backtrace) == 'scratchpads_tweaks.test'){return;}
+    }
   }
   // Install the filters.
   scratchpads_tweaks_install_help_install_filters();
@@ -313,15 +315,17 @@ function scratchpads_tweaks_install(){
   // Set the jQuery settings
   scratchpads_tweaks_update_7049();
   // Prevent optimize from running on Solr.
-  variable_set('apachesolr_last_optimize', 10000000000);
+  variable_set('apachesolr_optimize_interval', PHP_INT_MAX);
+  // Allow insecure derivatives
+  variable_set('image_allow_insecure_derivatives', TRUE);
+  // Enable the subpermissions module which has lay dormant for many many months
+  variable_set('subpermissions_config', array(
+    'show download links' => 'show download links'
+  ));
 }
 
 /**
- * Add the twitterscript filter.
- *
- * NOTE, This update should be renumbered and altered when wanting to update the
- * filters.  The hook_install function will also need to be changed to reflect
- * the renumber.
+ * Helper script to install/update filters.
  */
 function scratchpads_tweaks_install_help_install_filters(){
   // Add text formats.
@@ -367,15 +371,15 @@ function scratchpads_tweaks_install_help_install_filters(){
         'weight' => 12,
         'status' => 1
       ),
-      'twitterscript_filter' => array(
-        'weight' => 100,
+      'twitter_filter_filter' => array(
+        'weight' => 1000,
         'status' => 1
       )
     )
   );
   $filtered_html_format = (object)$filtered_html_format;
   filter_format_save($filtered_html_format);
-  unset($filtered_html_format->filters['twitterscript_filter']);
+  unset($filtered_html_format->filters['twitter_filter_filter']);
   $filtered_html_format->format = 'comment_filtered_html';
   $filtered_html_format->name = 'Comment Filtered HTML';
   $filtered_html_format->weight = 1;
@@ -626,6 +630,12 @@ function scratchpads_tweaks_update_7014(){
     'theme_config_js' => 'f',
     'js_conf' => '',
     'loadPlugins' => array(
+      'scratchpads_backend_tweaks' => array(
+        'name' => 'scratchpads_backend_tweaks',
+        'desc' => 'Ensure that image width/height/align are set as attributes, not as styles when using the image editor',
+        'path' => '%base_path%sites/all/modules/custom/scratchpads/scratchpads_backend/ckeditor/',
+        'buttons' => FALSE
+      ),
       'counter' => array(
         'name' => 'counter',
         'desc' => 'Plugin to count symbols, symbols without blanks and words',
@@ -860,21 +870,14 @@ function scratchpads_tweaks_update_7025(){
 }
 
 /**
- * Enable the twitterscript module.
+ * Enable the twitter script module.
+ * 
+ * Removed - the module has been removed from Scratchpads
  */
-function scratchpads_tweaks_update_7026(){
-  module_enable(array(
-    'twitterscript'
-  ));
-}
-
 /**
- * Add the twitterscript filter.
+ * Add the twitter script filter.
+ * Removed - the module has been removed from Scratchpads
  */
-function scratchpads_tweaks_update_7027(){
-  scratchpads_tweaks_install_help_install_filters();
-}
-
 /**
  * Add h1, h2 and div tags.
  */
@@ -1041,13 +1044,6 @@ function scratchpads_tweaks_update_7043(){
 }
 
 /**
- * Allow insecure derivatives
- */
-function scratchpads_tweaks_update_7045(){
-  variable_set('image_allow_insecure_derivatives', TRUE);
-}
-
-/**
  * Drop the primary key from the file_display table.
  * 
  * Renamed from from scratchpads_tweaks_update_7044.
@@ -1068,13 +1064,6 @@ function scratchpads_tweaks_update_7047(){
 }
 
 /**
- * Prevent optimize from running on Solr.
- */
-function scratchpads_tweaks_update_7048(){
-  variable_set('apachesolr_last_optimize', 10000000000);
-}
-
-/**
  * Set the jQuery update settings.
  */
 function scratchpads_tweaks_update_7049(){
@@ -1087,4 +1076,214 @@ function scratchpads_tweaks_update_7049(){
  */
 function scratchpads_tweaks_update_7050(){
   variable_del('scratchpad_last_reported');
+}
+
+/**
+ * Allow insecure derivatives
+ */
+function scratchpads_tweaks_update_7051(){
+  variable_set('image_allow_insecure_derivatives', TRUE);
+}
+
+/**
+ * Enable the scratchpads_blog module if blog is enabled.
+ */
+function scratchpads_tweaks_update_7052(){
+  if(module_exists('blog')){
+    module_enable(array(
+      'scratchpads_blog'
+    ));
+  }
+}
+
+/**
+ * Ensure the Simplenews categories have been properly initialised.
+ */
+function scratchpads_tweaks_update_7053(){
+  if(module_exists('simplenews')){
+    module_load_include('install', 'simplenews');
+    _simplenews_init_simplenews_category();
+  }
+}
+
+/**
+ * Disable the Hashcash module.
+ */
+function scratchpads_tweaks_update_7054(){
+  $uninstall = array(
+    'hashcash'
+  );
+  module_disable($uninstall);
+  drupal_uninstall_modules($uninstall);
+}
+
+/**
+ * Disable pathauto and redirect if the Pretty URLs tool has been disabled.
+ */
+function scratchpads_tweaks_update_7055(){
+  if(!module_exists('scratchpads_pretty_urls')){
+    module_disable(array(
+      'redirect',
+      'pathauto'
+    ));
+  }
+}
+
+/**
+ * Prevent optimize from running on Solr (fix of update 7048 which has been
+ * removed).
+ */
+function scratchpads_tweaks_update_7056(){
+  variable_set('apachesolr_optimize_interval', PHP_INT_MAX);
+}
+
+/**
+ * We disable the mollom module first, to ensure that the update runs as
+ * expected.
+ */
+function scratchpads_tweaks_update_7057(){
+  module_disable(array(
+    'scratchpads_mollom',
+    'mollom'
+  ));
+  module_enable(array(
+    'scratchpads_security'
+  ));
+}
+
+/**
+ * Disable/uninstall the scratchpads_mollom module and install the
+ * scratchpads_security module.
+ */
+function scratchpads_tweaks_update_7058(&$sandbox){
+  if(!isset($sandbox['cids'])){
+    // Get a list of all the comments that have been authored by anonymous, and 
+    // that have not been approved.
+    $query = db_select('comment', 'c')->fields('c', array(
+      'cid'
+    ))->condition('uid', 0)->condition('status', 0);
+    $query->innerJoin('field_data_comment_body', 'b', 'c.cid = b.entity_id');
+    $query->condition('comment_body_value', '%http%', 'LIKE');
+    $sandbox['cids'] = $query->execute()->fetchCol();
+    $sandbox['max'] = count($sandbox['cids']);
+    if(!$sandbox['max']){
+      $sandbox['#finished'] = 1;
+      return;
+    }
+  }
+  $i = 0;
+  while($i < 10 && count($sandbox['cids'])){
+    comment_delete(array_pop($sandbox['cids']));
+  }
+  $sandbox['#finished'] = $sandbox['progress'] = ($sandbox['max'] - count($sandbox['cids'])) / $sandbox['max'];
+}
+
+/**
+ * Unlock the body field.
+ */
+function scratchpads_tweaks_update_7059(){
+  db_update('field_config')->fields(array(
+    'locked' => 0
+  ))->condition('field_name', 'body')->execute();
+}
+
+/**
+ * Enable the width/height/align img attribute plugin.
+ */
+function scratchpads_tweaks_update_7060(){
+  scratchpads_tweaks_update_7014();
+}
+
+/**
+ * Use the Imagemagick Identify patch
+ */
+function scratchpads_tweaks_update_7061(){
+  variable_set('imagemagick_use_identify', TRUE);
+}
+
+/**
+ * Uninstall mollom and scratchpads_mollom
+ * 
+ */
+function scratchpads_tweaks_update_7062(){
+  drupal_uninstall_modules(array(
+    'scratchpads_mollom',
+    'mollom'
+  ));
+}
+
+/**
+ * Enable honeypot
+ */
+function scratchpads_tweaks_update_7063(){
+  if(!module_exists('honeypot')){
+    module_enable(array(
+      'honeypot'
+    ));
+  }
+  variable_set('honeypot_form_user_register_form', 1);
+  if(module_exists('boost')){
+    // Unless this has already been customised, change boost to not cache the user register page.
+    // This ensures we don't get caching issues with the spam protection,
+    if(variable_get('boost_cacheability_option', BLOCK_VISIBILITY_NOTLISTED) == BLOCK_VISIBILITY_NOTLISTED){
+      $pages = variable_get('boost_cacheability_pages', BOOST_CACHEABILITY_PAGES);
+      if(empty($pages)){
+        variable_set('boost_cacheability_pages', 'user/register');
+      }
+    }
+  }
+}
+
+/**
+ * Enable the setting of the biblio file attachments permission.
+ */
+function scratchpads_tweaks_update_7064(){
+  variable_set('subpermissions_config', array(
+    'show download links' => 'show download links'
+  ));
+}
+
+/**
+ * Update nodes to ensure they don't have duplicate UUID and V-UUIDs.
+ */
+function scratchpads_tweaks_update_7065(&$sandbox){
+  if(!isset($sandbox['nids'])){
+    $query = db_select('node', 'lft');
+    $query->fields('lft', array(
+      'nid'
+    ));
+    $query->innerJoin('node', 'rgt', 'lft.uuid = rgt.uuid AND lft.nid > rgt.nid');
+    $query->distinct();
+    $sandbox['nids'] = $query->execute()->fetchCol();
+    $sandbox['max'] = count($sandbox['nids']);
+    if(!$sandbox['max']){
+      $sandbox['#finished'] = 1;
+      return;
+    }
+  }
+  $i = 0;
+  while($i < 10 && count($sandbox['nids'])){
+    $node = node_load(array_pop($sandbox['nids']));
+    $old_uuid = $node->uuid;
+    unset($node->uuid);
+    unset($node->vuuid);
+    node_save($node);
+    db_update('feeds_item')->fields(array(
+      'guid' => $node->uuid
+    ))->condition('guid', $old_uuid)->condition('entity_id', $node->nid)->execute();
+  }
+  $sandbox['#finished'] = $sandbox['progress'] = ($sandbox['max'] - count($sandbox['nids'])) / $sandbox['max'];
+}
+
+/**
+ * Update the filters to ensure the new twitter filter is in there.
+ */
+function scratchpads_tweaks_update_7066(){
+  module_disable(array(
+    'twitterscript'
+  ));
+  module_enable(array(
+    'twitter_filter'
+  ));
+  scratchpads_tweaks_install_help_install_filters();
 }

@@ -67,6 +67,14 @@ function scratchpads_front_block_view_alter(&$data, $block){
   if(isset($block->context) && substr($block->bid, 0, -1) == 'views-front_page_blocks-block_' && substr($data['subject'], -3) == 'rys'){
     $data['subject'] = substr($data['subject'], 0, -2) . 'ies';
   }
+  if(isset($block->context) && (!user_access('administer front page'))){
+    if($block->context == 'scratchpads_front_page'){
+      if(substr_count($data['content']['#markup'], 'class="view-empty"') > 1){
+        unset($data['content']);
+        unset($data['subject']);
+      }
+    }
+  }
 }
 
 function scratchpads_front_menu_contextual_links_alter(&$links, $router_item, $root_path){
@@ -134,9 +142,10 @@ function scratchpads_front_views_pre_view(&$view, &$display_id, &$args){
     case 'front_page_blocks':
       $var = 'front_page_' . $display_id . '_node_type';
       $view->args[] = scratchpads_front_variable_get($var);
-    // Note, there is no break here as we want to execute the following code
-    // to remove the "empty" text for non-admin users.
+      break;
     case 'front_page_slideshow':
+      $var = 'front_page_' . $display_id . '_node_type';
+      $view->args[] = scratchpads_front_variable_get($var);
       if(!user_access('administer front page')){
         $view->display_handler->default_display->options['empty'] = FALSE;
         $view->display_handler->options['empty'] = FALSE;
@@ -285,6 +294,37 @@ function scratchpads_front_page_edit($form, &$form_state){
       )
     )
   );
+  // if the view has been edited we don't add the option to edit the view via this form
+  if(strlen(views_get_view('front_page_slideshow')->vid)==0){
+    $form['main_block']['front_page_main_block_slideshow_text_creator'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display Image Creator'),
+      '#description' => t('Do you want the image creators to be displayed in the slideshow?'),
+      '#default_value' => scratchpads_front_variable_get('front_page_main_block_slideshow_text_creator'),
+      '#required' => false,
+      '#states' => array(
+        'visible' => array(
+          'input[name="front_page_main_block_type"]' => array(
+            'value' => 'images'
+          )
+        )
+      )
+    );
+    $form['main_block']['front_page_main_block_slideshow_text_licence'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display Image Licence'),
+      '#description' => t('Do you want the image licences to be displayed in the slideshow?'),
+      '#default_value' => scratchpads_front_variable_get('front_page_main_block_slideshow_text_licence'),
+      '#required' => false,
+      '#states' => array(
+        'visible' => array(
+          'input[name="front_page_main_block_type"]' => array(
+            'value' => 'images'
+          )
+        )
+      )
+    );
+  }
   $form['small_blocks'] = array(
     '#type' => 'fieldset',
     '#title' => t('Small blocks'),
@@ -327,10 +367,14 @@ function scratchpads_front_page_edit_submit($form, &$form_state){
   variable_set('front_page_welcome_message', $form_state['values']['front_page_welcome_message']['value']);
   variable_set('front_page_main_block_type', $form_state['values']['front_page_main_block_type']);
   variable_set('front_page_main_block_node_type', $form_state['values']['front_page_main_block_node_type']);
+  variable_set('front_page_main_block_slideshow_text_creator', $form_state['values']['front_page_main_block_slideshow_text_creator']);
+  variable_set('front_page_main_block_slideshow_text_licence', $form_state['values']['front_page_main_block_slideshow_text_licence']);
   foreach($form_state['vars'] as $var){
     variable_set($var, $form_state['values'][$var]);
   }
   $form_state['redirect'] = '<front>';
+  // Clear the views cache, as the slideshow view is dynamic
+  views_invalidate_cache();
 }
 
 /*********************************************************************************************

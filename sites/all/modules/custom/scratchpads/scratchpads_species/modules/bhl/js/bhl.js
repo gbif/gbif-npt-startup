@@ -10,5 +10,10 @@
         $(this).parent().find('ul').toggle();
       }
     });
+    if(typeof $('#bhl-viewer').get(0) != 'undefined') {
+      if($('#bhl-viewer').get(0).naturalHeight > 1.5 * $('#bhl-viewer').height()) {
+        $("#bhl-viewer").elevateZoom({zoomType: "lens", lensShape: "square", lensSize: 200});
+      }
+    }
   }}
 })(jQuery);

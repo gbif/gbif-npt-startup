@@ -9,6 +9,36 @@ function darwincore_install(){
 }
 
 /**
+ * Implements hook_enable().
+ * 
+ * Re-enable any content types or views that might have been disabled previously
+ */
+function darwincore_enable(){
+  // Enable/re-enable all the features of this module.
+  $feature = features_get_features('darwincore');
+  $components = array_keys($feature->info['features']);
+  features_revert(array(
+    'darwincore' => $components
+  ));
+}
+
+/**
+ * Implements hook_disable().
+ * 
+ * Remove content types defined by this module
+ * 
+ */
+function darwincore_disable(){
+  // if there is no data, remove the fields and content type
+  if(darwincore_node_count() == 0){
+    node_type_delete('location');
+    variable_del('node_preview_location');
+    node_type_delete('specimen_observation');
+    variable_del('node_preview_specimen_observation');
+  }
+}
+
+/**
  * Change the input format for the date collected field.
  */
 function darwincore_update_7001(){
@@ -196,4 +226,49 @@ function darwincore_update_7011(){
     );
     field_update_instance($field_instance);
   }
+}
+
+/**
+ * Update the specimen/observation instance of the field_genbank_number field.
+ */
+function darwincore_update_7012(){
+  $field_instance = field_info_instance('node', 'field_genbank_number', 'specimen_observation');
+  if($field_instance){
+    $field_instance['label'] = 'GenBank number(s)';
+    $field_instance['description'] = t('Enter a comma separated list of numbers. For example: FN554775, FR694013');
+    $field_instance['display']['default']['type'] = 'darwincore_link_to_ncbi';
+    field_update_instance($field_instance);
+  }
+}
+
+/**
+ * Ensure all fields exist, and lock them!
+ */
+function darwincore_update_7013(){
+  $fields_to_lock = array();
+  module_load_include('features.field.inc', 'darwincore');
+  foreach(darwincore_field_default_fields() as $field){
+    $fields_to_lock[] = $field['field_config']['field_name'];
+    if(!field_info_field($field['field_config']['field_name'])){
+      field_create_field($field['field_config']);
+    }
+    try{
+      field_create_instance($field['field_instance']);
+    }
+    catch(Exception $e){
+    }
+  }
+  db_update('field_config')->fields(array(
+    'locked' => 1
+  ))->condition('field_name', $fields_to_lock)->execute();
+}
+
+/**
+ * Update the display of the Collector and Identified-By fields.
+ */
+function darwincore_update_7014(){
+  module_load_include('features.field.inc', 'darwincore');
+  $fields = darwincore_field_default_fields();
+  field_update_instance($fields['node-specimen_observation-field_collector']['field_instance']);
+  field_update_instance($fields['node-specimen_observation-field_identified_by']['field_instance']);
 }

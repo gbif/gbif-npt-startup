@@ -195,172 +195,204 @@ function silver_feeds_importer_default(){
     _silver_feeds_importer_default_helper($field_info, $feeds_importer, "file:$file_type:");
     $export['file_importer_' . $file_type] = $feeds_importer;
   }
-  // Users
-  $feeds_importer = new stdClass();
-  $feeds_importer->disabled = FALSE;
-  $feeds_importer->api_version = 1;
-  $feeds_importer->id = 'user_importer_user';
-  $feeds_importer->config = array(
-    'name' => t('Import into: Users'),
-    'description' => t('Add and Update users.'),
-    'fetcher' => array(
-      'plugin_key' => 'FeedsFileFetcher',
-      'config' => array(
-        'allowed_extensions' => 'xls xlsx',
-        'direct' => 0
-      )
-    ),
-    'parser' => array(
-      'plugin_key' => 'FeedsExcelParser',
-      'config' => array(
-        'no_headers' => 0,
-        'all_worksheets' => 1
-      )
-    ),
-    'processor' => array(
-      'plugin_key' => 'FeedsUserProcessor',
-      'config' => array(
-        'status' => 1,
-        'mappings' => array(),
-        'update_existing' => '1'
-      )
-    ),
-    'update' => 0,
-    'import_period' => -1,
-    'expire_period' => 3600,
-    'import_on_create' => TRUE,
-    'process_in_background' => FALSE
-  );
-  $field_info = field_info_instances('user', 'user');
-  // reorder the array
-  $order = array(
-    "field_user_title",
-    "field_user_given_names",
-    "field_user_family_name",
-    "field_user_country",
-    "field_homepage",
-    "field_user_institution",
-    "field_user_taxonomic_interest"
-  );
-  $out = array();
-  foreach($order as $element){
-    $out[$element] = $field_info[$element];
+  // Users ---------------------------------------------------------------------
+  if(user_access('administer users')){
+    // Add user fields 
+    // We use the form to ensure that the fields are in the same order as the form
+    $feeds_importer = new stdClass();
+    $feeds_importer->disabled = FALSE;
+    $feeds_importer->api_version = 1;
+    $feeds_importer->id = 'user_importer_user';
+    $feeds_importer->config = array(
+      'name' => t('Import into: Users'),
+      'description' => t('Add and Update users.'),
+      'fetcher' => array(
+        'plugin_key' => 'FeedsFileFetcher',
+        'config' => array(
+          'allowed_extensions' => 'xls xlsx',
+          'direct' => 0
+        )
+      ),
+      'parser' => array(
+        'plugin_key' => 'FeedsExcelParser',
+        'config' => array(
+          'no_headers' => 0,
+          'all_worksheets' => 1
+        )
+      ),
+      'processor' => array(
+        'plugin_key' => 'FeedsUserProcessor',
+        'config' => array(
+          'status' => 1,
+          'mappings' => array(),
+          'update_existing' => '1'
+        )
+      ),
+      'update' => 0,
+      'import_period' => -1,
+      'expire_period' => 3600,
+      'import_on_create' => TRUE,
+      'process_in_background' => FALSE
+    );
+    $form = drupal_get_form('user_register_form');
+    $field_info = field_info_instances('user', 'user');
+    $ordered_field_info = array();
+    $order = array();
+    $group_number = 0;
+    // If we are using fieldgroups, as in biography
+    if(!empty($form['#groups'])){
+      foreach($form['#groups'] as $group_name => $group){
+        if($group_name != 'group_tabs'){
+          foreach($group->children as $field_name){
+            // GroupNumber - Weight - Fieldname
+            $order[$group_number . $form[$field_name]['#weight'] . $field_name] = $field_name;
+          }
+        }
+        $group_number++;
+      }
+    }else{
+      // No fieldgroups, as in default scratchpads
+      foreach($field_info as $field_name => $info){
+        $order[$form[$field_name]['#weight'] . $field_name] = $field_name;
+      }
+    }
+    ksort($order);
+    foreach($order as $field_name){
+      $ordered_field_info[$field_name] = $field_info[$field_name];
+      unset($field_info[$field_name]);
+    }
+    // Add any fields that are not in fieldgroups to the end
+    foreach($field_info as $field_name => $info){
+      $ordered_field_info[$field_name] = $info;
+    }
+    $field_info = $ordered_field_info;
+    _silver_feeds_importer_default_helper($field_info, $feeds_importer, 'user:user:');
+    $feeds_importer->config['processor']['config']['mappings'][] = array(
+      'source' => 'E-Mail',
+      'target' => 'mail',
+      'unique' => TRUE
+    );
+    $feeds_importer->config['processor']['config']['mappings'][] = array(
+      'source' => 'Username',
+      'target' => 'name',
+      'unique' => TRUE
+    );
+    $feeds_importer->config['processor']['config']['mappings'][] = array(
+      'source' => 'Password',
+      'target' => 'pass',
+      'unique' => 0
+    );
+    $feeds_importer->config['processor']['config']['mappings'][] = array(
+      'source' => 'GUID',
+      'target' => 'guid',
+      'unique' => 1
+    );
+    $export['user_importer_user'] = $feeds_importer;
   }
-  $field_info = $out;
-  _silver_feeds_importer_default_helper($field_info, $feeds_importer, 'user:user:');
-  $feeds_importer->config['processor']['config']['mappings'][] = array(
-    'source' => 'E-Mail',
-    'target' => 'mail',
-    'unique' => TRUE
-  );
-  $feeds_importer->config['processor']['config']['mappings'][] = array(
-    'source' => 'Username',
-    'target' => 'name',
-    'unique' => TRUE
-  );
-  $feeds_importer->config['processor']['config']['mappings'][] = array(
-    'source' => 'Password',
-    'target' => 'pass',
-    'unique' => 0
-  );
-  $feeds_importer->config['processor']['config']['mappings'][] = array(
-    'source' => 'GUID',
-    'target' => 'guid',
-    'unique' => 1
-  );
-  $export['file_importer_' . $file_type] = $feeds_importer;
   return $export;
 }
 
 /**
  * Helper function which creates the correct mapping for certain field types.
  */
-function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $additional = ''){
+function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $additional = '', $map_field_collection = FALSE, $field_collection_label_addition = ''){
   foreach($field_info as $key => $field){
     $field_info = field_info_field($field['field_name']);
     switch($field_info['type']){
       case 'file':
         // Do nothing.  We can't import files in an Excel template.
         break;
+      case 'field_collection':
+        // We get the info about the field collection, and add a mapping for
+        // each of the fields in it.
+        if(!$map_field_collection){
+          _silver_feeds_importer_default_helper(field_info_instances('field_collection_item', $field_info['field_name']), $feeds_importer, $field_info['field_name'] . ':field_collection_item:' . $field_info['field_name'] . ':', $field_info['field_name'] . ':', $field['label'] . ': ');
+        }
+        break;
       case 'country':
         // We use iso3 country codes
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('ISO alpha-2') . ')',
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('ISO alpha-2') . ')',
           'target' => $additional . $key . ':iso2',
           'unique' => 0
         );
         break;
       case 'date':
+      case 'datetime':
         // Add the from date, and also the to date if required.
-        // We add two columns for the user reference field.
+       
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('Start') . ')',
-          'target' => $key . ':start',
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('Start') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':start' : $key . ':start',
           'unique' => 0
         );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('End') . ')',
-          'target' => $key . ':end',
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('End') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':end' : $key . ':end',
           'unique' => 0
         );
         break;
       case 'link_field':
-        // Add the from date, and also the to date if required.
-        // We add two columns for the user reference field.
+        // We add two columns: 'title' and 'url'
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('URL') . ')',
-          'target' => $key . ':url',
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('TITLE') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':title' : $key . ':title',
+          'unique' => 0
+        );
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('URL') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':url' : $key . ':url',
           'unique' => 0
         );
         break;
       case 'user_reference':
         // We add two columns for the user reference field.
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (UID)',
-          'target' => $key . ':uid:duplicates',
+          'source' => $field_collection_label_addition . $field['label'] . ' (UID)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':uid:duplicates' : $key . ':uid:duplicates',
           'unique' => 0
         );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('Name on site') . ')',
-          'target' => $key . ':name:duplicates',
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('Name on site') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':name:duplicates' : $key . ':name:duplicates',
           'unique' => 0
         );
         break;
       case 'node_reference':
         // We add two columns for the node reference field.
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (NID)',
-          'target' => $key . ':nid:duplicates',
+          'source' => $field_collection_label_addition . $field['label'] . ' (NID)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':nid:duplicates' : $key . ':nid:duplicates',
           'unique' => 0
         );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('Title') . ')',
-          'target' => $key . ':title:duplicates',
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('Title') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':title:duplicates' : $key . ':title:duplicates',
           'unique' => 0
         );
         break;
       case 'taxonomy_term_reference':
         // We add three columns for the term reference field.
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (' . t('Name') . ')',
-          'target' => $key,
+          'source' => $field_collection_label_addition . $field['label'] . ' (' . t('Name') . ')',
+          'target' => $map_field_collection ? $map_field_collection . $key : $key,
           'unique' => 0
         );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (TID)',
-          'target' => $key . ':tid',
+          'source' => $field_collection_label_addition . $field['label'] . ' (TID)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':tid' : $key . ':tid',
           'unique' => 0
         );
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => $field['label'] . ' (GUID)',
-          'target' => $key . ':guid',
+          'source' => $field_collection_label_addition . $field['label'] . ' (GUID)',
+          'target' => $map_field_collection ? $map_field_collection . $key . ':guid' : $key . ':guid',
           'unique' => 0
         );
         break;
       default:
         $feeds_importer->config['processor']['config']['mappings'][] = array(
-          'source' => trim($field['label']),
-          'target' => $key,
+          'source' => $field_collection_label_addition . trim($field['label']),
+          'target' => $map_field_collection ? $map_field_collection . $key : $key,
           'unique' => 0
         );
     }
