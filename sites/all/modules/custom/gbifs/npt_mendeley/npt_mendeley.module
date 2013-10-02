@@ -1006,13 +1006,18 @@ function npt_mendeley_token_info() {
     'description' => t("Tokens for various mendeley listings"),
   );
 
-  foreach ( array ('datapaper','usecases','climate','conservation','agriculture','humanhealth','invasive','distribution') as $type ) {
-    $npt_mendeley[ $type ] = array(
-      'name' => t($type),
-      'description' => t('Description for npt_mendeley token:' . $type),
-    );
+  $tag_sets = variable_get('npt_mendeley_tags');
+
+  foreach ($tag_sets as $tag_set) {
+    if ($tag_set['type'] == 'gbif_used') {
+      $type = $tagset['machine_name'];
+      $npt_mendeley[$type] = array(
+        'name' => $tag_set['name'],
+        'description' => $tag_set['desc'],
+      );
+    }
   }
-  
+
   return array(
     'types' => $types,
     'tokens' => array(
