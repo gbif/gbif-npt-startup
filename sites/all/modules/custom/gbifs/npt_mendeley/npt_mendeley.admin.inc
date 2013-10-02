@@ -27,10 +27,7 @@ function npt_mendeley_settings_form() {
   $total_docs = variable_get('npt_mendeley_total');
   $updated_docs = variable_get('npt_mendeley_updated', 0);
   $hours = ceil(($total_docs - $updated_docs) / 499);
-  $description = t('Journal names need separate calls to retrieve. @updated_docs of total @total_docs documents updated. ', array(
-    '@updated_docs' => $updated_docs,
-    '@total_docs' => $total_docs,
-  ));
+  $description = t('Journal names need separate calls to retrieve. ');
   $description .= format_plural($hours, t('1 cron job left to complete.'), t('@count cron jobs left to complete.'));
 
   $form['npt_mendeley_detail'] = array(

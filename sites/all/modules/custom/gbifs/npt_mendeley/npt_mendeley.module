@@ -618,8 +618,9 @@ function npt_mendeley_retrieve() {
       if ($file_exists == TRUE) {
         file_unmanaged_delete(drupal_realpath($documents_file_loc));
       }
-      variable_set('npt_mendeley_total', count($mendeley_gbif_documents));
-      return t('Mendeley documents retrieved and saved.');
+      $total_doc_count = count($mendeley_gbif_documents);
+      variable_set('npt_mendeley_total', $total_doc_count);
+      return t('!count Mendeley documents retrieved and saved.', array('!count' => $total_doc_count));
     } else {
       return t('Mendeley documents not successfully saved.');
     }
@@ -771,8 +772,10 @@ function npt_mendeley_fill_doc_detail() {
       $file_save_success = file_save_data($detailed_file, $detailed_doc_file_loc, FILE_EXISTS_REPLACE);
       
       if (is_object($file_save_success)) {
-        variable_set('npt_mendeley_updated', count($detailed_documents_to_save));
-        return t('Documents retrieved and inserted.');
+        $updated_count = count($detailed_documents_to_save);
+        variable_set('npt_mendeley_updated', $updated_count);
+        $total_doc_count = variable_get('npt_mendeley_total');
+        return t('!updated_count of totally !total_doc_count documents retrieved and inserted.', array('!updated_count' => $updated_count, '!total_doc_count' => $total_doc_count));
       } else {
         return t('There is an error while attempting to save retreived document detail.');
       }
