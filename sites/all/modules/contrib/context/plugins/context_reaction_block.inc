@@ -58,7 +58,7 @@ class context_reaction_block extends context_reaction {
       '#tree' => TRUE,
       '#theme' => 'context_block_regions_form',
     );
-    foreach (system_region_list($theme_key, REGIONS_VISIBLE) as $region => $label) {
+    foreach ($this->system_region_list($theme_key, REGIONS_VISIBLE) as $region => $label) {
       $form['blocks'][$region] = array(
         '#type' => 'item',
         '#title' => $label,
@@ -117,6 +117,7 @@ class context_reaction_block extends context_reaction {
     drupal_add_library('system', 'ui.droppable');
     drupal_add_library('system', 'ui.sortable');
     drupal_add_js(drupal_get_path('module', 'context_ui') . '/json2.js');
+    drupal_add_js(drupal_get_path('module', 'context_ui') . '/theme/filter.js');
     drupal_add_js(drupal_get_path('module', 'context') . '/plugins/context_reaction_block.js');
     drupal_add_css(drupal_get_path('module', 'context') . '/plugins/context_reaction_block.css');
 
@@ -124,7 +125,7 @@ class context_reaction_block extends context_reaction {
     static $once;
     if (!isset($once)) {
       $settings = array(
-        'path' => url($_GET['q']),
+        'path' => drupal_is_front_page() ? base_path() : url($_GET['q']),
         'params' => (object) array_diff_key($_GET, array('q' => '')),
         'scriptPlaceholder' => theme('context_block_script_placeholder', array('text' => '')),
       );
@@ -214,7 +215,7 @@ class context_reaction_block extends context_reaction {
     }
 
     // Populate all block regions
-    $all_regions = system_region_list($theme);
+    $all_regions = $this->system_region_list($theme);
 
     // Load all region content assigned via blocks.
     foreach (array_keys($all_regions) as $region) {
@@ -254,7 +255,7 @@ class context_reaction_block extends context_reaction {
    */
   protected function is_enabled_region($region) {
     global $theme;
-    $regions = array_keys(system_region_list($theme));
+    $regions = array_keys($this->system_region_list($theme));
     return in_array($region, $regions, TRUE);
   }
 
@@ -271,7 +272,7 @@ class context_reaction_block extends context_reaction {
     static $requirements;
     if (!isset($requirements) || $reset) {
       global $user;
-      if ($user->uid) {
+      if ($user->uid && user_access('administer contexts') && variable_get('context_ui_dialog_enabled', FALSE)) {
         $requirements = TRUE;
         drupal_add_library('system', 'ui.droppable');
         drupal_add_library('system', 'ui.sortable');
@@ -289,7 +290,7 @@ class context_reaction_block extends context_reaction {
       return FALSE;
     }
     // Check that this region is not hidden
-    $visible = system_region_list($theme, REGIONS_VISIBLE);
+    $visible = $this->system_region_list($theme, REGIONS_VISIBLE);
     return $requirements && $this->is_enabled_region($region) && isset($visible[$region]);
   }
 
@@ -297,7 +298,7 @@ class context_reaction_block extends context_reaction {
    * Add markup for making a block editable.
    */
   protected function editable_block($block) {
-    if (!empty($block->content['#markup']) || element_children($block->content)) {
+    if (!empty($block->content)) {
       $block->content = array(
         'content' => $block->content,
         'context' => array('#markup' => "<a id='context-block-{$block->module}-{$block->delta}' class='context-block editable edit-{$block->context}'></a>"),
@@ -307,6 +308,12 @@ class context_reaction_block extends context_reaction {
         $block->content['#contextual_links'] = $block->content['content']['#contextual_links'];
         unset($block->content['content']['#contextual_links']);
       }
+    }
+    else {
+      // the block alter in context.module should ensure that blocks are never
+      // empty if the inline editor is present but in the case that they are,
+      // warn that editing the context is likely to cause this block to be dropped
+      drupal_set_message(t('The block with delta @delta from module @module is not compatible with the inline editor and will be dropped from the context containing it if you edit contexts here', array('@delta' => $block->delta, '@module' => $block->module)), 'warning');
     }
     return $block;
   }
@@ -321,10 +328,19 @@ class context_reaction_block extends context_reaction {
          context_isset('context_ui', 'context_ui_editor_present'))
     ) {
       global $theme;
-      $regions = system_region_list($theme);
+      $regions = $this->system_region_list($theme);
       $name = isset($regions[$region]) ? $regions[$region] : $region;
-      $build['context']['#markup'] = "<a class='context-block-region' id='context-block-region-{$region}'>{$name}</a>";
+      // The negative weight + sorted will push our region marker to the top of the region
+      $build['context'] = array(
+        '#prefix' => "<div class='context-block-region' id='context-block-region-{$region}'>",
+        '#markup' => "<span class='region-name'>{$name}</span>" .
+                     "<a class='context-ui-add-link'>" . t('Add a block here.') . '</a>',
+        '#suffix' => '</div>',
+        '#weight' => -100,
+      );
+      $build['#sorted'] = FALSE;
     }
+
     return $build;
   }
 
@@ -372,13 +388,18 @@ class context_reaction_block extends context_reaction {
       }
       
       $this->is_editable_check($context_blocks);
+      global $theme;
+      $active_regions = $this->system_region_list($theme);
       foreach ($context_blocks as $r => $blocks) {
-        $context_blocks[$r] = _block_render_blocks($blocks);
+        //only render blocks in an active region
+        if (array_key_exists($r, $active_regions)) {
+          $context_blocks[$r] = _block_render_blocks($blocks);
 
-        // Make blocks editable if allowed.
-        if ($this->is_editable_region($r)) {
-          foreach ($context_blocks[$r] as $key => $block) {
-            $context_blocks[$r][$key] = $this->editable_block($block);
+          // Make blocks editable if allowed.
+          if ($this->is_editable_region($r)) {
+            foreach ($context_blocks[$r] as $key => $block) {
+              $context_blocks[$r][$key] = $this->editable_block($block);
+            }
           }
         }
 
@@ -496,14 +517,19 @@ class context_reaction_block extends context_reaction {
       // Gather only region info from the database.
       if (module_exists('block')) {
         $result = db_select('block')
-          ->fields('block', array('module', 'weight', 'delta', 'region', 'title'))
+          ->fields('block')
           ->condition('theme', $theme_key)
-          ->execute();
+          ->execute()
+          ->fetchAllAssoc('bid');
+
+        drupal_alter('block_list', $result);
+        drupal_alter('context_block_list', $result);
+
         foreach ($result as $row) {
           if (isset($block_info["{$row->module}-{$row->delta}"])) {
-            $block_info["{$row->module}-{$row->delta}"]->weight = $row->weight;
-            $block_info["{$row->module}-{$row->delta}"]->region = $row->region;
-            $block_info["{$row->module}-{$row->delta}"]->title = $row->title;
+            $block_info["{$row->module}-{$row->delta}"] = (object) array_merge((array) $row, (array) $block_info["{$row->module}-{$row->delta}"]);
+            unset($block_info["{$row->module}-{$row->delta}"]->status);
+            unset($block_info["{$row->module}-{$row->delta}"]->visibility);
           }
         }
       }
@@ -623,6 +649,11 @@ class context_reaction_block extends context_reaction {
     if (strpos($param, ',') !== FALSE) {
       list($bid, $context) = explode(',', $param);
       list($module, $delta) = explode('-', $bid, 2);
+      // Check token to make sure user has access to block.
+      if (empty($_GET['context_token']) || $_GET['context_token'] != drupal_get_token($bid)) {
+        echo drupal_json_encode(array('status' => 0));
+        exit;
+      }
 
       // Ensure $bid is valid.
       $info = $this->get_blocks();
@@ -648,5 +679,21 @@ class context_reaction_block extends context_reaction {
     }
     echo drupal_json_encode(array('status' => 0));
     drupal_exit();
+  }
+
+  /**
+   * Provide caching for system_region_list since it can get called
+   * frequently. Evaluate for removal once https://drupal.org/node/1873450
+   * lands or system_region_list is otherwise cached in core
+   */
+  protected function system_region_list($theme_key, $show = REGIONS_ALL) {
+    static $cache = array();
+    if (!isset($cache[$theme_key])) {
+      $cache[$theme_key] = array();
+    }
+    if (!isset($cache[$theme_key][$show])) {
+      $cache[$theme_key][$show] = system_region_list($theme_key, $show);
+    }
+    return $cache[$theme_key][$show];
   }
 }

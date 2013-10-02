@@ -72,7 +72,13 @@ function context_theme_registry_alter(&$theme_registry) {
   if ($position !== FALSE) {
     unset($theme_registry['page']['preprocess functions'][$position]);
   }
-  $position = array_search('template_preprocess_page', $theme_registry['page']['preprocess functions']);
+  // Prevent conflict with i18n_menu.
+  if (module_exists('i18n_menu')) {
+    $position = array_search('i18n_menu_preprocess_page', $theme_registry['page']['preprocess functions']);
+  }
+  else {
+    $position = array_search('template_preprocess_page', $theme_registry['page']['preprocess functions']);
+  }
   $position = $position ? $position + 1 : 2;
   array_splice($theme_registry['page']['preprocess functions'], $position, 0, 'context_preprocess_page');
 }
@@ -99,7 +105,8 @@ function context_ctools_render_alter($info, $page, $data) {
 function context_entity_prepare_view($prepare, $entity_type) {
   if ($entity_type === 'taxonomy_term' && count($prepare) === 1) {
     $term = reset($prepare);
-    if ($term === menu_get_object('taxonomy_term', 2) && $plugin = context_get_plugin('condition', 'taxonomy_term')) {
+    $menu = menu_get_object('taxonomy_term', 2);
+    if ($term->tid == $menu->tid && $plugin = context_get_plugin('condition', 'taxonomy_term')) {
       $plugin->execute($term, 'view');
     }
   }
@@ -333,7 +340,7 @@ function context_context_page_reaction() {
 }
 
 /**
- * Implementation of hook_page_alter().
+ * Implementation of hook_preprocess_page().
  */
 function context_preprocess_page(&$vars) {
   if ($plugin = context_get_plugin('reaction', 'menu')) {
