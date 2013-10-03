@@ -8,11 +8,11 @@
 // NPT Startup constants
 define('NPTSTARTUP_THEME', 'gbifwhite');
 define('NPTSTARTUP_ADMIN_THEME', 'npt_admin');
-define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/node');
-define('GBIF_REGISTRY_API_ORG', 'http://api.gbif.org/organization');
-define('GBIF_API', 'http://api.gbif.org');
-define('GBIF_COUNTRY_ENUM', 'http://api.gbif.org/enumeration/country');
-define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/browse/agent?uuid=');
+define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/v0.9/node');
+define('GBIF_REGISTRY_API_ORG', 'http://api.gbif.org/v0.9/organization');
+define('GBIF_API', 'http://api.gbif.org/v0.9/');
+define('GBIF_COUNTRY_ENUM', 'http://api.gbif.org/v0.9/enumeration/country');
+define('GBRDS_AGENT_URL', 'http://gbrds.gbif.org/v0.9/browse/agent?uuid=');
 define('GBIF_PORTAL_PUBLISHER', 'http://uat.gbif.org/portal/publisher');
 define('GBIF_PORTAL', 'http://uat.gbif.org');
 
