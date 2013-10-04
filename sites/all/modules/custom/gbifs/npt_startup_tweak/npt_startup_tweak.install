@@ -80,9 +80,9 @@ function npt_startup_tweak_vocabularies() {
         ),
       ),
     ),
-    'species_list' => array(
+    'biodiversity_data' => array(
       'name' => 'Biodiversity Data',
-      'machine_name' => 'species_list',
+      'machine_name' => 'biodiversity_data',
       'description' => 'A default site-wide biological classification',
       'hierarchy' => '0',
       'module' => 'taxonomy',
@@ -151,7 +151,7 @@ function npt_startup_tweak_vocabularies() {
   }
 
   // Insert default biological classification
-  $default_biological_vocabulary = taxonomy_vocabulary_machine_name_load('species_list');
+  $default_biological_vocabulary = taxonomy_vocabulary_machine_name_load('biodiversity_data');
   $default_biological_vocabulary->biological_classification = 1;
   itis_term_taxonomy_vocabulary_biological_classification($default_biological_vocabulary, '1');
 }
