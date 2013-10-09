@@ -268,6 +268,12 @@ function npt_mendeley_full_list($gbif_cat_type = 'usecases', $machine_name = '',
   // If the request is for JSON, stop processing and export right away.
   if ($gbif_cat_type == 'country' && $json == 'json') {
 
+    $doc_count = count($$machine_name);
+    if ($doc_count == 0) {
+      $message = 'No document is tagged with ' . $machine_name . '.';
+      $result = array('Error' => $message);
+    }
+    
     // Determine whether this is a JSONP request
     if (isset($_GET['callback'])) {
       header('Content-Type: text/javascript; charset=utf8');
@@ -275,11 +281,21 @@ function npt_mendeley_full_list($gbif_cat_type = 'usecases', $machine_name = '',
       header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 
       $callback = $_GET['callback'];
-      echo $callback . '(' . json_encode($$machine_name) . ')';
-      
+      if ($doc_count == 0) {
+        echo $callback . '(' . json_encode($result) . ')';
+      }
+      else {
+        echo $callback . '(' . json_encode($$machine_name) . ')';
+      }
     }
     else {
-      drupal_json_output($$machine_name);
+      
+      if ($doc_count == 0) {
+        drupal_json_output($result);
+      }
+      else {
+        drupal_json_output($$machine_name);
+      }
     }
   }
   else {
@@ -432,7 +448,7 @@ function _npt_mendeley_list_documents($gbif_cat_type, $machine_name, $render) {
             }
           }
         }
-        elseif ($doc_count === 0) {
+        elseif ($doc_count == 0) {
           $content .= t('There is so far no publication in this category.');
         }
         $content .= '</p>';
