@@ -116,10 +116,15 @@ function npt_mendeley_default_tag_sets() {
   );
 
   // Prepare tag sets for countries
-  $gbif_countries = json_decode(file_get_contents(GBIF_REGISTRY_API_NODE . '/country'));
+  $countries = country_get_list();
+  $iso_countries = array();
+  foreach ($countries as $iso => $country) {
+    $iso_countries[] = $iso;
+  }
+  sort($iso_countries);
   $gbif_enum_countries = json_decode(file_get_contents(GBIF_ENUMERATION_COUNTRY));
   
-  foreach ($gbif_countries as $gbif_country) {
+  foreach ($iso_countries as $gbif_country) {
     foreach ($gbif_enum_countries as $gbif_enum_country) {
       if ($gbif_enum_country->iso2 == $gbif_country) $title = $gbif_enum_country->title;
     }
