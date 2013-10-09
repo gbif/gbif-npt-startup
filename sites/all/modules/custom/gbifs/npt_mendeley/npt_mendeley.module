@@ -620,6 +620,7 @@ function npt_mendeley_retrieve() {
       }
       $total_doc_count = count($mendeley_gbif_documents);
       variable_set('npt_mendeley_total', $total_doc_count);
+      variable_set('npt_mendeley_updated', 0);
       return t('!count Mendeley documents retrieved and saved.', array('!count' => $total_doc_count));
     } else {
       return t('Mendeley documents not successfully saved.');
