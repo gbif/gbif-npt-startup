@@ -1,0 +1,3 @@
+[submodule "sites/all/libraries/DwC-A-PHP-Library"]
+	path = sites/all/libraries/DwC-A-PHP-Library
+	url = https://github.com/Sufrostico/DwC-A-PHP-Library.git
