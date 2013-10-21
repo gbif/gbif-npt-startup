@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * Implementation of hook_gm3_alter().
+ */
+function npt_maps_gm3_map_alter(&$map){
+  // Add the country mask to a google map on taxonomy term pages only.
+  //if($term = menu_get_object('taxonomy_term', 2) && $map['id'] == 'gm3-map'){
+  if($term = menu_get_object('taxonomy_term', 2)){
+    $map['libraries']['npt_country_mask'] = array(
+      'module' => 'npt_maps',
+    );
+  }
+}
+
+/**
+ * Implementation of hook_library().
+ */
+function npt_maps_library(){
+  return array(
+    'npt_country_mask' => array(
+      'title' => t('Country mask'),
+      'website' => 'http://www.gadm.org',
+      'version' => '0.1',
+      'js' => array(
+        array(
+          'data' => drupal_get_path('module', 'npt_maps') . "/js/npt_maps.js"
+        ),
+      ),
+      'css' => array(
+        array(
+          'data' => drupal_get_path('module', 'npt_maps') . '/css/npt_maps.css'
+        )
+      ),
+      'dependencies' => array(
+        array(
+          'gm3',
+        )
+      )
+    )
+  );
+}

@@ -1,0 +1,8 @@
+name = NPT Maps
+description = Tweak default Scratchpads map to include other layers.
+version = 7.x-0.1
+package = GBIFS
+project = Nodes Portal Toolkit
+core = 7.x
+
+dependencies[] = gm3
