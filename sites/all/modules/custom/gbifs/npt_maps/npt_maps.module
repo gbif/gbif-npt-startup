@@ -7,9 +7,22 @@ function npt_maps_gm3_map_alter(&$map){
   // Add the country mask to a google map on taxonomy term pages only.
   //if($term = menu_get_object('taxonomy_term', 2) && $map['id'] == 'gm3-map'){
   if($term = menu_get_object('taxonomy_term', 2)){
+
+    // Use external KML files
     $map['libraries']['npt_country_mask'] = array(
       'module' => 'npt_maps',
     );
+    
+    // Use gm3_region data
+    /*
+    $map['libraries']['region'] = array(
+      'module' => 'gm3_region',
+        'regions' => array(
+        '1:10:BEN'
+       )
+     );
+    $map['libraries']['polygon'] = array();
+    */
   }
 }
 

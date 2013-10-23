@@ -4,7 +4,7 @@
     if (map.google_map) {
 
       var maskLayer = new google.maps.KmlLayer({
-        url: 'http://bkotemp.gbif.org/map/BEN_adm1.kmz'
+        url: 'http://bkotemp.gbif.org/map/BEN_adm0_inverted.kml'
       });
       maskLayer.setMap(map.google_map);
 
