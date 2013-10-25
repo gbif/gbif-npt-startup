@@ -5,7 +5,6 @@
  */
 function npt_maps_gm3_map_alter(&$map){
   // Add the country mask to a google map on taxonomy term pages only.
-  //if($term = menu_get_object('taxonomy_term', 2) && $map['id'] == 'gm3-map'){
   if($term = menu_get_object('taxonomy_term', 2)){
 
     // Use external KML files
@@ -30,10 +29,13 @@ function npt_maps_gm3_map_alter(&$map){
  * Implementation of hook_library().
  */
 function npt_maps_library(){
+  // Prepare coordinate and polygon information.
+  // First calculate the boundary of the outer polygon
+  
+
   return array(
     'npt_country_mask' => array(
       'title' => t('Country mask'),
-      'website' => 'http://www.gadm.org',
       'version' => '0.1',
       'js' => array(
         array(
