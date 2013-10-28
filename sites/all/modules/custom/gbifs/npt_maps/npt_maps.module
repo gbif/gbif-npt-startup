@@ -30,8 +30,26 @@ function npt_maps_gm3_map_alter(&$map){
  */
 function npt_maps_library(){
   // Prepare coordinate and polygon information.
-  // First calculate the boundary of the outer polygon
+  // The country is first decided by the Participant setting
+  $gbif_participant_settings = variable_get('gbif_participant_settings');
+  $iso3 = _npt_startup_get_iso3_by_iso2($gbif_participant_settings['node_country']);
   
+  $polygon_results = db_select('gm3_region_data', 'g')
+               ->fields('g', array('polygons'))
+               ->condition('level_3_code', $iso3)
+               ->execute()
+               ->fetchField();
+               
+  // Calculate the centre point of the polygon
+  gm3_load_geophp();
+  
+  $polygon = geoPHP::load($polygon_results);
+  $centroid = $polygon->getCentroid();
+  $centX = $centroid->getX();
+  $centY = $centroid->getY();
+  
+  // The four points of the masking polygon.
+  $maxX = if ($centX + 60)
 
   return array(
     'npt_country_mask' => array(
