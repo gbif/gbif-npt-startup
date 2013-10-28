@@ -260,6 +260,16 @@ function _npt_startup_get_enum_by_country_code($iso) {
   return $enum;
 }
 
+function _npt_startup_get_iso3_by_iso2($iso2) {
+  $countries = json_decode(file_get_contents(GBIF_COUNTRY_ENUM));
+  $iso3 = '';
+  foreach ($countries as $country) {
+    if ($country->iso2 == $iso2) $iso3 = $country->iso3;
+  }
+  return $iso3;
+}
+
+
 function _npt_startup_get_country_coordinate($iso, $enum) {
   $url = "http://api.geonames.org/searchJSON?country=" . $iso . "&name=" . $enum . "&maxRows=1&username=nptstartup";
   $coordinate_json = json_decode(file_get_contents($url));
