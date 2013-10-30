@@ -30,10 +30,11 @@ function npt_maps_gm3_map_alter(&$map){
  */
 function npt_maps_library(){
   // Prepare coordinate and polygon information.
-  // The country is first decided by the Participant setting
+  // The country is first decided by the Participant setting.
   $gbif_participant_settings = variable_get('gbif_participant_settings');
   $iso3 = _npt_startup_get_iso3_by_iso2($gbif_participant_settings['node_country']);
   
+  // Need take into account that if this returns multiple results.
   $polygon_results = db_select('gm3_region_data', 'g')
                ->fields('g', array('polygons'))
                ->condition('level_3_code', $iso3)
@@ -45,11 +46,28 @@ function npt_maps_library(){
   
   $polygon = geoPHP::load($polygon_results);
   $centroid = $polygon->getCentroid();
-  $centX = $centroid->getX();
-  $centY = $centroid->getY();
+  $centX = round($centroid->getX(), 2);
+  $centY = round($centroid->getY(), 2);
   
-  // The four points of the masking polygon.
-  $maxX = if ($centX + 60)
+  // Determine the four points of the masking polygon. There is obviously a better way
+  // to deal with the limit of 180/90 lng/lat degree. But I'll live with it for now.
+  $maxX = ($centX + 60 > 179) ? 179 : $centX + 60;
+  $minX = ($centX - 60 < -179) ? -179 : $centX - 60;
+  $maxY = ($centY + 60 > 89) ? 89 : $centY + 60;
+  $minY = ($centY - 60 < -89) ? -89 : $centY - 60;
+  
+  // For some unknown reason, the coordinates work with counterclockwise order.
+  $outer_polygon_to_insert = "((" . $maxX . ' ' . $maxY . ',' . $minX . ' ' . $maxY . ',' . $minX . ' ' . $minY . ',' . $maxX . ' ' . $minY . ',' . $maxX . ' ' . $maxY . "),(";
+  
+  // Insert the outer polygon as the first ring in the polygon,
+  // as the first ring will be the outer polygon therefore makes others holes.
+  $wkt_strings = explode("((", $polygon_results);
+  $wkt = $wkt_strings[0] . $outer_polygon_to_insert;
+  for ($i = 1; $i <= count($wkt_strings) - 1; $i++) {
+    $wkt .= $wkt_strings[$i];
+  }
+
+  $wkt = str_replace("POLYGON ", "POLYGON", $wkt);
 
   return array(
     'npt_country_mask' => array(
@@ -58,6 +76,18 @@ function npt_maps_library(){
       'js' => array(
         array(
           'data' => drupal_get_path('module', 'npt_maps') . "/js/npt_maps.js"
+        ),
+        array(
+          'data' => array(
+            'npt_maps' => array(
+              'settings' => array(
+                'mask' => array(
+                  'wkt' => $wkt
+                )
+              )
+            )
+          ),
+          'type' => 'setting'
         ),
       ),
       'css' => array(
