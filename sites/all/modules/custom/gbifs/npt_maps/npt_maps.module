@@ -34,72 +34,77 @@ function npt_maps_library(){
   $gbif_participant_settings = variable_get('gbif_participant_settings');
   $iso3 = _npt_startup_get_iso3_by_iso2($gbif_participant_settings['node_country']);
   
-  // Need take into account that if this returns multiple results.
+  // Getting the WKT from gm3_region_data table.
+  // @TODO: Need take into account that if this returns multiple results.
   $polygon_results = db_select('gm3_region_data', 'g')
                ->fields('g', array('polygons'))
                ->condition('level_3_code', $iso3)
                ->execute()
                ->fetchField();
-               
-  // Calculate the centre point of the polygon
-  gm3_load_geophp();
   
-  $polygon = geoPHP::load($polygon_results);
-  $centroid = $polygon->getCentroid();
-  $centX = round($centroid->getX(), 2);
-  $centY = round($centroid->getY(), 2);
-  
-  // Determine the four points of the masking polygon. There is obviously a better way
-  // to deal with the limit of 180/90 lng/lat degree. But I'll live with it for now.
-  $maxX = ($centX + 60 > 179) ? 179 : $centX + 60;
-  $minX = ($centX - 60 < -179) ? -179 : $centX - 60;
-  $maxY = ($centY + 60 > 89) ? 89 : $centY + 60;
-  $minY = ($centY - 60 < -89) ? -89 : $centY - 60;
-  
-  // For some unknown reason, the coordinates work with counterclockwise order.
-  $outer_polygon_to_insert = "((" . $maxX . ' ' . $maxY . ',' . $minX . ' ' . $maxY . ',' . $minX . ' ' . $minY . ',' . $maxX . ' ' . $minY . ',' . $maxX . ' ' . $maxY . "),(";
-  
-  // Insert the outer polygon as the first ring in the polygon,
-  // as the first ring will be the outer polygon therefore makes others holes.
-  $wkt_strings = explode("((", $polygon_results);
-  $wkt = $wkt_strings[0] . $outer_polygon_to_insert;
-  for ($i = 1; $i <= count($wkt_strings) - 1; $i++) {
-    $wkt .= $wkt_strings[$i];
-  }
+  if ($polygon_results <> FALSE) {
+    gm3_load_geophp();
 
-  $wkt = str_replace("POLYGON ", "POLYGON", $wkt);
+    // Calculate the centre point of the polygon
+    $polygon = geoPHP::load($polygon_results);
+    $centroid = $polygon->getCentroid();
+    $centX = round($centroid->getX(), 2);
+    $centY = round($centroid->getY(), 2);
 
-  return array(
-    'npt_country_mask' => array(
-      'title' => t('Country mask'),
-      'version' => '0.1',
-      'js' => array(
-        array(
-          'data' => drupal_get_path('module', 'npt_maps') . "/js/npt_maps.js"
-        ),
-        array(
-          'data' => array(
-            'npt_maps' => array(
-              'settings' => array(
-                'mask' => array(
-                  'wkt' => $wkt
+    // Determine the four points of the masking polygon. There is obviously a better way
+    // to deal with the limit of 180/90 lng/lat degree. But I'll live with it for now.
+    $maxX = ($centX + 60 > 179) ? 179 : $centX + 60;
+    $minX = ($centX - 60 < -179) ? -179 : $centX - 60;
+    $maxY = ($centY + 60 > 89) ? 89 : $centY + 60;
+    $minY = ($centY - 60 < -89) ? -89 : $centY - 60;
+
+    // For some unknown reason, the coordinates work with counterclockwise order.
+    $outer_polygon_to_insert = "((" . $maxX . ' ' . $maxY . ',' . $minX . ' ' . $maxY . ',' . $minX . ' ' . $minY . ',' . $maxX . ' ' . $minY . ',' . $maxX . ' ' . $maxY . "),(";
+
+    // Insert the outer polygon as the first ring in the polygon,
+    // as the first ring will be the outer polygon therefore makes others holes.
+    $wkt_strings = explode("((", $polygon_results);
+    $wkt = $wkt_strings[0] . $outer_polygon_to_insert;
+    for ($i = 1; $i <= count($wkt_strings) - 1; $i++) {
+      $wkt .= $wkt_strings[$i];
+    }
+
+    return array(
+      'npt_country_mask' => array(
+        'title' => t('Country mask'),
+        'version' => '0.1',
+        'js' => array(
+          array(
+            'data' => drupal_get_path('module', 'npt_maps') . "/js/npt_maps.js"
+          ),
+          array(
+            'data' => array(
+              'npt_maps' => array(
+                'settings' => array(
+                  'mask' => array(
+                    'wkt' => $wkt
+                  )
                 )
               )
-            )
+            ),
+            'type' => 'setting'
           ),
-          'type' => 'setting'
         ),
-      ),
-      'css' => array(
-        array(
-          'data' => drupal_get_path('module', 'npt_maps') . '/css/npt_maps.css'
-        )
-      ),
-      'dependencies' => array(
-        array(
-          'gm3',
+        'css' => array(
+          array(
+            'data' => drupal_get_path('module', 'npt_maps') . '/css/npt_maps.css'
+          )
+        ),
+        'dependencies' => array(
+          array(
+            'gm3',
+          )
         )
       )
-    )
-  );
+    );
+  }
+  else {
+    // Return empty array here so the Javascript and CSS don't load.
+    return array();
+  }      
 }
