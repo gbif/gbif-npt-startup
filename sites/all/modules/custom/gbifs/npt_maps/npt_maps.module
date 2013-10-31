@@ -83,7 +83,11 @@ function npt_maps_library(){
                 'settings' => array(
                   'mask' => array(
                     'wkt' => $wkt
-                  )
+                  ),
+                  'center' => array(
+                    'centX' => $centX,
+                    'centY' => $centY,
+                  ),
                 )
               )
             ),
