@@ -42,14 +42,6 @@
 
       polyMask.setMap(this.GM3.google_map);
       
-      //set the center of the map
-      var center = Drupal.settings.npt_maps.center;
-      var centX = center.centX;
-      var centY = center.centY;
-      
-      var centerPoint = new google.maps.LatLng(centY, centX);
-      this.GM3.google_map.setCenter(centerPoint);
-
       //function to add points from individual rings
       function AddPoints(data){
         //first spilt the string into individual points
