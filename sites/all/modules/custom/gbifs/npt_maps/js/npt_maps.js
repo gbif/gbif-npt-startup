@@ -1,38 +1,45 @@
+// http://gis.stackexchange.com/questions/59330/how-to-use-wkt-in-google-map-v3
+// http://stackoverflow.com/questions/2956355/highlight-polygon-and-tint-rest-of-map-using-google-maps/2958856#2958856
+// http://stackoverflow.com/questions/7494474/google-maps-api-polygon-with-hole-in-center
+
 (function($){
   Drupal.GM3.npt_country_mask = function(map){
     this.GM3 = map;
 
     if (this.GM3.google_map) {
-      /* Code snippet for loading KML
-      var maskLayer = new google.maps.KmlLayer({
-        url: 'http://bkotemp.gbif.org/map/BEN_adm0.kmz'
-      });
-      maskLayer.setMap(map.google_map);
-      */
       
-      var elevator;
+      var ringPaths = [];
 
+      // Drawing the masking polygon.
+      var outerRingString = Drupal.settings.npt_maps.settings.outerRingString;
+      var outerRing = [];
+      AddPoints(outerRingString, outerRing);
+      ringPaths.push(outerRing);
+      
+      // Drawing inner rings with country polygons
       var wkt = Drupal.settings.npt_maps.settings.mask.wkt;
 
-      //using regex, we will get the indivudal Rings
+      // Using the regex to get individual rings.
       var regex = /\(([^()]+)\)/g;
       var Rings = [];
       var results;
-      while( results = regex.exec(wkt) ) {
-        Rings.push( results[1] );
+      while (results = regex.exec(wkt)) {
+        Rings.push(results[1]);
       }
 
       var ptsArray = [];
 
-      var polyLen = Rings.length;
-
-      //now we need to draw the polygon for each of inner rings, but reversed
-      for ( var i = 0; i < polyLen ; i++){
-        AddPoints(Rings[i]);
+      // Now we need to draw the polygon for each of inner rings, but reversed.
+      // Each ring should be its own array.
+      for ( var i = 0; i < Rings.length; i++) {
+        AddPoints(Rings[i], ptsArray);
+        ringPaths.push(ptsArray);
+        // Empty ptsArray for the next ring.
+        ptsArray = [];
       }
 
       var polyMask = new google.maps.Polygon({
-          paths: ptsArray,
+          paths: ringPaths,
           strokeColor: '#1E90FF',
           strokeOpacity: 0.8,
           strokeWeight: 0,
@@ -42,20 +49,18 @@
 
       polyMask.setMap(this.GM3.google_map);
       
-      //function to add points from individual rings
-      function AddPoints(data){
-        //first spilt the string into individual points
+      // function to add points from individual rings
+      function AddPoints(data, array){
+        // first spilt the string into individual points
         var pointsData = data.split(",");
 
-
-        //iterate over each points data and create a latlong
-        //& add it to the cords array
-        var len = pointsData.length;
-        for ( var i = 0; i < len; i++) {
+        // iterate over each points data and create a latlong
+        // & add it to the cords array
+        for ( var i = 0; i < pointsData.length; i++) {
           var xy = pointsData[i].split(" ");
 
           var pt = new google.maps.LatLng(xy[1],xy[0]);
-          ptsArray.push(pt);
+          array.push(pt);
         }
       }
     }

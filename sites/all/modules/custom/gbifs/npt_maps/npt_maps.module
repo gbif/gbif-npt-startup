@@ -58,16 +58,12 @@ function npt_maps_library(){
     $maxY = ($centY + 60 > 89) ? 89 : $centY + 60;
     $minY = ($centY - 60 < -89) ? -89 : $centY - 60;
 
-    // For some unknown reason, the coordinates work with counterclockwise order.
-    $outer_polygon_to_insert = "((" . $maxX . ' ' . $maxY . ',' . $minX . ' ' . $maxY . ',' . $minX . ' ' . $minY . ',' . $maxX . ' ' . $minY . ',' . $maxX . ' ' . $maxY . "),(";
+    // The points of the masking polygon should be put in counterclockwise order.
+    $outer_ring_string = $maxX . ' ' . $maxY . ',' . $minX . ' ' . $maxY . ',' . $minX . ' ' . $minY . ',' . $maxX . ' ' . $minY . ',' . $maxX . ' ' . $maxY;
 
     // Insert the outer polygon as the first ring in the polygon,
     // as the first ring will be the outer polygon therefore makes others holes.
-    $wkt_strings = explode("((", $polygon_results);
-    $wkt = $wkt_strings[0] . $outer_polygon_to_insert;
-    for ($i = 1; $i <= count($wkt_strings) - 1; $i++) {
-      $wkt .= $wkt_strings[$i];
-    }
+    $wkt = $polygon_results;
 
     return array(
       'npt_country_mask' => array(
@@ -84,10 +80,11 @@ function npt_maps_library(){
                   'mask' => array(
                     'wkt' => $wkt
                   ),
-                  'center' => array(
+                  'centre' => array(
                     'centX' => $centX,
                     'centY' => $centY,
                   ),
+                  'outerRingString' => $outer_ring_string,
                 )
               )
             ),
