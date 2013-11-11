@@ -7,6 +7,7 @@ function npt_maps_gm3_map_alter(&$map){
   // Add the country mask to a google map on taxonomy term pages only.
   if($term = menu_get_object('taxonomy_term', 2)){
 
+    // Use external KML files
     $map['libraries']['npt_country_mask'] = array(
       'module' => 'npt_maps',
     );
@@ -21,59 +22,47 @@ function npt_maps_library(){
   // The country is first decided by the Participant setting.
   $gbif_participant_settings = variable_get('gbif_participant_settings');
   $iso2 = $gbif_participant_settings['node_country'];
-  $iso3 = _npt_startup_get_iso3_by_iso2($gbif_participant_settings['node_country']);
   
   // Getting the WKT from gm3_region_data table.
   // @TODO: Need take into account that if this returns multiple results.
-  $polygon_results = db_select('gm3_region_data', 'g')
+  $polygon_query = db_select('gm3_region_data', 'g')
                ->fields('g', array('polygons'))
                ->condition('iso_code', $iso2)
                ->execute();
-  $row_count = $polygon_results->rowCount();
-  $result = $polygon_results->fetchAll();
+  $row_count = $polygon_query->rowCount();
+  $results = $polygon_query->fetchAll();
   
-  if ($row_count > 0) {
+  if ($results <> FALSE) {
     gm3_load_geophp();
-
-    // If there are more than one polygon, combine them as one multipolygon.
-    $unified_multipolygon = array();
     
     if ($row_count > 1) {
-      foreach ($result as $k) {
-        $geometry = geoPHP::load($k->polygons);
-        if ($geometry->getGeomType() == 'Polygon') {
-          array_push($unified_multipolygon, $geometry);
-        }
-        elseif ($geometry->getGeomType() == 'MultiPolygon') {
-          $polygons = $geometry->getComponents();
-          foreach ($polygons as $polygon) {
-            array_push($unified_multipolygon, $polygon);
-          }
+      $rings = array();
+      // Break all resuls into pieces of rings
+      foreach ($results as $result) {
+      	$pattern = '/\(([^()]+)\)/';
+        preg_match_all($pattern, $result->polygons, $matched, PREG_PATTERN_ORDER);
+        foreach ($matched[1] as $matched_ring) {
+          array_push($rings, $matched_ring);
         }
       }
-    }
-    elseif ($row_count == 1) {
-      $geometry = geoPHP::load($result[0]->polygons);
-      if ($geometry->getGeomType() == 'Polygon') {
-        array_push($unified_multipolygon, $geometry);
+      // Assemble them back to one MULTIPOLYGON
+      $rings_count = count($rings);
+      $wkt = 'MULTIPOLYGON (';
+      for ($i = 0; $i < $rings_count; $i++) {
+        $wkt .= '((' . $rings[$i] . '))';
+        if ($i < $rings_count -1) {
+          $wkt .= ',';
+        }
       }
+      $wkt .= ')';
     }
-
-    // initialise an empty geometry
-    $num = count($unified_multipolygon);
-    $poly1 = $unified_multipolygon[0];
-    $poly2 = $unified_multipolygon[1];
-    $combined_poly = $poly1->union($poly2);
-    
-    for ($i = 1; $i < $num; $i++) {
-      $combined = $combined->union($unified_multipolygon[$i]);
+    elseif ($row_count = 1) {
+      $wkt = $results[0]->polygons;
     }
+    $geometry = geoPHP::load($wkt);
     
-    $wkt = $combined->out('wkt');
-
-    // Calculate the centre point of the polygon
-    $polygon = geoPHP::load($polygon_results);
-    $centroid = $polygon->getCentroid();
+    // Calculate the centre point of the geometry
+    $centroid = $geometry->getCentroid();
     $centX = round($centroid->getX(), 2);
     $centY = round($centroid->getY(), 2);
 
@@ -85,11 +74,9 @@ function npt_maps_library(){
     $minY = ($centY - 60 < -89) ? -89 : $centY - 60;
 
     // The points of the masking polygon should be put in counterclockwise order.
+    // These four points will be sent to Google Map API to form the outer polygon,
+    // So we don't need to put it as the first ring in the polygon WKT.
     $outer_ring_string = $maxX . ' ' . $maxY . ',' . $minX . ' ' . $maxY . ',' . $minX . ' ' . $minY . ',' . $maxX . ' ' . $minY . ',' . $maxX . ' ' . $maxY;
-
-    // Insert the outer polygon as the first ring in the polygon,
-    // as the first ring will be the outer polygon therefore makes others holes.
-    $wkt = $polygon_results;
 
     return array(
       'npt_country_mask' => array(
