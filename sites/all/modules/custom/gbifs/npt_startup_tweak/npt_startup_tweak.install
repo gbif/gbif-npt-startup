@@ -28,12 +28,14 @@ function npt_startup_tweak_install() {
   // Disable unnecessary modules
   module_disable(array(
     'overlay',
-    'toolbar'
+    'toolbar',
+    'gravatar'
   ), TRUE);
 
   module_enable(array(
     'npt_stats',
     'npt_mendeley',
+    'npt_maps'
   ));
 
   // Default variables
