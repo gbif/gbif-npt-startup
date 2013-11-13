@@ -16,13 +16,12 @@ function npt_startup_tweak_install() {
 
   // Set the default theme.
   variable_set('theme_default', 'gbifwhite');
-  variable_set('admin_theme', 'npt_admin');
+  variable_set('admin_theme', 'scratchpads_admin');
 
   // Disable unused themes and the Scratchpads themes.
   theme_disable(array(
     'bartik',
     'scratchpads',
-    'scratchpads_admin',
   ));
 
   // Disable unnecessary modules
