@@ -105,7 +105,7 @@
   <div class="region-inner region-branding-inner">
         <div class="branding-data clearfix">
             <div class="logo-img">
-        <a href="/" rel="home" title="GBIF Benin" class="active"><img src="http://npt.bkolocal:10088/sites/all/themes/custom/gbifwhite/logo.svg" alt="GBIF Benin" id="logo" /></a>      </div>
+        <a href="/" rel="home" title="GBIF Benin" class="active"><img src="http://npt.bkolocal:10088/sites/all/themes/gbifwhite/logo.svg" alt="GBIF Benin" id="logo" /></a>      </div>
                         <hgroup class="site-name-slogan">        
                                 
         <h1 class="site-name"><a href="/" rel="home" title="Home" class="active">GBIF Benin</a></h1>
