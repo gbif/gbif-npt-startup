@@ -74,7 +74,7 @@ settings[toggle_gbif_footer] = '0'
 settings[toggle_gbif_credit] = '0'
 
 settings[default_logo] = '0'
-settings[logo_path] = 'sites/all/themes/custom/gbifwhite/logo.svg'
+settings[logo_path] = 'sites/all/themes/gbifwhite/logo.svg'
 settings[logo_upload] = ''
 settings[default_favicon] = '1'
 settings[favicon_path] = ''
