@@ -2,7 +2,7 @@
 // This line is updated by the "create-aegir-platform" script to reflect the
 // name of the tag or branch that has been checked out.  This constant should be
 // used anywhere that we want to display the branch/tag.
-define('SCRATCHPADS_VERSION', 'TAG');
+define('SCRATCHPADS_VERSION', '2.3.0');
 
 /**
  * Implements hook_init()
