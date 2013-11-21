@@ -63,8 +63,10 @@ function silver_feeds_importer_default(){
               'unique' => 0
             )
           ),
+          'bundle' => $vocabulary->machine_name,
           'update_existing' => '2',
-          'input_format' => 'plain_text'
+          'input_format' => 'plain_text',
+          'skip_hash_check' => 0
         )
       ),
       'content_type' => '',
@@ -117,8 +119,10 @@ function silver_feeds_importer_default(){
               'unique' => TRUE
             )
           ),
+          'bundle' => $node_type,
           'update_existing' => '2',
-          'input_format' => 'filtered_html'
+          'input_format' => 'filtered_html',
+          'skip_hash_check' => 0
         )
       ),
       'content_type' => '',
@@ -128,7 +132,16 @@ function silver_feeds_importer_default(){
       'import_on_create' => TRUE,
       'process_in_background' => FALSE
     );
-    if(auto_nodetitle_get_setting($node_type) != AUTO_NODETITLE_ENABLED){
+    // The title field may not have been enabled.
+    if(function_exists('title_field_replacement_enabled') && title_field_replacement_enabled('node', $node_type, 'title')){
+      if(function_exists('auto_entitylabel_get_setting') && auto_entitylabel_get_setting($node_type) != AUTO_ENTITYLABEL_ENABLED){
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => 'Title',
+          'target' => 'title_field',
+          'unique' => FALSE
+        );
+      }
+    }else if(function_exists('auto_entitylabel_get_setting') && auto_entitylabel_get_setting($node_type) != AUTO_ENTITYLABEL_ENABLED){
       $feeds_importer->config['processor']['config']['mappings'][] = array(
         'source' => 'Title',
         'target' => 'title',
@@ -301,6 +314,18 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
     switch($field_info['type']){
       case 'file':
         // Do nothing.  We can't import files in an Excel template.
+        $feeds_importer->config['processor']['config']['mappings'][] = array(
+          'source' => $field_collection_label_addition . trim($field['label']),
+          'target' => $map_field_collection ? $map_field_collection . $key . ':MediaFeedsLibraryProvider' : $key . ':MediaFeedsLibraryProvider',
+          'unique' => 0
+        );
+        break;
+      case 'field_collection':
+        // We get the info about the field collection, and add a mapping for
+        // each of the fields in it.
+        if(!$map_field_collection){
+          _silver_feeds_importer_default_helper(field_info_instances('field_collection_item', $field_info['field_name']), $feeds_importer, $field_info['field_name'] . ':field_collection_item:' . $field_info['field_name'] . ':', $field_info['field_name'] . ':', $field['label'] . ': ');
+        }
         break;
       case 'field_collection':
         // We get the info about the field collection, and add a mapping for
@@ -320,7 +345,6 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
       case 'date':
       case 'datetime':
         // Add the from date, and also the to date if required.
-       
         $feeds_importer->config['processor']['config']['mappings'][] = array(
           'source' => $field_collection_label_addition . $field['label'] . ' (' . t('Start') . ')',
           'target' => $map_field_collection ? $map_field_collection . $key . ':start' : $key . ':start',

@@ -1,5 +1,13 @@
 <?php
 
+// FIXME - The following code may help add a thumbnail to the slickgrid view
+// #3103.
+// /* Field: File: Rendered */
+// $handler->display->display_options['fields']['rendered']['id'] = 'rendered';
+// $handler->display->display_options['fields']['rendered']['table'] = 'file_managed';
+// $handler->display->display_options['fields']['rendered']['field'] = 'rendered';
+// $handler->display->display_options['fields']['rendered']['file_view_mode'] = 'file_styles_thumbnail';
+
 function scratchpads_backend_views_default_views(){
   $views = array();
   // Build the node slickgrid editor views
@@ -175,6 +183,7 @@ function scratchpads_backend_views_default_views(){
     'action::system_send_email_action' => array(
       'selected' => 0,
       'postpone_processing' => 0,
+
       'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => ''
@@ -388,7 +397,7 @@ function scratchpads_backend_views_default_views(){
         'url' => ''
       )
     ),
-    'action::system_send_email_action' => array(
+    'action::views_bulk_operations_script_action' => array(
       'selected' => 0,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
@@ -1100,6 +1109,7 @@ function scratchpads_backend_views_default_views(){
     2 => 'OR'
   );
   $handler->display->display_options['defaults']['filters'] = FALSE;
+
   $file_fields_array = field_info_instances('file', 'video');
   foreach($file_fields_array as $key => $file_field){
     $field_value = $key . '_value';
@@ -2130,9 +2140,8 @@ function _scratchpads_backend_views_sort_by_label($array_to_sort){
   ksort($label_keyed);
   $final = array();
   foreach($label_keyed as $key => $element){
-    $final[key($element)] = array_shift(array_values($element));
+    $array_values = array_values($element);
+    $final[key($element)] = array_shift($array_values);
   }
   return array_merge($final, $other);
 }
-
-

@@ -1030,12 +1030,6 @@ function entity_theme() {
       'render element' => 'elements',
       'template' => 'entity',
       'pattern' => $pattern,
-      'path' => drupal_get_path('module', 'entity') . '/theme',
-      'file' => 'entity.theme.inc',
-    ),
-    'entity_property' => array(
-      'render element' => 'elements',
-      'file' => 'theme/entity.theme.inc',
     ),
     'entity_ui_overview_item' => array(
       'variables' => array('label' => NULL, 'entity_type' => NULL, 'url' => FALSE, 'name' => FALSE),

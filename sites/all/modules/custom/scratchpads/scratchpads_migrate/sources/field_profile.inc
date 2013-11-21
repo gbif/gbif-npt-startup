@@ -151,18 +151,4 @@ return false;}
     if(isset($map[$field_name])){return $map[$field_name];}
     return substr('field_' . $field_name, 0, 32);
   }
-
-  /**
-   * Generate destination field name from source field name
-   */
-  public static function destinationFieldName($field_name) {
-    $map = array(
-      'profile_url' => 'field_homepage'
-    );
-    $field_name = strtolower($field_name);
-    if (isset($map[$field_name])) {
-      return $map[$field_name];
-    }
-    return substr('field_' . $field_name, 0, 32);
-  }
 }

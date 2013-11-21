@@ -132,9 +132,13 @@ function creative_commons_display($licence_type, $jurisdiction, $display_type){
   switch($licence_type){
     // These licence types are text only
     case CC_NONE:
-      return array(
-        '#markup' => t('All rights reserved.')
-      );
+      if ($display_type == CC_URL) {
+      	$url = '';
+      } else {
+        return array(
+          '#markup' => t('All rights reserved.')
+        );
+      }
       break;
     case CC_0:
       $image = $path . '/images/zero.png';
@@ -275,11 +279,25 @@ function creative_commons_feeds_processor_targets_alter(&$targets, $entity_type,
 
 /**
  * Callback to set the value for a CC field.
+ * 
+ * FIXME - Should CC be translatable?
  */
 function _creative_commons_feeds_set_target_value($source, $entity, $target, $value){
+  $entity_type = strtolower(get_class($source->importer->processor));
+  if(($processor_location = strpos($entity_type, 'processor')) > 0){
+    $entity_type = substr($entity_type, 0, $processor_location);
+  }
+  if(substr($entity_type, 0, 5) == 'feeds'){
+    $entity_type = substr($entity_type, 5);
+  }
+  if(!entity_get_info($entity_type)){
+    $entity_type = 'node';
+  }
   $field = isset($entity->$target) ? $entity->$target : array();
   $value = array_search($value, creative_commons_get_licence_types());
-  $field['und'][] = array(
+  $lang = field_language($entity_type, $entity, $field);
+  $lang = $lang ? $lang : LANGUAGE_NONE;
+  $field[$lang][] = array(
     'licence' => $value
   );
   $entity->{$target} = $field;
@@ -391,9 +409,9 @@ function creative_commons_block_view($delta = ''){
       $block['content'] = array(
         '#theme' => 'creative_commons_block',
         '#licence' => creative_commons_display($licence, variable_get('creative_commons_block_jurisdiction', ''), variable_get('creative_commons_block_display_type', CC_LARGE_IMAGE)),
-        '#text' => $licence == CC_NONE ? creative_commons_get_licence_types(CC_NONE) : t('Except where otherwise noted, content on this site is licensed under a Creative Commons !licence Licence. ', array(
-          '!licence' => creative_commons_get_licence_types($licence),
-        )) . $GDSA
+        '#text' => $licence == CC_NONE ? t('All rights reserved, except where otherwise stated.') : t('Except where otherwise noted, content on this site is licensed under a Creative Commons !licence Licence.', array(
+          '!licence' => creative_commons_get_licence_types($licence)
+        ))
       );
       if($licence != CC_NONE){
         $block['content']['#attached'] = array(

@@ -13,13 +13,19 @@ function scratchpads_tweaks_init(){
     // Set the REQUIREMENT_ERROR variable so that no errors are displayed when
     // viewing the admin/config page as a non-admin user.
     define('REQUIREMENT_ERROR', 'Hide requirement error');
-  }
-  // Check to see if we're trying to view the admin/appearance/settings/scratchpads
-  // page, and if so we redirect to the general settings page.
-  if($_GET['q'] == 'admin/appearance/settings/scratchpads' || $_GET['q'] == 'admin/appearance/settings/scratchpads_em'){
+  }else if($_GET['q'] == 'admin/appearance/settings/scratchpads' || $_GET['q'] == 'admin/appearance/settings/scratchpads_em'){
+    // Check to see if we're trying to view the admin/appearance/settings/scratchpads
+    // page, and if so we redirect to the general settings page.
     if(!user_access('scratchpad team')){
       drupal_goto('admin/appearance/settings');
     }
+  }
+  $menu_item = menu_get_item();
+  if($menu_item['path'] == 'node/%/edit'){
+    // We clear the cache for this node, to ensure we're editing an uncached
+    // version. FIXME - This is a temporary fix, and should be removed once we
+    // know what is causing incorrect copies of a node to be cached.
+    node_load(arg(1), NULL, FALSE);
   }
   // Set the expire/domain/params on the has_js cookie to the same as the session
   // cookie to prevent any issues, especially with the "Issues..." block.
@@ -115,7 +121,7 @@ function _scratchpads_tweaks_get_media_browser_query(){
 
 /**
  * Implements hook_watchdog().
- * 
+ *
  * This function simply adds an additional entry to the dblog (if dblog is
  * enabled) that displays the full trace of a PHP error.
  */
@@ -264,8 +270,19 @@ function scratchpads_tweaks_form_alter(&$form, &$form_state, $form_id){
     default:
       // Only use the "comment_filtered_html" input type for comment bodies!
       if(substr($form_id, 0, 8) == 'comment_'){
-        if(@isset($form['comment_body'][LANGUAGE_NONE])){
-          $form['comment_body'][LANGUAGE_NONE]['#after_build'][] = 'scratchpads_tweaks_comment_body_after_build';
+        if(@isset($form['comment_body'][$form['#entity']->language])){
+          $form['comment_body'][$form['#entity']->language]['#after_build'][] = 'scratchpads_tweaks_comment_body_after_build';
+        }
+      }else if(substr($form_id, -10) == '_node_form'){
+        // Add the UUID to the title of the page.
+        if($form['nid']['#value']){
+          $guid = db_select('feeds_item', 'f')->fields('f', array(
+            'guid'
+          ))->condition('entity_type', 'node')->condition('entity_id', $form['nid']['#value'])->execute()->fetchField();
+          if(!$guid){
+            $guid = $form['#node']->uuid;
+          }
+          drupal_set_title(drupal_get_title() . ' <span class="uuid" title="NID : GUID">(' . $form['nid']['#value'] . ' : ' . $guid . ')</span>', PASS_THROUGH);
         }
       }else if(substr($form_id, -10) == '_node_form'){
         // Add the UUID to the title of the page.
@@ -468,6 +485,7 @@ function scratchpads_tweaks_system_info_alter(&$info, $file, $type){
       $info['tool'] = TRUE;
       $info['name'] = 'Views';
       $info['description'] = 'Allows you to create custom reports or views of the data held on your Scratchpad';
+      $info['dependencies'][] = 'views_date_format_sql';
       break;
     case 'rules':
       $info['dependencies'][] = 'trigger';
@@ -488,7 +506,7 @@ function scratchpads_tweaks_system_info_alter(&$info, $file, $type){
  *        node type object.
  * @param $label The
  *        label for the body instance.
- *        
+ *
  * @return Body field instance.
  */
 function scratchpads_tweaks_add_body_field($type, $label = 'Body', $weight = 0){
