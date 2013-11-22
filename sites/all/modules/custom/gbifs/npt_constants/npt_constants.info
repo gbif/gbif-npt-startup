@@ -2,7 +2,7 @@ name = NPT Constants
 description = Only define several API endpoints for NPT modules.
 version = 7.x-0.1
 package = GBIFS
-project = NPT Startup
+project = npt_constants
 core = 7.x
 
 l10n server = localise-npt.gbif.org

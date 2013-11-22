@@ -2,7 +2,7 @@ name = NPT solr settings
 description = Based on ScratchPads solr settings, provide settings that fit NPT.
 version = 7.x-0.9
 package = GBIFS
-project = NPT Startup
+project = npt_solr
 core = 7.x
 
 dependencies[] = scratchpads_solr

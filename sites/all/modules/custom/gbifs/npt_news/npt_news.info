@@ -2,7 +2,7 @@ name = NPT News
 description = Necessary settings to create news page base on article content type.
 version = 7.x-0.9
 package = GBIFS
-project = NPT Startup
+project = npt_news
 core = 7.x
 
 dependencies[] = "ctools"

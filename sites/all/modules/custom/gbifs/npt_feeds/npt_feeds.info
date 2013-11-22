@@ -2,7 +2,7 @@ name = NPT Feeds
 description = Add default GBIF feeds, including twitter feeds
 version = 7.x-0.9
 package = GBIFS
-project = NPT Startup
+project = npt_feeds
 core = 7.x
 
 dependencies[] = aggregator

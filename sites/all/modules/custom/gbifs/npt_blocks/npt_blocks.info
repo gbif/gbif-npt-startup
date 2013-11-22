@@ -2,7 +2,7 @@ name = NPT Blocks
 description = Provide default blocks, deltas, contexts for NPT Startup.
 version = 7.x-0.9
 package = GBIFS
-project = NPT Startup
+project = npt_blocks
 core = 7.x
 #php = 5.3
 

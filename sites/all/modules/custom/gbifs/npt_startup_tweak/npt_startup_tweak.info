@@ -2,7 +2,7 @@ name = NPT Startup Tweak
 description = Tweak a Scratchpads/Drupal site into a NPT Startup instance
 version = 7.x-0.9
 package = GBIFS
-project = NPT Startup
+project = npt_startup_tweak
 core = 7.x
 
 ; Features
