@@ -2,7 +2,10 @@ name = NPT Feeds
 description = Add default GBIF feeds, including twitter feeds
 version = 7.x-0.9
 package = GBIFS
-project = Nodes Portal Toolkit
+project = NPT Startup
 core = 7.x
 
 dependencies[] = aggregator
+
+l10n server = localise-npt.gbif.org
+l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml

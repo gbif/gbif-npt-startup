@@ -2,7 +2,10 @@ name = NPT solr settings
 description = Based on ScratchPads solr settings, provide settings that fit NPT.
 version = 7.x-0.9
 package = GBIFS
-project = Nodes Portal Toolkit
+project = NPT Startup
 core = 7.x
 
 dependencies[] = scratchpads_solr
+
+l10n server = localise-npt.gbif.org
+l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
