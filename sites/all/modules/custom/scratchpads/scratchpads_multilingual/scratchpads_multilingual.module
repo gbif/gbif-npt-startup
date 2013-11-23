@@ -104,9 +104,6 @@ function scratchpads_multilingual_preprocess_html(&$variables){
 }
 
 /**
- * Implements hook_system_info_alter()
- */
-/**
  * Implements hook_system_info_alter().
  */
 function scratchpads_multilingual_system_info_alter(&$info, $file, $type){
@@ -157,8 +154,11 @@ function scratchpads_multilingual_system_info_alter(&$info, $file, $type){
       break;
   }
   if(substr($file->uri, 0, 24) == 'sites/all/modules/custom'){
-    if(empty($info['version']) || $info['version'] != VERSION){
-      $info['version'] = '7.x-' . SCRATCHPADS_VERSION;
+
+    if ($info['package'] <> 'GBIFS') {
+      if(empty($info['version']) || $info['version'] != VERSION){
+        $info['version'] = '7.x-' . SCRATCHPADS_VERSION;
+      }
     }
   }
 }
