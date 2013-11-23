@@ -1,12 +1,12 @@
 name = NPT Maps
 description = Tweak default Scratchpads map to include other layers.
-version = 7.x-0.1
+core = 7.x
+version = 7.x-0.9
 package = GBIFS
 project = npt_maps
-core = 7.x
 
 dependencies[] = gm3
 dependencies[] = gm3_region
 
 l10n server = localise-npt.gbif.org
-l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
+l10n url = http://localise-npt.gbif.org/sites/localise-npt.gbif.org/files/l10n_packager/l10n_server.xml

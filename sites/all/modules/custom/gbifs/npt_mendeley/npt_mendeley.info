@@ -1,13 +1,13 @@
 name = NPT Mendeley
 description = List professional publications of the GBIF Participant Node that is been associated with this Drupal site.
+core = 7.x
 version = 7.x-0.8
 package = GBIFS
 project = npt_mendeley
-core = 7.x
 
 configure = admin/config/npt/mendeley_settings
 
 dependencies[] = npt_constants
 
 l10n server = localise-npt.gbif.org
-l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
+l10n url = http://localise-npt.gbif.org/sites/localise-npt.gbif.org/files/l10n_packager/l10n_server.xml

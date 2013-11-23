@@ -1,9 +1,9 @@
 name = NPT News
 description = Necessary settings to create news page base on article content type.
+core = 7.x
 version = 7.x-0.9
 package = GBIFS
 project = npt_news
-core = 7.x
 
 dependencies[] = "ctools"
 dependencies[] = "features"
@@ -18,4 +18,4 @@ features[field][] = "node-article-field_article_type"
 features[views_view][] = "news"
 
 l10n server = localise-npt.gbif.org
-l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
+l10n url = http://localise-npt.gbif.org/sites/localise-npt.gbif.org/files/l10n_packager/l10n_server.xml

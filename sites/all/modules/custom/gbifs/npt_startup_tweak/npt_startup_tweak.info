@@ -1,9 +1,9 @@
 name = NPT Startup Tweak
 description = Tweak a Scratchpads/Drupal site into a NPT Startup instance
+core = 7.x
 version = 7.x-0.9
 package = GBIFS
 project = npt_startup_tweak
-core = 7.x
 
 ; Features
 ;features[menu_links][] = "management:http://community.gbif.org/pg/groups/3507/nodes-portal-toolkit-npt/"
@@ -37,4 +37,4 @@ dependencies[] = npt_setup
 dependencies[] = image_allow_insecure_derivatives
 
 l10n server = localise-npt.gbif.org
-l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
+l10n url = http://localise-npt.gbif.org/sites/localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
