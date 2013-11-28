@@ -42,10 +42,8 @@ dependencies[] = entityconnect
 dependencies[] = feeds_oai_pmh
 dependencies[] = globalredirect
 dependencies[] = gravatar
-<<<<<<< HEAD
-=======
 dependencies[] = honeypot
->>>>>>> 2317-content-translate
+dependencies[] = honeypot
 dependencies[] = imagemagick
 dependencies[] = link
 dependencies[] = linkit
@@ -115,3 +113,4 @@ dependencies[] = tools
 dependencies[] = tree_widget
 dependencies[] = tui
 ;dependencies[] = twitter_filter
+;dependencies[] = twitterscript

@@ -327,13 +327,6 @@ function _silver_feeds_importer_default_helper($field_info, &$feeds_importer, $a
           _silver_feeds_importer_default_helper(field_info_instances('field_collection_item', $field_info['field_name']), $feeds_importer, $field_info['field_name'] . ':field_collection_item:' . $field_info['field_name'] . ':', $field_info['field_name'] . ':', $field['label'] . ': ');
         }
         break;
-      case 'field_collection':
-        // We get the info about the field collection, and add a mapping for
-        // each of the fields in it.
-        if(!$map_field_collection){
-          _silver_feeds_importer_default_helper(field_info_instances('field_collection_item', $field_info['field_name']), $feeds_importer, $field_info['field_name'] . ':field_collection_item:' . $field_info['field_name'] . ':', $field_info['field_name'] . ':', $field['label'] . ': ');
-        }
-        break;
       case 'country':
         // We use iso3 country codes
         $feeds_importer->config['processor']['config']['mappings'][] = array(
