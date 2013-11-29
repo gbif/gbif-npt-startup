@@ -8,4 +8,4 @@ core = 7.x
 dependencies[] = aggregator
 
 l10n server = localise-npt.gbif.org
-l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
+l10n url = http://localise-npt.gbif.org/sites/localise-npt.gbif.org/files/l10n_packager/l10n_server.xml

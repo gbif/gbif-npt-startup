@@ -19,7 +19,7 @@ function npt_mendeley_menu() {
   $items = array();
   $items['admin/config/npt'] = array(
     'title' => 'NPT Configuration',
-    'description' => t("Configure settings that determine how this Drupal site presents itself as a Nodes' portal."),
+    'description' => "Configure settings that determine how this Drupal site presents itself as a Nodes' portal.",
     'position' => 'right',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -29,7 +29,7 @@ function npt_mendeley_menu() {
   );
   $items['admin/config/npt/mendeley_settings'] = array(
     'title' => 'GBIF on Mendeley',
-    'description' => t('Settings for accessing GBIF public library on Mendeley and updating statistics.'),
+    'description' => 'Settings for accessing GBIF public library on Mendeley and updating statistics.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('npt_mendeley_settings_form'),
     'access arguments' => array('administer site configuration'),
@@ -62,7 +62,7 @@ function npt_mendeley_menu() {
     $machine_name = $tag_set['machine_name'];
     $items["mendeley/$machine_name"] = array(
       'type' => MENU_LOCAL_TASK,
-      'title' => $tag_set['tab_name'],
+      'title' => '!title', array('!title' => $tag_set['tab_name']),
       'page callback' => 'npt_mendeley_full_list',
       'page arguments' => array(1),
       'access callback' => TRUE,

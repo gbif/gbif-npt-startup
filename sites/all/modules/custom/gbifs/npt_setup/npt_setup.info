@@ -1,13 +1,13 @@
 name = NPT Setup
 description = Provides several steps to establish initial contents so the site is started as a node web presence.
+core = 7.x
 version = 7.x-0.9
 package = GBIFS
 project = npt_setup
-core = 7.x
 
 stylesheets[all][] = css/npt-setup.css
 dependencies[] = formflow
 dependencies[] = npt_constants
 
 l10n server = localise-npt.gbif.org
-l10n url = http://localise-npt.gbif.org/files/l10n_packager/l10n_server.xml
+l10n url = http://localise-npt.gbif.org/sites/localise-npt.gbif.org/files/l10n_packager/l10n_server.xml

@@ -11,8 +11,8 @@ function npt_stats_menu() {
   $node_info = variable_get('gbif_participant_settings');
   $name = isset($node_info['node_shortname']) ? $node_info['node_shortname'] : $node_info['node_title'];
   $items['npt/stats'] = array(
-    'title' => t('Facts'),
-    'description' => t('Statistics about !name', array('!name' => $name)),
+    'title' => 'Facts',
+    'description' => 'Statistics about !name', array('!name' => $name),
     'page callback' => 'npt_stats_page_view',
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
