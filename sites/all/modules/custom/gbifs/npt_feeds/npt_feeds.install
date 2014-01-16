@@ -13,17 +13,17 @@ function npt_feeds_install() {
  * Default feeds
  */
 function npt_feeds_default_feeds() {
-  // Subscribe some GBIF RSS feeds
+  // Subscribe to some GBIF RSS feeds
   $values = array(
     array(
       'title' => 'GBIF News',
-      'url' => 'http://imsgbif.gbif.org/rss.xml',
+      'url' => 'http://www.gbif.org/newsroom/archive/rss',
       'refresh' => '3600',
       'block' => 8
     ),
     array(
       'title' => 'GBIF Latest Online Resources',
-      'url' => 'http://imsgbif.gbif.org/CMS_ORC/?rss=new',
+      'url' => 'http://www.gbif.org/resources/archive/rss',
       'refresh' => '3600',
       'block' => 8      
     ),
