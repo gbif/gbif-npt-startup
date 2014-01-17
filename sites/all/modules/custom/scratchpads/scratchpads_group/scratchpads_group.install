@@ -172,3 +172,23 @@ function scratchpads_group_update_7006(){
     ))->condition('field_name', $fields_to_lock)->execute();
   }
 }
+
+/**
+ * Add the node-group-group_access field.
+ */
+function scratchpads_group_update_7007(){
+  module_load_include('features.field.inc', 'scratchpads_group');
+  $fields = scratchpads_group_field_default_fields();
+  try{
+    field_create_field($fields['node-group-group_access']['field_config']);
+  }
+  catch(Exception $e){
+    ;
+  }
+  try{
+    field_create_instance($fields['scratchpads_group_field_default_fields']['field_instance']);
+  }
+  catch(Exception $e){
+    ;
+  }
+}
