@@ -83,7 +83,6 @@ function npt_blocks_delta_default_templates() {
         'modules/comment/comment.css' => 0,
         'sites/all/modules/contrib/date/date_api/date.css' => 0,
         'sites/all/modules/custom/field_quick_delete/theme/field.css' => 0,
-        'sites/all/modules/contrib/mollom/mollom.css' => 0,
         'modules/node/node.css' => 0,
         'sites/all/modules/custom/gbifs/npt_setup/css/npt-setup.css' => 0,
         'modules/search/search.css' => 0,
