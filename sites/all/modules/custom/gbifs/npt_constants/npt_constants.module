@@ -7,7 +7,7 @@
 
 // NPT Startup constants
 define('NPTSTARTUP_THEME', 'gbifwhite');
-define('NPTSTARTUP_ADMIN_THEME', 'npt_admin');
+define('NPTSTARTUP_ADMIN_THEME', 'scratchpads_admin');
 define('GBIF_REGISTRY_API_NODE', 'http://api.gbif.org/v0.9/node');
 define('GBIF_REGISTRY_API_ORG', 'http://api.gbif.org/v0.9/organization');
 define('GBIF_API', 'http://api.gbif.org/v0.9');

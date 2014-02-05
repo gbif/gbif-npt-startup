@@ -567,7 +567,7 @@ function npt_setup_block_info() {
     'cache' => DRUPAL_NO_CACHE,
     'region' => 'dashboard_sidebar',
     'status' => 1,
-    'theme' => 'npt_admin'
+    'theme' => 'scratchpads_admin'
   );
   return $blocks;
 }

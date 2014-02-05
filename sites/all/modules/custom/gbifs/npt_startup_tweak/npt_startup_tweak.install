@@ -10,7 +10,7 @@ function npt_startup_tweak_install() {
   // Enable NPT themes.
   theme_enable(array(
     'gbifwhite',
-    'npt_admin',
+    //'npt_admin',
   ));
   variable_set('node_admin_theme', '1');
 

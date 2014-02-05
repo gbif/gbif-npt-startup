@@ -17,7 +17,7 @@ function npt_setup_install() {
     array(
       'module' => 'npt_setup',
       'delta' => 'npt_setup',
-      'theme' => 'npt_admin',
+      'theme' => 'scratchpads_admin',
       'status' => 1,
       'weight' => 0,
       'region' => 'dashboard_sidebar',
