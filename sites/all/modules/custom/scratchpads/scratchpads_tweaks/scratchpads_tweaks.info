@@ -53,7 +53,7 @@ dependencies[] = plupload
 dependencies[] = remember_me
 dependencies[] = role_delegation
 dependencies[] = uuid
-dependencies[] = varnish
+;dependencies[] = varnish
 dependencies[] = weight
 dependencies[] = honeypot
 

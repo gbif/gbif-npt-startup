@@ -28,7 +28,8 @@ function npt_startup_tweak_install() {
   module_disable(array(
     'overlay',
     'toolbar',
-    'gravatar'
+    'gravatar',
+    'varnish'
   ), TRUE);
 
   module_enable(array(
