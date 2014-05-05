@@ -25,8 +25,9 @@ function feeds_xls_get_populated_template(){
     }
     header('Cache-Control: max-age=0');
     readfile($_SESSION['feeds_xls']['csv_path'] . '.excel');
-    // delete the file
+    // delete the files
     drupal_unlink($_SESSION['feeds_xls']['csv_path'] . '.excel');
+    drupal_unlink($_SESSION['feeds_xls']['csv_path']);
     unset($_SESSION['feeds_xls']);
     exit();
   }else{
@@ -255,6 +256,15 @@ function feeds_xls_create_csv_of_data($feeds_importer, &$context){
         }
       }else{
         switch($mapping['target']){
+          case 'group_audience':
+            $gids = array();
+            foreach($entity->{$mapping['target']} as $language => $values){
+              foreach($entity->{$mapping['target']}[$language] as $value){
+                $gids[] = $value['gid'];
+              }
+            }
+            $row_values[$key] = implode('|', $gids);
+            break;
           case 'guid':
             // Look for this entity in the feeds_item table.  If not there, we
             // generate an entry for it.
@@ -302,7 +312,7 @@ function feeds_xls_create_csv_of_data($feeds_importer, &$context){
                     foreach($value as $subkey => $item){
                       // Change to the allowed values array().
                       $field = field_info_field($mapping['target']);
-                      if($field && @isset($field['settings']['allowed_values'][$item])){
+                      if($field && !empty($field['settings']['allowed_values'][$item])){
                         $item = $field['settings']['allowed_values'][$item];
                       }
                       if($item){
@@ -438,7 +448,7 @@ function feeds_xls_download_template($feeds_importer){
   ini_set('memory_limit', '1500M');
   ini_set('max_execution_time', 240);
   if(get_class($feeds_importer->parser) == 'FeedsExcelParser'){
-    if(!$feeds_importer->parser->config['no_headers']){
+    if(empty($feeds_importer->parser->config['no_headers'])){
       feeds_xls_download_template_helper($feeds_importer);
       exit();
     }else{
@@ -457,9 +467,6 @@ function feeds_xls_download_template($feeds_importer){
  */
 function feeds_xls_field_type_help_text($field){
   switch($field['type']){
-    case 'date':
-    case 'datetime':
-      return "Dates should be entered in the format 'YYYY/MM/DD'.  You may need to specify that this column is a 'text' column type to ensure the formatting is preserved.";
     case 'gm3_combination':
       return 'Please enter data in the following format, entering multiple values on a single line (this is easier to do in a text editor, and then paste into Excel):
 
@@ -568,7 +575,7 @@ function feeds_xls_set_headers($feeds_importer, $objPHPExcel, $output = 'php://o
           }
         }else if($field['type'] == 'node_reference'){
           // If the view name is set, we can not do anything.
-          if(!$field['settings']['view']['view_name']){
+          if(!$field['settings']['view']['view_name'] && array_filter($field['settings']['referenceable_types'])){
             $results = db_select('node', 'n')->condition('type', $field['settings']['referenceable_types'])->fields('n', array(
               'nid',
               'title'
@@ -620,7 +627,10 @@ function feeds_xls_set_headers($feeds_importer, $objPHPExcel, $output = 'php://o
               }
               $break_at_end = FALSE;
             }else{
-              foreach($allowed_values as $term){
+              foreach($allowed_values as $key => $term){
+                if(!$term){
+                  $term = $key;
+                }
                 $row++;
                 $objPHPExcel->getSheet(1)->setCellValue("{$column}{$row}", _feeds_xls_get_value($term));
               }

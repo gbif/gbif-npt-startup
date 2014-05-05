@@ -115,6 +115,11 @@ class FeedsExcelParser extends FeedsParser{
         }
         $column++;
       }
+      // A special case.  We need to ensure that the GUID column has a value
+      // defined, even if that value is the empty string.
+      if(count($row_values) && $column < count($this->state->column_names) && !isset($row_values['GUID']) && array_search('GUID', $this->state->column_names)){
+        $row_values['GUID'] = '';
+      }
       if(!isset($this->state->column_names)){
         $this->state->column_names = $row_values;
       }else{
@@ -231,7 +236,7 @@ class FeedsExcelParser extends FeedsParser{
       $empty_template_text = '';
     }else{
       $empty_template_text = t('<a href="!url" target="_blank" class="overlay-exclude">Excel template file</a> for this import.  Your template file should contain the following column headers:', array(
-        '!url' => url('import/' . $this->id . '/template')
+        '!url' => url('import/' . $this->id . '/xlstemplate')
       )) . '<br/><span style="font-size:80%">' . implode(", ", $sources) . '</span>';
     }
     $form['help'] = array(

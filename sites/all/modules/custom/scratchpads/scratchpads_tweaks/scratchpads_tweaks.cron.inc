@@ -121,29 +121,60 @@ function _scratchpads_tweaks_cron(){
       }
     }
   }
-  // Delete certain messages from the watchdog as we know they can be safely
-  // ignored.
-  $db_or = db_or();
-  $db_or->condition('message', array(
-    '%module module enabled.',
-    '%module module installed.',
-    "Action '%action' added.",
-    'There is new syndicated content from %site.',
-    'Flushed all files (%count) from static page cache.',
-    '@actioning @module_name / @component.',
-    '@action completed for @module_name / @component.',
-    'Updated site meta data',
-    'Fetched site meta data',
-    'Expired %count stale files from static page cache.',
-    'Cron run completed.',
-    '"@openid" logged in as "@user"'
-  ));
-  $db_or->condition('type', array(
-    'scratchpads_tweaks_install'
-  ));
-  db_delete('watchdog')->condition($db_or)->execute();
   // Clean up the file_display table now that we have removed its primary key
   db_query('CREATE TEMPORARY TABLE file_display_temp AS SELECT DISTINCT * FROM {file_display}; TRUNCATE {file_display}; INSERT INTO {file_display} SELECT * FROM file_display_temp;');
   // Rebuild caches
   _scratchpads_tweaks_register_shutdown();
+  // Mail the team if the site looks like it's not being used.
+  $account = user_load(2);
+  if($account && $account->mail != 'scratchpad@nhm.ac.uk'){
+    $time = time();
+    if(!$account->login && variable_get('install_time', 0) + 604800 < $time && $time - variable_get('scratchpads_tweaks_account_notify', 0) > 604800){
+      variable_set('scratchpads_tweaks_account_notify', $time);
+      _user_mail_notify('register_no_approval_required', $account);
+    }
+    // If the site has been around for over three months, we check that it is
+    // active.  If it isn't, we notify ourselves to ping the owner.
+    // 15778800
+    $query = db_select('users');
+    $query->addExpression('MAX(login)', 'lastlogin');
+    $login = $query->execute()->fetchField();
+    $norecentlogin = FALSE;
+    if($login + 15778800 < $time){
+      $norecentlogin = TRUE;
+    }
+    $login = $login ? format_date($login) : t('Never');
+    if($time - variable_get('scratchpads_tweaks_site_active_check_time', 0) > 8000000){
+      if((variable_get('install_time', 0) + 15778800 < $time && $norecentlogin) || (variable_get('install_time', 0) + 8000000 < $time && !variable_get('scratchpads_tweaks_site_active', FALSE))){
+        // Get a count of the number of nodes, if we're less than 5, we ping a
+        // message
+        if(($num_nodes = db_select('node')->condition('type', 'biblio', '!=')->countQuery()->execute()->fetchField()) < 10 || $norecentlogin){
+          $query = db_select('node');
+          $query->addExpression('MAX(changed)', 'lastedit');
+          $lastedit = $query->execute()->fetchField();
+          $lastedit = $lastedit ? format_date($lastedit) : t('Never');
+          global $language;
+          variable_set('scratchpads_tweaks_site_active_check_time', $time);
+          drupal_mail('scratchpads_tweaks', 'nominate-for-deletion', 'Scratchpads Support Team <support@scratchpads.eu>', $language, array(
+            'nodes' => $num_nodes,
+            'login' => $login,
+            'edit' => $lastedit
+          ));
+        }else{
+          variable_set('scratchpads_tweaks_site_active', TRUE);
+        }
+      }
+    }
+  }
+  // Delete files from the temporary directory (assuming the path is different
+  // to the files folder) if they're overy one month old.
+  $temp_folder = drupal_realpath('temporary://');
+  if($temp_folder != '/tmp' && $temp_folder != drupal_realpath('public://') && $temp_folder != drupal_realpath('private://')){
+    foreach(scandir($temp_folder) as $file){
+      if(is_file("$temp_folder/$file") && filemtime("$temp_folder/$file") + 2419200 < time()){
+        file_unmanaged_delete("$temp_folder/$file");
+        db_delete('file_managed')->condition('uri', 'temporary://' . $file)->execute();
+      }
+    }
+  }
 }

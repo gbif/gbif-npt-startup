@@ -1,12 +1,22 @@
-*~
+# Ignore configuration files that may contain sensitive information and user-generated content
+sites/*/settings*.php
+sites/*/files
+sites/*/private
+
+# Examples module
+sites/all/modules/contrib/examples
+
+# Mac shite and SQL files
 *.DS_Store
 *.sql
 *.dump
+
+# Zend studio files
 .buildpath
 .cache
 .project
 .settings
-.DS_Store
+
 scratchpad_1_database.php
 index2.php
 cache

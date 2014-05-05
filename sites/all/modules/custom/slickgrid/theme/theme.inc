@@ -292,6 +292,7 @@ function theme_slickgrid($variables){
   drupal_add_js($path . '/js/slickgrid.js');
   drupal_add_js($path . '/js/slickgrid.theme.js');
   drupal_add_js($path . '/js/slickgrid.remote.js');
+  drupal_add_js($path . '/js/slickgrid.command.js');
   drupal_add_css($path . '/css/slickgrid.css');
   drupal_add_js(array(
     'slickgrid' => array(
@@ -387,7 +388,7 @@ function theme_slickgrid_controls($variables){
 function theme_slickgrid_control($variables){
   $output = '';
   $control = $variables['control'];
-  if($variables['view']->style_plugin->options[$control]){
+  if(!empty($variables['view']->style_plugin->options[$control])){
     drupal_add_js($variables['path'] . '/js/controls/slickgrid.control.js');
     drupal_add_js($variables['path'] . '/js/controls/slickgrid.' . $control . '.js');
     drupal_add_js(array(
@@ -414,7 +415,7 @@ function theme_slickgrid_control($variables){
 function slickgrid_preprocess_slickgrid_control__add(&$variables){
   $entity_info = entity_get_info();
   $variables['add_links'] = array();
-  if(array_filter($variables['view']->style_plugin->options['add'])){
+  if(is_array($variables['view']->style_plugin->options['add']) && array_filter($variables['view']->style_plugin->options['add'])){
     ctools_include('ajax');
     foreach($variables['view']->style_plugin->options['add'] as $add){
       list($entity_type, $bundle) = explode('/', $add);

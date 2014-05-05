@@ -195,21 +195,25 @@
       Drupal.tui.resize_frame();
     });
     // CLICK TO HIGHLIGHT
-    $('#tui-tree-subcontainer li>div').click(function(){
+    $('#tui-tree-subcontainer li>div').once().click(function(e){
       function tui_recurse_highlight(parent_tid){
         $('li[data-tui-child-of="' + parent_tid + '"]').each(function(){
           $(this).children('div').each(function(){
-            $(this).addClass('tui-highlight');
+            $(this).toggleClass('tui-highlight');
             tui_recurse_highlight($(this).parent().data('tui-this-term'));
           });
         });
       }
-      $('.tui-highlight').removeClass('tui-highlight');
-      $(this).addClass('tui-highlight');
+      // If we are not holding control or apple, we remove the highlight from
+      // other terms.
+      if(!e.ctrlKey && !e.metaKey) {
+        $('.tui-highlight').removeClass('tui-highlight');
+      }
+      $(this).toggleClass('tui-highlight');
       tui_recurse_highlight($(this).parent().data('tui-this-term'));
     });
     // SORTING
-    $('#tui-tree-subcontainer>ol').nestedSortable({cursorAt: {top: 15}, disableNesting: 'no-nest', forcePlaceholderSize: true, handle: 'div', helper: 'clone', items: 'li', opacity: .8, placeholder: 'placeholder', revert: 250, tabSize: 25, tolerance: 'pointer', toleranceElement: '> div', update: function(event, ui){
+    $('#tui-tree-subcontainer>ol').nestedSortable({scrollSensitivity: 40, scrollSpeed: 40, cursorAt: {top: 15}, disableNesting: 'no-nest', forcePlaceholderSize: true, handle: 'div', helper: 'clone', items: 'li', opacity: .8, placeholder: 'placeholder', revert: 250, tabSize: 25, tolerance: 'pointer', toleranceElement: '> div', update: function(event, ui){
       if($('li[data-tui-child-of="' + ui.item.data('tui-child-of') + '"]').length == 1) {
         $('li[data-tui-this-term="' + ui.item.data('tui-child-of') + '"]').removeClass('tui-open');
         $('li[data-tui-this-term="' + ui.item.data('tui-child-of') + '"]').removeClass('tui-has-children');

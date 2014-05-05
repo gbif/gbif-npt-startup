@@ -48,7 +48,17 @@ function scratchpads_species_menu_alter(&$items){
 }
 
 /**
- *
+ * Implements hook_scratchpads_hands_off_hidden_views_alter()
+ */
+function scratchpads_species_scratchpads_hands_off_hidden_views_alter(&$view_ids){
+  $view_ids = array_merge($view_ids, array(
+    'species_nomenclature',
+    'species_overview_map'
+  ));
+}
+
+/**
+ * 
  * Implementation of hook_theme
  */
 function scratchpads_species_theme(){
@@ -81,7 +91,12 @@ function scratchpads_species_entity_info_alter(&$info){
  * Implements hook_module_implements_alter().
  */
 function scratchpads_species_module_implements_alter(&$implementations, $hook){
-  if(($hook == 'form_taxonomy_form_vocabulary_alter' || $hook == 'form_alter' || $hook == 'menu_alter') && isset($implementations['scratchpads_species'])){
+  if(in_array($hook, array(
+    'form_taxonomy_form_vocabulary_alter',
+    'form_alter',
+    'menu',
+    'menu_alter'
+  )) && isset($implementations['scratchpads_species'])){
     $group = $implementations['scratchpads_species'];
     unset($implementations['scratchpads_species']);
     $implementations['scratchpads_species'] = $group;
@@ -388,11 +403,11 @@ function scratchpads_species_views_pre_view(&$view, &$display_id, &$args){
         break;
       case 'species_media':
       case 'species_slideshow':
-        // Add children to media views
+      case 'species_biblio':
+      case 'species_specimen_observation':
+        // Add children to media, literature and specimen views
         if(!count($args)){
-          $args[0] = implode('+', array_merge(array(
-            arg(2)
-          ), array_keys(taxonomy_get_children(arg(2)))));
+          $args[0] = _scratchpads_species_get_descendant_tids(arg(2));
         }
         break;
       default:
@@ -423,6 +438,35 @@ function scratchpads_species_views_pre_view(&$view, &$display_id, &$args){
 }
 
 /**
+ * Get a list of TIDs descendant of the passed tid as a string suitable for
+ * using by views for the arguments of a view.
+ * 
+ * Note, we need to set a limit due to a potential bug with views (possibly due
+ * to a memory error due to the length of the arguments string).
+ */
+function _scratchpads_species_get_descendant_tids($tid){
+  $tids = array(
+    $tid
+  );
+  for($i = 0; $i < count($tids); $i++){
+    $results = db_select('taxonomy_term_hierarchy', 't')->condition('parent', $tids[$i])->fields('t', array(
+      'tid'
+    ))->execute()->fetchCol();
+    $tids = array_merge($tids, $results);
+    if(count($tids) > 50){
+      break;
+    }
+  }
+  $total = count($tids);
+  if($total > 50){
+    for($i = 50; $i < $total; $i++){
+      unset($tids[$i]);
+    }
+  }
+  return implode('+', $tids);
+}
+
+/**
  * Implements hook_slickgrid_view_arguments_alter().
  */
 function scratchpads_species_slickgrid_view_arguments_alter(&$arguments, $view){
@@ -448,6 +492,12 @@ function scratchpads_species_slickgrid_view_arguments_alter(&$arguments, $view){
         }
         $arguments[0] = implode('+', $tids);
       }
+      switch($view->name){
+        case 'species_specimen_observation':
+          // Add children to media, literature and specimen views
+          $arguments[0] = _scratchpads_species_get_descendant_tids($term->tid);
+          break;
+      }
     }
   }
 }
@@ -472,11 +522,9 @@ function scratchpads_species_preprocess_views_view(&$vars){
     case 'species_nomenclature':
       if(!scratchpads_blocks_show_placeholders()){
         // If species slideshow is empty, expand this block
-        if($view = views_get_view('species_slideshow')){
+        if(($view = views_get_view('species_slideshow')) != FALSE){
           $view->args = array(
-            implode('+', array_merge(array(
-              arg(2)
-            ), array_keys(taxonomy_get_children(arg(2)))))
+            _scratchpads_species_get_descendant_tids(arg(2))
           );
           $view->execute();
           if(!count($view->result)){
@@ -788,12 +836,17 @@ function scratchpads_species_get_species_node_types($tab = NULL){
  * Return a list of default species tabs
  */
 function scratchpads_species_get_default_tabs(){
+  t('Descriptions');
+  t('Media');
+  t('Literature');
+  t('Maps');
+  t('Specimens');
   $tabs = array(
-    'descriptions' => t('Descriptions'),
-    'media' => t('Media'),
-    'literature' => t('Literature'),
-    'maps' => t('Maps'),
-    'specimens' => t('Occurrences')
+    'descriptions' => 'Descriptions',
+    'media' => 'Media',
+    'literature' => 'Literature',
+    'maps' => 'Maps',
+    'specimens' => 'Specimens'
   );
   drupal_alter('scratchpads_species_tabs', $tabs);
   return $tabs;
