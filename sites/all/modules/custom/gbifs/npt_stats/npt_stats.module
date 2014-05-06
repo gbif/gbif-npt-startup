@@ -25,6 +25,7 @@ function npt_stats_menu() {
 function npt_stats_library() {
   $libraries['gbif_participation'] = array(
     'title' => 'GBIF Participation',
+    'version' => '0.5',
     'js' => array(
       drupal_get_path('module', 'npt_stats') . '/js/gbifParticipation.js' => array(
         'type' => 'file',
@@ -35,6 +36,7 @@ function npt_stats_library() {
   );
   $libraries['data_publishing_orgs'] = array(
     'title' => 'Data publishers',
+    'version' => '0.5',
     'js' => array(
       drupal_get_path('module', 'npt_stats') . '/js/dataPublishers.js' => array(
         'type' => 'file',
@@ -45,6 +47,7 @@ function npt_stats_library() {
   );
   $libraries['data_publishing_tech'] = array(
     'title' => 'Technical installations',
+    'version' => '0.5',
     'js' => array(
       drupal_get_path('module', 'npt_stats') . '/js/techInstallations.js' => array(
         'type' => 'file',
@@ -55,6 +58,7 @@ function npt_stats_library() {
   );
   $libraries['data_publishing_status'] = array(
     'title' => 'Technical installations',
+    'version' => '0.5',
     'js' => array(
       drupal_get_path('module', 'npt_stats') . '/js/dataPublishingStatus.js' => array(
         'type' => 'file',
