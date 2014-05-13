@@ -184,170 +184,6 @@ function scratchpads_backend_views_default_views(){
       'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => ''
-    )
-  );
-  /* Field: File: Name */
-  $handler->display->display_options['fields']['filename']['id'] = 'filename';
-  $handler->display->display_options['fields']['filename']['table'] = 'file_managed';
-  $handler->display->display_options['fields']['filename']['field'] = 'filename';
-  $handler->display->display_options['fields']['filename']['label'] = 'Title';
-  $handler->display->display_options['fields']['filename']['alter']['word_boundary'] = FALSE;
-  $handler->display->display_options['fields']['filename']['alter']['ellipsis'] = FALSE;
-  $handler->display->display_options['fields']['filename']['link_to_file'] = TRUE;
-  /* Field: File: Size */
-  $handler->display->display_options['fields']['filesize']['id'] = 'filesize';
-  $handler->display->display_options['fields']['filesize']['table'] = 'file_managed';
-  $handler->display->display_options['fields']['filesize']['field'] = 'filesize';
-  $handler->display->display_options['fields']['filesize']['hide_alter_empty'] = FALSE;
-  /* Field: User: Name */
-  $handler->display->display_options['fields']['name']['id'] = 'name';
-  $handler->display->display_options['fields']['name']['table'] = 'users';
-  $handler->display->display_options['fields']['name']['field'] = 'name';
-  $handler->display->display_options['fields']['name']['relationship'] = 'uid';
-  $handler->display->display_options['fields']['name']['label'] = 'Contributor';
-  /* Field: File: Upload date */
-  $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
-  $handler->display->display_options['fields']['timestamp']['table'] = 'file_managed';
-  $handler->display->display_options['fields']['timestamp']['field'] = 'timestamp';
-  $handler->display->display_options['fields']['timestamp']['label'] = 'Uploaded';
-  $handler->display->display_options['fields']['timestamp']['date_format'] = 'short';
-  /* Field: Edit */
-  $handler->display->display_options['fields']['fid']['id'] = 'fid';
-  $handler->display->display_options['fields']['fid']['table'] = 'file_managed';
-  $handler->display->display_options['fields']['fid']['field'] = 'fid';
-  $handler->display->display_options['fields']['fid']['ui_name'] = 'Edit';
-  $handler->display->display_options['fields']['fid']['label'] = 'Operations';
-  $handler->display->display_options['fields']['fid']['alter']['alter_text'] = TRUE;
-  $handler->display->display_options['fields']['fid']['alter']['text'] = 'Edit';
-  $handler->display->display_options['fields']['fid']['alter']['make_link'] = TRUE;
-  $handler->display->display_options['fields']['fid']['alter']['path'] = 'file/[fid]/edit';
-  /* Field: Delete */
-  $handler->display->display_options['fields']['fid_1']['id'] = 'fid_1';
-  $handler->display->display_options['fields']['fid_1']['table'] = 'file_managed';
-  $handler->display->display_options['fields']['fid_1']['field'] = 'fid';
-  $handler->display->display_options['fields']['fid_1']['ui_name'] = 'Delete';
-  $handler->display->display_options['fields']['fid_1']['label'] = '';
-  $handler->display->display_options['fields']['fid_1']['alter']['alter_text'] = TRUE;
-  $handler->display->display_options['fields']['fid_1']['alter']['text'] = 'Delete';
-  $handler->display->display_options['fields']['fid_1']['alter']['make_link'] = TRUE;
-  $handler->display->display_options['fields']['fid_1']['alter']['path'] = 'file/[fid_1]/delete';
-  $handler->display->display_options['fields']['fid_1']['element_label_colon'] = FALSE;
-  /* Sort criterion: File: Upload date */
-  $handler->display->display_options['sorts']['timestamp']['id'] = 'timestamp';
-  $handler->display->display_options['sorts']['timestamp']['table'] = 'file_managed';
-  $handler->display->display_options['sorts']['timestamp']['field'] = 'timestamp';
-  $handler->display->display_options['sorts']['timestamp']['order'] = 'DESC';
-  /* Contextual filter: File: Type */
-  $handler->display->display_options['arguments']['type']['id'] = 'type';
-  $handler->display->display_options['arguments']['type']['table'] = 'file_managed';
-  $handler->display->display_options['arguments']['type']['field'] = 'type';
-  $handler->display->display_options['arguments']['type']['default_action'] = 'not found';
-  $handler->display->display_options['arguments']['type']['title_enable'] = TRUE;
-  $handler->display->display_options['arguments']['type']['title'] = '%1 files';
-  $handler->display->display_options['arguments']['type']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['type']['summary']['number_of_records'] = '0';
-  $handler->display->display_options['arguments']['type']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['type']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['type']['limit'] = '0';
-  $handler->display->display_options['filter_groups']['groups'] = array(
-    1 => 'AND',
-    2 => 'OR'
-  );
-  /* Filter criterion: User: Name (raw) */
-  $handler->display->display_options['filters']['name']['id'] = 'name';
-  $handler->display->display_options['filters']['name']['table'] = 'users';
-  $handler->display->display_options['filters']['name']['field'] = 'name';
-  $handler->display->display_options['filters']['name']['relationship'] = 'uid';
-  $handler->display->display_options['filters']['name']['group'] = 1;
-  $handler->display->display_options['filters']['name']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['name']['expose']['operator_id'] = 'name_op';
-  $handler->display->display_options['filters']['name']['expose']['label'] = 'Contributor';
-  $handler->display->display_options['filters']['name']['expose']['operator'] = 'name_op';
-  $handler->display->display_options['filters']['name']['expose']['identifier'] = 'name';
-  /* Filter criterion: File: Name */
-  $handler->display->display_options['filters']['filename']['id'] = 'filename';
-  $handler->display->display_options['filters']['filename']['table'] = 'file_managed';
-  $handler->display->display_options['filters']['filename']['field'] = 'filename';
-  $handler->display->display_options['filters']['filename']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['filename']['expose']['operator_id'] = 'filename_op';
-  $handler->display->display_options['filters']['filename']['expose']['label'] = 'Title';
-  $handler->display->display_options['filters']['filename']['expose']['use_operator'] = TRUE;
-  $handler->display->display_options['filters']['filename']['expose']['operator'] = 'filename_op';
-  $handler->display->display_options['filters']['filename']['expose']['identifier'] = 'filename';
-  $handler->display->display_options['filters']['filename']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-    4 => 0,
-    5 => 0
-  );
-  /* Filter criterion: File: Upload date */
-  $handler->display->display_options['filters']['timestamp']['id'] = 'timestamp';
-  $handler->display->display_options['filters']['timestamp']['table'] = 'file_managed';
-  $handler->display->display_options['filters']['timestamp']['field'] = 'timestamp';
-  $handler->display->display_options['filters']['timestamp']['group'] = 1;
-  $handler->display->display_options['filters']['timestamp']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['timestamp']['expose']['operator_id'] = 'timestamp_op';
-  $handler->display->display_options['filters']['timestamp']['expose']['label'] = 'Upload date';
-  $handler->display->display_options['filters']['timestamp']['expose']['use_operator'] = TRUE;
-  $handler->display->display_options['filters']['timestamp']['expose']['operator'] = 'timestamp_op';
-  $handler->display->display_options['filters']['timestamp']['expose']['identifier'] = 'timestamp';
-  $handler->display->display_options['filters']['timestamp']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-    4 => 0,
-    5 => 0
-  );
-  /* Filter criterion: File Usage: Entity type */
-  $handler->display->display_options['filters']['type']['id'] = 'type';
-  $handler->display->display_options['filters']['type']['table'] = 'file_usage';
-  $handler->display->display_options['filters']['type']['field'] = 'type';
-  $handler->display->display_options['filters']['type']['operator'] = 'empty';
-  $handler->display->display_options['filters']['type']['group'] = 2;
-  /* Filter criterion: File Usage: Entity type */
-  $handler->display->display_options['filters']['type_1']['id'] = 'type_1';
-  $handler->display->display_options['filters']['type_1']['table'] = 'file_usage';
-  $handler->display->display_options['filters']['type_1']['field'] = 'type';
-  $handler->display->display_options['filters']['type_1']['operator'] = '!=';
-  $handler->display->display_options['filters']['type_1']['value'] = 'eolapi';
-  $handler->display->display_options['filters']['type_1']['group'] = 2;
-  /* Filter criterion: File: Path */
-  $handler->display->display_options['filters']['uri']['id'] = 'uri';
-  $handler->display->display_options['filters']['uri']['table'] = 'file_managed';
-  $handler->display->display_options['filters']['uri']['field'] = 'uri';
-  $handler->display->display_options['filters']['uri']['operator'] = 'not_starts';
-  $handler->display->display_options['filters']['uri']['value'] = 'temporary';
-  /* Display: Default */
-  $handler = $view->new_display('page', 'Default', 'page');
-  $handler->display->display_options['path'] = 'admin/file/%';
-  /* Display: Images */
-  $handler = $view->new_display('page', 'Images', 'page_1');
-  $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['title'] = 'Image files';
-  $handler->display->display_options['defaults']['group_by'] = FALSE;
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Bulk operations: File */
-  $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
-  $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'file_managed';
-  $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
-  $handler->display->display_options['fields']['views_bulk_operations']['label'] = '';
-  $handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '0';
-  $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
-  $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-  $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
-  $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
-    'action::views_bulk_operations_archive_action' => array(
-      'selected' => 0,
-      'postpone_processing' => 0,
-      'skip_confirmation' => 0,
-      'override_label' => 0,
-      'label' => '',
-      'settings' => array(
-        'scheme' => 'public',
-        'temporary' => 1
-      )
     ),
     'action::scratchpads_fine_grained_file_access_swap_file' => array(
       'selected' => 1,
@@ -524,35 +360,16 @@ function scratchpads_backend_views_default_views(){
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
-      'override_label' => 1,
-      'label' => 'Modify Values',
-      'settings' => array(
-        'show_all_tokens' => 0,
-        'display_values' => array(
-          'image::field_taxonomic_name' => 'image::field_taxonomic_name',
-          'image::field_cc_licence' => 'image::field_cc_licence',
-          'image::field_imaging_technique' => 'image::field_imaging_technique',
-          'image::field_keywords' => 'image::field_keywords',
-          'image::field_preparation_technique' => 'image::field_preparation_technique',
-          'image::field_description' => 'image::field_description',
-          'image::field_sticky' => 'image::field_sticky',
-          'image::field_creator' => 'image::field_creator',
-          'image::field_weight' => 'image::field_weight',
-          'image::field_promote_to_home_page' => 'image::field_promote_to_home_page'
-        )
-      )
+      'override_label' => 0,
+      'label' => ''
     ),
     'action::views_bulk_operations_script_action' => array(
       'selected' => 0,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
-      'label' => '',
-      'settings' => array(
-        'url' => ''
-      )
+      'label' => ''
     ),
-
     'action::views_bulk_operations_modify_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
@@ -591,7 +408,6 @@ function scratchpads_backend_views_default_views(){
       'override_label' => 0,
       'label' => ''
     ),
-
     'action::scratchpads_fine_grained_file_access_swap_file' => array(
       'selected' => 1,
       'postpone_processing' => 0,
@@ -2064,7 +1880,6 @@ function scratchpads_backend_views_get_admin_vbo_view($base_table, $entity_type,
           );
         }
       }
-
     }elseif($field_details['widget']['module'] == 'text'){
       /* Filter criterion: */
       $handler->display->display_options['filters'][$value]['id'] = $value;
@@ -2374,3 +2189,5 @@ function _scratchpads_backend_views_sort_by_label($array_to_sort){
   }
   return array_merge($final, $other);
 }
+
+

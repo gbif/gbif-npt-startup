@@ -681,3 +681,7 @@ function scratchpads_blog_tools_pre_disable(){
   );
   return $tools_settings;
 }
+
+
+
+

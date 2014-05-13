@@ -11,3 +11,4 @@ configure = admin/config/media/image-styles
 version = "7.26"
 project = "drupal"
 datestamp = "1389815930"
+

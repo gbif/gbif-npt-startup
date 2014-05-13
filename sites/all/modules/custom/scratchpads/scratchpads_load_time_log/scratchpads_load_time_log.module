@@ -19,7 +19,6 @@ function scratchpads_load_time_log_shutdown(){
   }else{
     $path = variable_get('site_frontpage', 'node');
   }
-
   $time = time();
   global $user;
   watchdog('scratchpads load time', 'Path: !path, Timer: !timer, UID: !uid, Time: !time, Request type: !request_method, Memory usage: !memory_usage, Peak memory usage: !peak_memory_usage', array(

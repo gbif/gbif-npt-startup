@@ -185,6 +185,7 @@ function lexicon_block_configure($delta) {
         '#description' => t('Enter the text of the read more link in English (you can use the Drupal translate interface to locallize the string).'),
       );
       break;
+
   }
   return $form;
 }

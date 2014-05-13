@@ -192,46 +192,6 @@ function slickgrid_get_data($view_name, $offset, $rows, $sortcol = FALSE, $sortd
                 );
                 break;
             }
-            switch($real_field['type']){
-              case 'node_reference':
-                if(($operator == 'regular_expression') && ($op_val != '')){
-                  $val = $op_val;
-                  $op = 'RLIKE';
-                }else{
-                  $val = db_like($value) . '%';
-                  $op = 'LIKE';
-                }
-                $filter['value'] = drupal_map_assoc(db_select('node', 'n')->condition('title', $val, $op)->fields('n', array(
-                  'nid'
-                ))->execute()->fetchCol());
-                // Ensure that empty sets don't display items
-                if(empty($filter['value'])){
-                  $filter['value'] = $val;
-                }
-                unset($filter['operator']);
-                break;
-              case 'taxonomy_term_reference':
-                if(($operator == 'regular_expression') && ($op_val != '')){
-                  $t_val = array_keys(taxonomy_get_terms_by_name_match_regex($op_val));
-                }else{
-                  $t_val = array_keys(taxonomy_get_terms_by_name_match($value));
-                }
-                foreach($real_field['storage']['details']['sql'][FIELD_LOAD_CURRENT] as $table => $more_info){
-                  foreach($more_info as $key => $name){
-                    if($key != 'format'){
-                      $filter['operator'] = 'or';
-                      $filter['value'] = $t_val;
-                      $filter['reduce_duplicates'] = 0;
-                      $filter['type'] = 'textfield';
-                      $filter['limit'] = 100;
-                      $filter['vocabulary'] = 'cod'; // FIXME
-                      $filter['hierarchy'] = 0;
-                      break;
-                    }
-                  }
-                }
-                break;
-            }
           }
       }
       $view->display['default']->display_options['filters'][$field] = $filter;

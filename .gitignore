@@ -3,30 +3,13 @@ sites/*/settings*.php
 sites/*/files
 sites/*/private
 
-# Examples module
-sites/all/modules/contrib/examples
-
 # Mac shite and SQL files
 *.DS_Store
 *.sql
 *.dump
 
-# Zend studio files
-.buildpath
-.cache
-.project
-.settings
-
-scratchpad_1_database.php
-index2.php
 cache
 dummy.php
-sites/all/modules/contrib/examples/
-sites/all/modules/custom/feeds_xls/PHPExcel/
 sites/default/files
 sites/default/settings.php
-sites/10088.deims.mini/
-sites/10088.npt-spatial.mini/
-sites/10088.npt.mini/
-sites/10088.bko.gbif.org/
 sites/10088.npt.bkolocal/
