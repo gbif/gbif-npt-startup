@@ -1,3 +1,6 @@
+#PLEASE BE AWARE: This project is no longer maintained, but code remains for reference.#
+
+
 GBIF NPT Startup
 ==========
 The NPT Startup is intended to enable countries with limited or no web
